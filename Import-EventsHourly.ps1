@@ -1,4 +1,4 @@
-# Built off of some blog I read. They wrote this. I cant find where the link I got this from. I edited a few things of course.
+# Built off of some blog I read. https://blog.netnerds.net/2013/03/importing-windows-forwarded-events-into-sql-server-using-powershell/
 #
 # This should be configured to run in a task once an hour. This can be done by importing the XML file inside this repo
 
