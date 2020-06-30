@@ -1,0 +1,32 @@
+<Subscription xmlns="http://schemas.microsoft.com/2006/03/windows/events/subscription">
+<SubscriptionId>Domain Computer Events</SubscriptionId>
+<SubscriptionType>SourceInitiated</SubscriptionType>
+<Description>Important Domain Controller Events</Description>
+<Enabled>True</Enabled>
+<Uri>http://schemas.microsoft.com/wbem/wsman/1/windows/EventLog</Uri>
+<ConfigurationMode>MinLatency</ConfigurationMode>
+<Query>
+<![CDATA[<QueryList>
+<Query Id="0" Path="Security">
+<!-- Local Admins Changed -->
+<Select Path="Security">
+*[EventData[Data[@Name='TargetUserName'] and (Data='Administrators')]]
+and
+*[System[(EventID='4732') or (EventID='4733')]]
+</Select>
+<!-- Local user created or deleted -->
+<Select Path="Security">*[System[(EventID='4720') or (EventID='4726')]]</Select>
+<!-- New Service Installed -->
+<!-- Event Log Cleared -->
+<Select Path="Security">*[System[(EventID='1102')]]</Select>
+</Query>
+</QueryList>]]>
+</Query>
+<ReadExistingEvents>true</ReadExistingEvents>
+<TransportName>http</TransportName>
+<ContentFormat>RenderedText</ContentFormat>
+<Locale Language="en-US"/>
+<LogFile>ForwardedEvents</LogFile>
+<AllowedSourceNonDomainComputers></AllowedSourceNonDomainComputers>
+<AllowedSourceDomainComputers>O:NSG:NSD:(A;;GA;;;DC)(A;;GA;;;DD)</AllowedSourceDomainComputers>
+</Subscription>
