@@ -1,0 +1,25 @@
+CREATE DATABASE EventCollections
+GO
+USE EventCollections
+GO
+-- the table name loosely relates to the name of my Win Event Subscription name
+CREATE TABLE [dbo].[GeneralEvents]( 
+     [Id] [int] NULL,
+     [LevelDisplayName] [varchar](255) NULL,
+     [LogName] [varchar](255) NULL,
+     [MachineName] [varchar](255) NULL,
+     [Message] [varchar](max) NULL,
+     [ProviderName] [varchar](255) NULL,
+     [RecordID] [bigint] NULL,
+     [TaskDisplayName] [varchar](255) NULL,
+     [TimeCreated] [smalldatetime] NULL
+)
+-- Create Unique Clustered Index with IGNORE_DUPE_KEY=ON to avoid duplicates in sqlbulk imports
+CREATE UNIQUE CLUSTERED INDEX [ClusteredIndex-EventCombo] ON [dbo].[GeneralEvents]
+(
+     [RecordID] ASC,
+     [MachineName] ASC,
+     [LogName] ASC
+) WITH (IGNORE_DUP_KEY = ON)
+GO
+/*  AUTHOR https://blog.netnerds.net/2013/03/importing-windows-forwarded-events-into-sql-server-using-powershell/ */
