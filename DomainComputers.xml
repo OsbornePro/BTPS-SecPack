@@ -16,9 +16,9 @@ and
 </Select>
 <!-- Local user created or deleted -->
 <Select Path="Security">*[System[(EventID='4720') or (EventID='4726')]]</Select>
-<!-- New Service Installed -->
 <!-- Event Log Cleared -->
 <Select Path="Security">*[System[(EventID='1102')]]</Select>
+<!-- New Service Installed -->
 <Select Path="Security">*[System[(EventID='7045')]]</Select>
 </Query>
 </QueryList>]]>
