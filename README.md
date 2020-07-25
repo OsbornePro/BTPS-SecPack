@@ -1,7 +1,7 @@
 # WindowsEventForwarding
 This repo contains all the files needed for using Windows Event Forwarding to monitor for intruders.
 
-#### File List
+## File List
 - __DomainComputers.xml__ (Windows Event Forwarding Config file for Domain Computers ```wecutil cs DomainComputers.xml```)
 - __DomainControllers.xml__ (Windows Event Forwarding Config file for Domain Controllers ```wecutil cs DomainControllers.xml```)
 - __Import-EventsHourly.ps1__ (PowerShell script that imports collected WEF events into SQL database)
@@ -13,19 +13,29 @@ This repo contains all the files needed for using Windows Event Forwarding to mo
 ## PREREQUISITES
 - Download and Install [SSMS](https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-ver15)
 - WinRM (Preferably WinRM over HTTPS) needs to be configured in your environment Follow the steps [HERE](https://docs.microsoft.com/en-us/archive/blogs/jepayne/monitoring-what-matters-windows-event-forwarding-for-everyone-even-if-you-already-have-a-siem) to configure WinRM in your environment for Windows Event Forwarding.
+  ```powershell
+  # Some WinRM Commands to know that may be helpful
+  Enable-PSRemoting -Force # Enables firewall rules for WinRM
+  winrm qc -q # Qucik config for WinRM 5985
+  winrm enum winrm/config/listener # Enumerate cert thumbprint used on different winrm ports
+  winrm delete winrm/config/listener?Address=*+Transport=HTTPS # Delete winrm certificate and stop listener on 5986. This allows new cert to be attached to port
+  winrm create winrm/config/listener?Address=*+Transport=HTTPS # Creates a WinRM listener on 5986 using any available certificate
+  # The below command defines a certificate to use on port 5986. Certificate Template needed is a Web Server certificate from Windows PKI
+  New-WSManInstance -ResourceUri WinRM/Config/Listener -SelectorSet @{Address = "*"; Transport = "HTTPS"} -ValueSet @{Hostname = FqdnRequiredHere.domain.com; CertificateThumbprint = $Thumbprint }
+  ```
 - Group Policy setting "__Computer Configuration__ > __Policies__ > __Adminsitrative Templates__ > __Windows Components__ > __Event Forwarding__ > __Configure Target Subscription Manager__" needs to be set to 
   - __WinRM__ (Port 5985): NOTE: The refresh interval is not required. I have it set to the default value (15 minutes) in the configs below
-```
-Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900 
-```
+  ```
+  Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900 
+  ```
   __OR__
   - __WinRM over HTTPS__ (Port 5986): In my environment I added 3 entries for this. One without a CA certificate, one with spaces after every 2 numbers, and one without spaces in the root CA's certificate thumbprint
-```
-# Examples
-Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900,IssuerCA=ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
-Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900,IssuerCA=ffffffffffffffffffffffffffffffffffffffff 
-Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900 
-```
+  ```
+  # Examples
+  Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900,IssuerCA=ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+  Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900,IssuerCA=ffffffffffffffffffffffffffffffffffffffff 
+  Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900 
+  ```
   - Group Policy Setting "__Computer Configuration__ > __Policies__ > __Adminsitrative Templates__ > __Windows Components__ > __Event Log Service__ > __Security__ > __Change Log Access__" needs to be set to the value of the property "__ChannelAccess__" after issuing the command ```wevtutil gl security```
   - Group Policy Setting "__Computer Configuration__ > __Policies__ > __Adminsitrative Templates__ > __Windows Components__ > __Event Log Service__ > __Security__ > __Change Log Access (Legacy)__" needs to be set to the value of the property "__ChannelAccess__" after issuing the command ```wevtutil gl security```
  
