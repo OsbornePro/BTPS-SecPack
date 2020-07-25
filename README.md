@@ -1,20 +1,67 @@
 # WindowsEventForwarding
-Way to centralize important Security Events using Windows Event Forwarding.
-These are files that can be used with Windows Event Forwarding to import important collected events from Domain Controllers and Domain Computers into a SQL database.
-The PowerShell script can be set up with Task Scheduler to send reports say once a day sending IT admins an email containing a table of events containing possible intrusion info.
-These files were built upon the work done in the below links.
+This repo contains all the files needed for using Windows Event Forwarding to monitor for intruders.
 
-Follow the steps [HERE](https://docs.microsoft.com/en-us/archive/blogs/jepayne/monitoring-what-matters-windows-event-forwarding-for-everyone-even-if-you-already-have-a-siem) to configure WinRM in your environment for Windows Event Forwarding. I suggest using WinRM over HTTPS as certificate validation is then required for communication over that port.
-In order to use the __DomainComputers.xml__ and __DomainControllers.xml__ centralized event configuration in Windows Event Forwarding the below commands must be issued in Command Prompt.
+#### File List
+- DomainComputers.xml (Windows Event Forwarding Config file for Domain Computers ```wecutil cs DomainComputers.xml```)
+- DomainControllers.xml (Windows Event Forwarding Config file for Domain Controllers ```wecutil cs DomainControllers.xml```)
+- Import-EventsHourly.ps1 (PowerShell script that imports collected WEF events into SQL database)
+- Query to Create MSSQ LDB Table (Creates the required database and table configuration for the MSSQL server database)
+- SQL-Query-Suspicious-Events.ps1 (PowerShell script that discovers possible indicators of compromise and sends and an email alert)
+- TaskForSQLQueryEventsMonitor.xml (Task Scheduler import file that goes with SQL-Query-Suspicious-Events.ps1)
+- TaskImportFile.xml (Task Scheudler Import file that goes with Import-EventsHourly.ps)
+
+## PREREQUISITES
+- Download and Install [SSMS](https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-ver15)
+- WinRM (Preferably WinRM over HTTPS) needs to be configured in your environment Follow the steps [HERE](https://docs.microsoft.com/en-us/archive/blogs/jepayne/monitoring-what-matters-windows-event-forwarding-for-everyone-even-if-you-already-have-a-siem) to configure WinRM in your environment for Windows Event Forwarding.
+- Group Policy setting "__Computer Configuration__ > __Policies__ > __Adminsitrative Templates__ > __Windows Components__ > __Event Forwarding__ > __Configure Target Subscription Manager__" needs to be set to 
+  - __WinRM__ (Port 5985): NOTE: The refresh interval is not required. I have it set to the default value (15 minutes) in the configs below
+```
+Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900 
+```
+  __OR__
+  - __WinRM over HTTPS__ (Port 5986): In my environment I added 3 entries for this. One without a CA certificate, one with spaces after every 2 numbers, and one without spaces in the root CA's certificate thumbprint
+```
+# Examples
+Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900,IssuerCA=ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900,IssuerCA=ffffffffffffffffffffffffffffffffffffffff 
+Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900 
+```
+  - Group Policy Setting "__Computer Configuration__ > __Policies__ > __Adminsitrative Templates__ > __Windows Components__ > __Event Log Service__ > __Security__ > __Change Log Access__" needs to be set to the value of the property "__ChannelAccess__" after issuing the command ```wevtutil gl security```
+  - Group Policy Setting "__Computer Configuration__ > __Policies__ > __Adminsitrative Templates__ > __Windows Components__ > __Event Log Service__ > __Security__ > __Change Log Access (Legacy)__" needs to be set to the value of the property "__ChannelAccess__" after issuing the command ```wevtutil gl security```
+ 
+## SET UP USING THESE FILES
+#### STEP 1.)
+In order to use the __DomainComputers.xml__ and __DomainControllers.xml__ config files in Windows Event Forwarding the below commands must be issued in an Administrator Command Prompt.
 ```cmd
 wecutil cs DomainComputers.xml
 wecutil cs DomainControllers.xml
 ```
 
-1. Once the above is configured use the __Query to Create MSSQL DB Table__ to build your SQL Database table. This is where events will be imported.
-2. Place the powershell script Import-EventsHourly.ps1 into C:\Users\Public\Documents (_this is to match the Task Template in this repo_) or wherever you prefer to store this script. Be sure to sign in with a trusted Code Signing Certificate in your environment to prevent it from running malicious code. Modify the permissions so only administrators can modify the script.
-3. Create a scheduled task that runs once an hour. You can use my template __TaskImportFile.xml__. Import this task and you should only need to define the user with Batch and Service permissions to run the script.
-4. Create a task that runs once a day to execute SQL-Query-Suspicous-Events.ps1 Once run the script returns event information on the below possible indications of compromise from all those devices forwarding events. 
+#### STEP 2.)
+Create the SQL database schema and table.
+1. Open SSMS (SQL Server Management Studio)
+2. Click "Execute New Query" in the top ribbon.
+3. Copy and paste the contents of __Query to Create MSSQL DB Table__ into the query and click "Execute" This builds your SQL Database table where events will be imported.
+
+#### STEP 3.)
+Create Scheduled tasks
+1. Place the powershell script __Import-EventsHourly.ps1__ into C:\Users\Public\Documents (_this is to match the Task Template in this repo_) or wherever you prefer to store this script. Be sure to sign in with a trusted Code Signing Certificate in your environment to prevent it from running malicious code. Modify the permissions so only administrators can modify the script.
+2. Create a scheduled task that runs once an hour. You can use my template __TaskImportFile.xml__. Import this task and you should only need to define the user with Batch and Service permissions to run the script.
+```powershell
+# PowerShell Command to use code signing certificate
+Set-AuthenticodeSignature C:\Users\Public\Documents\Import-EventsHourly.ps1 @(Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert)[0]
+```
+
+#### Step 4.)
+Create monitoring task that runs once a day
+1. Add __SQL-Query-Suspicous-Events.ps1__ to C:\Users\Public\Documents which will match with the location of my XML template. Be sure to sign in with a trusted Code Signing Certificate in your environment to prevent it from running malicious code. Modify the permissions so only administrators can modify the script.
+```powershell
+# PowerShell Command to use code signing certificate
+Set-AuthenticodeSignature C:\Users\Public\Documents\Import-EventsHourly.ps1 @(Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert)[0]
+```
+2. Import the task from __TaskForSQLQueryEventsMonitor.xml__ that runs once a day to execute SQL-Query-Suspicous-Events.ps1 
+
+Once run, the script returns event information on the below possible indications of compromise from all those devices forwarding events. 
   -	Were any Event Logs Cleared
   -	Was a new Local or Domain User created anywhere (Excluding WDAGUtilityAccount)
   -	User added to a high privileged security group (Administrators, Domain Admins, Schema Admins, Enterprise Admins, Print Operators, Server Operators, Backup Operators)
