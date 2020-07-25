@@ -60,6 +60,7 @@ Create monitoring task that runs once a day
 Set-AuthenticodeSignature C:\Users\Public\Documents\Import-EventsHourly.ps1 @(Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert)[0]
 ```
 2. Import the task from __TaskForSQLQueryEventsMonitor.xml__ that runs once a day to execute SQL-Query-Suspicous-Events.ps1 
+3. Edit the file __SQL-Query-Suspicous-Events.ps1__ so the email variables are set to match your environment. Once of the SQL querties will also need to be modified in order to add accounts that commonly receive special permissions such as accounts that are used for LDAP binds or domain controllers. Or don't use any special filtering. Whatever floats your boat. The SQL queries only return events from the last 24 hours. This is significantly faster than filtering the Windows Event log through XML.
 
 Once run, the script returns event information on the below possible indications of compromise from all those devices forwarding events. 
   -	Were any Event Logs Cleared
