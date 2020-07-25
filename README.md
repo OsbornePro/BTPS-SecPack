@@ -80,7 +80,7 @@ Once run, the script returns event information on the below possible indications
   -	Were any new services run/created
   -	Were any accounts locked out
   -	Were any accounts unlocked
-  -	Were any special privileges assigned outside the norm (Normal accounts: bbadmin, roadmin, paessler, cisco.admin, dnsdynamic, svc_git, Alertus.Service, <DomainController>$
+  -	Were any special privileges assigned outside the norm (Normal accounts: admin, dnsdynamic, <DomainController>$
   -	Were any replay attack attempts detected
 
 #### IMAGE OF AN EMAILED ALERT
