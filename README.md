@@ -82,7 +82,10 @@ Once run, the script returns event information on the below possible indications
   -	Were any accounts unlocked
   -	Were any special privileges assigned outside the norm (Normal accounts: bbadmin, roadmin, paessler, cisco.admin, dnsdynamic, svc_git, Alertus.Service, <DomainController>$
   -	Were any replay attack attempts detected
-  
+
+#### IMAGE OF AN EMAILED ALERT
+![Email Alert Image](https://raw.githubusercontent.com/tobor88/WindowsEventForwarding/master/Email%20Alert%20Image.png)
+
 When the script gets triggered it performs a search on all collected targeted events for the last 24 hours only. The results will not always mean compromise but they will definitely help to discover them when they happen. 
 (Microsoft says the max limit of machines to collect events from is 2,000 to 4,000).
 __REFERNCE:__ [https://support.microsoft.com/en-gb/help/4494356/best-practice-eventlog-forwarding-performance](https://support.microsoft.com/en-gb/help/4494356/best-practice-eventlog-forwarding-performance)
