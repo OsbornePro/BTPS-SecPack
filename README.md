@@ -2,13 +2,13 @@
 This repo contains all the files needed for using Windows Event Forwarding to monitor for intruders.
 
 #### File List
-- DomainComputers.xml (Windows Event Forwarding Config file for Domain Computers ```wecutil cs DomainComputers.xml```)
-- DomainControllers.xml (Windows Event Forwarding Config file for Domain Controllers ```wecutil cs DomainControllers.xml```)
-- Import-EventsHourly.ps1 (PowerShell script that imports collected WEF events into SQL database)
-- Query to Create MSSQ LDB Table (Creates the required database and table configuration for the MSSQL server database)
-- SQL-Query-Suspicious-Events.ps1 (PowerShell script that discovers possible indicators of compromise and sends and an email alert)
-- TaskForSQLQueryEventsMonitor.xml (Task Scheduler import file that goes with SQL-Query-Suspicious-Events.ps1)
-- TaskImportFile.xml (Task Scheudler Import file that goes with Import-EventsHourly.ps)
+- __DomainComputers.xml__ (Windows Event Forwarding Config file for Domain Computers ```wecutil cs DomainComputers.xml```)
+- __DomainControllers.xml__ (Windows Event Forwarding Config file for Domain Controllers ```wecutil cs DomainControllers.xml```)
+- __Import-EventsHourly.ps1__ (PowerShell script that imports collected WEF events into SQL database)
+- __Query to Create MSSQ LDB Table__ (Creates the required database and table configuration for the MSSQL server database)
+- __SQL-Query-Suspicious-Events.ps1__ (PowerShell script that discovers possible indicators of compromise and sends and an email alert)
+- __TaskForSQLQueryEventsMonitor.xml__ (Task Scheduler import file that goes with SQL-Query-Suspicious-Events.ps1)
+- __TaskImportFile.xml__ (Task Scheudler Import file that goes with Import-EventsHourly.ps)
 
 ## PREREQUISITES
 - Download and Install [SSMS](https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-ver15)
