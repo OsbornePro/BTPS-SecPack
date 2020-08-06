@@ -19,7 +19,7 @@ $UserAddedToAdminGroup = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.Gen
 $UserRemovedFromAdminGroup = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4733 OR Id=4757 OR Id=4729 AND GeneralEvents.TimeCreated >= DATEADD(day, -1, GETDATE())"
 $UserAccountCreated = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4720 AND GeneralEvents.TimeCreated >= DATEADD(day, -1, GETDATE());"
 $UserAccountDeleted = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4726 AND GeneralEvents.TimeCreated >= DATEADD(day, -1, GETDATE());"
-$NewServiceInstalled = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=7045 AND GeneralEvents.TimeCreated >= DATEADD(day, -1, GETDATE());"
+$NewServiceInstalled = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=7045 AND Message NOT LIKE '%C:\ProgramData\Microsoft\Windows Defender\Definition Updates\%' AND GeneralEvents.TimeCreated >= DATEADD(day, -1, GETDATE());"
 $UserAccountLocked = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4740 AND GeneralEvents.TimeCreated >= DATEADD(day, -1, GETDATE());"
 $UserAccountUnlocked = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4767 AND GeneralEvents.TimeCreated >= DATEADD(day, -1, GETDATE());"
 $SpecialPrivilegeAssigned = "SELECT Id,MachineName,Message,TimeCreated FROM dbo.GeneralEvents WHERE Id=4672 AND Message NOT LIKE '%AccountsThatConnectToLdapBinds%' AND Message NOT LIKE '%DWM-6%' AND Message NOT LIKE '%AdminsAdminAccounts%' AND Message NOT LIKE '%DomainComputerAccounts$%' AND Message NOT LIKE '%dnsdynamic%' AND GeneralEvents.TimeCreated >= DATEADD(day, -1, GETDATE());"
