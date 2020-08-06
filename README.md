@@ -85,6 +85,7 @@ Once run, the script returns event information on the below possible indications
 
 #### IMAGE OF AN EMAILED ALERT
 ![Email Alert Image](https://raw.githubusercontent.com/tobor88/WindowsEventForwarding/master/Email%20Alert%20Image.png)
+![Another Alert Image](https://raw.githubusercontent.com/tobor88/WindowsEventForwarding/master/Alert2.png)
 
 When the script gets triggered it performs a search on all collected targeted events for the last 24 hours only. The results will not always mean compromise but they will definitely help to discover them when they happen. 
 (Microsoft says the max limit of machines to collect events from is 2,000 to 4,000).
