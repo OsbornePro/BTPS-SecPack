@@ -26,7 +26,7 @@ This repo contains all the files needed for using Windows Event Forwarding to mo
 - Group Policy setting "__Computer Configuration__ > __Policies__ > __Adminsitrative Templates__ > __Windows Components__ > __Event Forwarding__ > __Configure Target Subscription Manager__" needs to be set to 
   - __WinRM__ (Port 5985): NOTE: The refresh interval is not required. I have it set to the default value (15 minutes) in the configs below
   ```
-  Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900 
+  Server=http://wef.domain.com:5985/wsman/SubscriptionManager/WEC,Refresh=900 
   ```
   __OR__
   - __WinRM over HTTPS__ (Port 5986): In my environment I added 3 entries for this. One without a CA certificate, one with spaces after every 2 numbers, and one without spaces in the root CA's certificate thumbprint
