@@ -83,14 +83,7 @@ Once run, the script returns event information on the below possible indications
   -	Were any special privileges assigned outside the norm (Normal accounts: admin, dnsdynamic, <DomainController>$
   -	Were any replay attack attempts detected
 
-#### IMAGE OF AN EMAILED ALERT
-![Email Alert Image](https://raw.githubusercontent.com/tobor88/WindowsEventForwarding/master/Email%20Alert%20Image.png)
-![Another Alert Image](https://raw.githubusercontent.com/tobor88/WindowsEventForwarding/master/Alert2.png)
-
-When the script gets triggered it performs a search on all collected targeted events for the last 24 hours only. The results will not always mean compromise but they will definitely help to discover them when they happen. 
-(Microsoft says the max limit of machines to collect events from is 2,000 to 4,000).
-__REFERNCE:__ [https://support.microsoft.com/en-gb/help/4494356/best-practice-eventlog-forwarding-performance](https://support.microsoft.com/en-gb/help/4494356/best-practice-eventlog-forwarding-performance)
-
+#### Step 5.) 
 To ensure the correct permissions are set on the Windows Event Log Source Collector issue the below commands (on the Windows Event Forwarding Collection Server)
 ```cmd
 netsh http delete urlacl url=http://+:5985/wsman/ 
@@ -98,6 +91,14 @@ netsh http add urlacl url=http://+:5985/wsman/ sddl=D:(A;;GX;;;S-1-5-80-56925658
 netsh http delete urlacl url=https://+:5986/wsman/
 netsh http add urlacl url=https://+:5986/wsman/ sddl=D:(A;;GX;;;S-1-5-80-569256582-2953403351-2909559716-1301513147-412116970)(A;;GX;;;S-1-5-80-4059739203-877974739-1245631912-527174227-2996563517)
 ```
+
+#### IMAGE OF AN EMAILED ALERT
+![Email Alert Image](https://raw.githubusercontent.com/tobor88/WindowsEventForwarding/master/Email%20Alert%20Image.png)
+![Another Alert Image](https://raw.githubusercontent.com/tobor88/WindowsEventForwarding/master/Alert2.png)
+
+When the script gets triggered it performs a search on all collected targeted events for the last 24 hours only. The results will not always mean compromise but they will definitely help to discover them when they happen. 
+(Microsoft says the max limit of machines to collect events from is 2,000 to 4,000).
+__REFERNCE:__ [https://support.microsoft.com/en-gb/help/4494356/best-practice-eventlog-forwarding-performance](https://support.microsoft.com/en-gb/help/4494356/best-practice-eventlog-forwarding-performance)
 
 ### REFERENCE LINKS
 - https://blog.netnerds.net/2013/03/importing-windows-forwarded-events-into-sql-server-using-powershell/
