@@ -1,7 +1,17 @@
-<QueryList>
-  <Query Id="0" Path="Security">
-    <Select Path="System">*[System[(EventID='7045')]]</Select>
-    <Select Path="Security">
+<Subscription xmlns="http://schemas.microsoft.com/2006/03/windows/events/subscription">
+<SubscriptionId>Domain Controller Events</SubscriptionId>
+<SubscriptionType>SourceInitiated</SubscriptionType>
+<Description>Important Domain Controller Events</Description>
+<Enabled>True</Enabled>
+<Uri>http://schemas.microsoft.com/wbem/wsman/1/windows/EventLog</Uri>
+<ConfigurationMode>MinLatency</ConfigurationMode>
+<Query>
+<![CDATA[<QueryList>
+<Query Id="0" Path="Security">
+<!-- New Service Installed -->
+<Select Path="System">*[System[(EventID='7045')]]</Select>
+<!-- Member Added or Removed from an AD Domain Local, Universal or  Global Security Group -->
+<Select Path="Security">
 (*[EventData[Data[@Name="TargetUserName"] = "Administrators"]]) or
 (*[EventData[Data[@Name="TargetUserName"] = "Domain Admins"]]) or
 (*[EventData[Data[@Name="TargetUserName"] = "Schema Admins"]]) or
@@ -12,90 +22,16 @@
 and
 *[System[(EventID='4732') or (EventID='4733') or (EventID='4756') or (EventID='4757') or (EventID='4728') or (EventID='4729')]]
 </Select>
-    <Select Path="Security">*[System[(EventID='1102')]]</Select>
-  </Query>
-  <!-- Inspired by Microsoft Documentation and/or IADGOV -->
-  <Query Id="1" Path="Security">
-    <!-- 4662: Directory Service Access Operation Performed On An Object -->
-    <Select Path="Security">*[System[(EventID=4662)]] and *[System[Task='14080']]</Select>
-  </Query>
-  <Query Id="2" Path="Security">
-    <!-- 5136: A directory service object was modified. -->
-    <!-- 5137: A directory service object was created. -->
-    <!-- 5138: A directory service object was undeleted. -->
-    <!-- 5139: A directory service object was moved. -->
-    <!-- 5141: A directory service object was deleted. -->
-    <Select Path="Security">*[System[(EventID=5136 or EventID=5137 or EventID=5178 or EventID=5139 or EventID=5141)]]</Select>
-  </Query>
-  <Query Id="3" Path="Security">
-    <!-- 4713: Kerberos Policy was changed. -->
-    <Select Path="Security">*[System[(EventID=4713)]]</Select>
-  </Query>
-  <Query Id="4" Path="Security">
-    <!-- 4706: A new trust was created to a domain. -->
-    <!-- 4707: A trust to a domain was removed. -->
-    <!-- 4716: Trusted domain information was modified. -->
-    <!-- 4717: System security access was granted to an account. -->
-    <!-- 4718: System security access was removed from an account. -->
-    <!-- 4739: Domain Policy was changed. -->
-    <!-- 4864: A namespace collision was detected. -->
-    <!-- 4865: A trusted forest information entry was added. -->
-    <!-- 4866: A trusted forest information entry was removed. -->
-    <!-- 4867: A trusted forest information entry was modified. -->
-    <Select Path="Security">*[System[(EventID=4706 or EventID=4707 or EventID=4716 or EventID=4717 or EventID=4718 or EventID=4739 or EventID=4864 or EventID=4865 or EventID=4866 or EventID=4867)]]</Select>
-  </Query>
-  <Query Id="5" Path="Security">
-    <!-- For Domain Accounts event is created on DC-->
-    <!-- For Local Accounts event is created locally-->
-    <!-- 4740: Account Lockouts -->
-    <Select Path="Security">*[System[Provider[@Name='Microsoft-Windows-Security-Auditing'] and (Level=4 or Level=0) and EventID=4740]]</Select>
-  </Query>
-  <!-- Inspired by Microsoft Documentation and/or IADGOV -->
-  <Query Id="6" Path="Microsoft-Windows-DNS-Client/Operational">
-    <!-- 3008: DNS Client events Query Completed -->
-    <Select Path="Microsoft-Windows-DNS-Client/Operational">*[System[(EventID=3008)]]</Select>
-    <!-- Suppresses local machine name resolution events -->
-    <Suppress Path="Microsoft-Windows-DNS-Client/Operational">*[EventData[Data[@Name="QueryOptions"]="140737488355328"]]</Suppress>
-    <!-- Suppresses empty name resolution events -->
-    <Suppress Path="Microsoft-Windows-DNS-Client/Operational">*[EventData[Data[@Name="QueryResults"]=""]]</Suppress>
-  </Query>
-  <Query Id="7" Path="DNS Server">
-    <!-- 150: DNS Server could not load or initialize the plug-in DLL -->
-    <!-- 770: DNS Server plugin DLL has been loaded -->
-    <Select Path="DNS Server">*[System[(EventID=150 or EventID=770)]]</Select>
-    <!-- NOTE: The ACL for Microsoft-Windows-DNSServer/Audit may need to be updated to allow read access by Event Log Readers -->
-    <!-- 541: The setting serverlevelplugindll on scope . has been set to $dll_path -->
-    <Select Path="Microsoft-Windows-DNSServer/Audit">*[System[(EventID=541)]]</Select>
-  </Query>
-  <!-- Inspired by Microsoft Documentation and/or IADGOV -->
-  <Query Id="8" Path="Security">
-    <!-- 4624: An account was successfully logged on. -->
-    <!-- 4625: An account failed to log on. -->
-    <!-- 4626: User/Device claims information. -->
-    <Select Path="Security">*[System[(EventID &gt;=4624 and EventID &lt;=4626)]]</Select>
-    <!-- 4634: An account was successfully logged off. -->
-    <!-- 4647: User initiated logoff. -->
-    <!-- 4649: A replay attack was detected. -->
-    <!-- 4672: Special privileges assigned to a new logon, administrative logins -sa, -ada, etc. -->
-    <!-- 4675: SIDs were filtered. -->
-    <Select Path="Security">*[System[(EventID=4634 or EventID=4647 or EventID=4649 or EventID=4672 or EventID=4675)]]</Select>
-    <!-- 4774: An account was mapped for logon. -->
-    <!-- 4775: An account could not be mapped for logon. -->
-    <!-- 4776: The computer attempted to validate the credentials for an account. -->
-    <!-- 4777: The domain controller failed to validate the credentials for an account. -->
-    <!-- 4778: A session was reconnected to a Window Station. -->
-    <!-- 4779: A session was disconnected from a Window Station. -->
-    <Select Path="Security">*[System[(EventID &gt;=4774 and EventID &lt;=4779)]]</Select>
-    <!-- 4800 The workstation was locked. -->
-    <!-- 4801 The workstation was unlocked. -->
-    <!-- 4802 The screen saver was invoked. -->
-    <!-- 4803 The screen saver was dismissed. -->
-    <Select Path="Security">*[System[(EventID &gt;=4800 and EventID &lt;=4803)]]</Select>
-    <!-- 4964: Special groups have been assigned a new logon. -->
-    <Select Path="Security">*[System[(EventID=4964)]]</Select>
-    <!-- 5378 The requested credentials delegation was disallowed by policy. -->
-    <Select Path="Security">*[System[(EventID=5378)]]</Select>
-    <!-- Suppress SECURITY_LOCAL_SYSTEM_RID A special account used by the OS, noisy -->
-    <Suppress Path="Security">*[EventData[Data[1]="S-1-5-18"]]</Suppress>
-  </Query>
-</QueryList>
+<!-- Event Log Cleared -->
+<Select Path="Security">*[System[(EventID='1102')]]</Select>
+</Query>
+</QueryList>]]>
+</Query>
+<ReadExistingEvents>True</ReadExistingEvents>
+<TransportName>http</TransportName>
+<ContentFormat>RenderedText</ContentFormat>
+<Locale Language="en-US"/>
+<LogFile>ForwardedEvents</LogFile>
+<AllowedSourceNonDomainComputers></AllowedSourceNonDomainComputers>
+<AllowedSourceDomainComputers>O:NSG:NSD:(A;;GA;;;DD)</AllowedSourceDomainComputers>
+</Subscription>
