@@ -2,6 +2,15 @@
 This repo contains all the files needed for using Windows Event Forwarding to monitor for intruders. 
 This repo also assumes that you have referenced the Windows Event Logging Cheat Sheet for logging in your environment. Use [LOG-MD](https://www.imfsecurity.com/free) or [CIS-CAT](https://learn.cisecurity.org/benchmarks#:~:text=CIS%20Benchmarks%20are%20the%20only%20consensus-based%2C%20best-practice%20security,and%20accepted%20by%20government%2C%20business%2C%20industry%2C%20and%20academia) to ensure the recommended logging is configured.
 
+__STARTUP SCRIPT NOTE:__ Windows Event Forwarding can be tricky. I have computers in the same OU with the exact same settings and configuations applied with some servers forwarding events and other servers not forwarding events. To compensate I have the below lines added to a startup script which was done to ensure the settings I want applied are being applied.
+```powershell
+Write-Verbose "Giving NETWORK SERVICE permissions to the Security log for WEF"
+cmd /c 'wevtutil sl Security /ca:O:BAG:SYD:(A;;0xf0007;;;SY)(A;;0x7;;;BA)(A;;0x1;;;BO)(A;;0x1;;;SO)(A;;0x1;;;S-1-5-32-573)(A;;0x1;;;S-1-5-20)'
+
+Write-Verbose "Add NETWORK SERVICE to event log readers group for WEF"
+Add-LocalGroupMember -Group "Event Log Readers" -Member "NETWORK SERVICE" -ErrorAction SilentlyContinue | Out-Null
+```
+
 ## File List
 - __DomainComputers.xml__ (Windows Event Forwarding Config file for Domain Computers ```wecutil cs DomainComputers.xml```)
 - __DomainControllers.xml__ (Windows Event Forwarding Config file for Domain Controllers ```wecutil cs DomainControllers.xml```)
