@@ -73,8 +73,8 @@ Create the SQL database schema and table.
 3. Copy and paste the contents of __Query to Create MSSQL DB Table__ into the query and click "Execute" This builds your SQL Database table where events will be imported.
 
 #### STEP 3.)
-Create Scheduled tasks
-1. Place the powershell script __Import-EventsHourly.ps1__ into C:\Users\Public\Documents (_this is to match the Task Template in this repo_) or wherever you prefer to store this script. Be sure to sign in with a trusted Code Signing Certificate in your environment to prevent it from running malicious code. Modify the permissions so only administrators can modify the script.
+Create Scheduled Task to Import Events into SQL Database
+1. Place the powershell script __Import-EventsHourly.ps1__ into C:\Users\Public\Documents (_this is to match the Task Template in this repo_) or wherever you prefer to store this script. Be sure to sign it with a trusted Code Signing Certificate in your environment _(Import Code Signing Cert Info __"Trusted Publishers"__ store in certmgr.msc)_ to prevent it from running malicious code. Modify the permissions so only administrators can modify the script. Have this run every hour on minute 55. This leaves time for the events to get imported into the SQL database. Then on the hour, have the next task run.
 2. Create a scheduled task that runs once an hour. You can use my template __TaskImportFile.xml__. Import this task and you should only need to define the user with Batch and Service permissions to run the script.
 ```powershell
 # PowerShell Command to use code signing certificate
@@ -82,14 +82,14 @@ Set-AuthenticodeSignature C:\Users\Public\Documents\Import-EventsHourly.ps1 @(Ge
 ```
 
 #### Step 4.)
-Create monitoring task that runs once a day
-1. Add __SQL-Query-Suspicous-Events.ps1__ to C:\Users\Public\Documents which will match with the location of my XML template. Be sure to sign in with a trusted Code Signing Certificate in your environment to prevent it from running malicious code. Modify the permissions so only administrators can modify the script.
+Create Monitoring and Alert Task
+1. Add __SQL-Query-Suspicous-Events.ps1__ to C:\Users\Public\Documents which will match with the location of my XML template. Be sure to sign in with a trusted Code Signing Certificate _(Import Code Signing Cert Info __"Trusted Publishers"__ store in certmgr.msc)_ in your environment to prevent it from running malicious code. Modify the permissions so only administrators can modify the script. Have this task run on the hour.
 ```powershell
 # PowerShell Command to use code signing certificate
 Set-AuthenticodeSignature C:\Users\Public\Documents\Import-EventsHourly.ps1 @(Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert)[0]
 ```
 2. Import the task from __TaskForSQLQueryEventsMonitor.xml__ that runs once a day to execute SQL-Query-Suspicous-Events.ps1 
-3. Edit the file __SQL-Query-Suspicous-Events.ps1__ so the email variables are set to match your environment. Once of the SQL querties will also need to be modified in order to add accounts that commonly receive special permissions such as accounts that are used for LDAP binds or domain controllers. Or don't use any special filtering. Whatever floats your boat. The SQL queries only return events from the last 24 hours. This is significantly faster than filtering the Windows Event log through XML.
+3. Edit the file __SQL-Query-Suspicous-Events.ps1__ so the email variables are set to match your environment. Once of the SQL querties will also need to be modified in order to add accounts that commonly receive special permissions such as accounts that are used for LDAP binds or domain controllers. Or don't use any special filtering. Whatever floats your boat. The SQL queries only return events from the last hour. This is significantly faster than filtering the Windows Event log through XML which also will eventually delete logs to make room for newer logs.
 
 Once run, the script returns event information on the below possible indications of compromise from all those devices forwarding events. 
   -	Were any Event Logs Cleared
@@ -115,7 +115,7 @@ netsh http add urlacl url=https://+:5986/wsman/ sddl=D:(A;;GX;;;S-1-5-80-5692565
 ![Email Alert Image](https://raw.githubusercontent.com/tobor88/WindowsEventForwarding/master/Email%20Alert%20Image.png)
 ![Another Alert Image](https://raw.githubusercontent.com/tobor88/WindowsEventForwarding/master/Alert2.png)
 
-When the script gets triggered it performs a search on all collected targeted events for the last 24 hours only. The results will not always mean compromise but they will definitely help to discover them when they happen. 
+When the script gets triggered it performs a search on all collected targeted events for the last 1 hour and 5 minutes only. You can change this in the task and SQL Query script. The results will not always mean compromise but they will definitely help to discover them when they happen.
 (Microsoft says the max limit of machines to collect events from is 2,000 to 4,000).
 __REFERNCE:__ [https://support.microsoft.com/en-gb/help/4494356/best-practice-eventlog-forwarding-performance](https://support.microsoft.com/en-gb/help/4494356/best-practice-eventlog-forwarding-performance)
 
@@ -123,3 +123,4 @@ __REFERNCE:__ [https://support.microsoft.com/en-gb/help/4494356/best-practice-ev
 - https://blog.netnerds.net/2013/03/importing-windows-forwarded-events-into-sql-server-using-powershell/
 - https://docs.microsoft.com/en-us/archive/blogs/jepayne/monitoring-what-matters-windows-event-forwarding-for-everyone-even-if-you-already-have-a-siem
 - https://support.microsoft.com/en-us/help/4494462/events-not-forwarded-if-the-collector-runs-windows-server
+- https://serverfault.com/questions/769282/windows-event-log-forwarding-permission
