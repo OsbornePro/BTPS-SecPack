@@ -24,10 +24,12 @@ If ($EventInfo.LevelDisplayName -ne "Information")
 - __DomainComputers.xml__ (Windows Event Forwarding Config file for Domain Computers ```wecutil cs DomainComputers.xml```)
 - __DomainControllers.xml__ (Windows Event Forwarding Config file for Domain Controllers ```wecutil cs DomainControllers.xml```)
 - __Import-EventsHourly.ps1__ (PowerShell script that imports collected WEF events into SQL database)
+- __ImportTheScheduledTasks.ps1__ (This is an optional script that can be used to import the task scheduler xml files, simultaneously creating the needed scheduled tasks on the Windows Event Log Collector centralized Server)
 - __Query to Create MSSQ LDB Table__ (Creates the required database and table configuration for the MSSQL server database)
 - __SQL-Query-Suspicious-Events.ps1__ (PowerShell script that discovers possible indicators of compromise and sends and an email alert)
 - __TaskForSQLQueryEventsMonitor.xml__ (Task Scheduler import file that goes with SQL-Query-Suspicious-Events.ps1)
 - __TaskImportFile.xml__ (Task Scheudler Import file that goes with Import-EventsHourly.ps)
+- __WEFStartupScript.ps1__ (This should be the startup script on all devices sending events to the source WEF collector)
 
 ## PREREQUISITES
 - Download and Install [SSMS](https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-ver15)
