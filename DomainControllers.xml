@@ -1,4 +1,12 @@
-<QueryList>
+<Subscription xmlns="http://schemas.microsoft.com/2006/03/windows/events/subscription">
+<SubscriptionId>Domain Controller Events</SubscriptionId>
+<SubscriptionType>SourceInitiated</SubscriptionType>
+<Description>Important Domain Controller Events</Description>
+<Enabled>True</Enabled>
+<Uri>http://schemas.microsoft.com/wbem/wsman/1/windows/EventLog</Uri>
+<ConfigurationMode>MinLatency</ConfigurationMode>
+<Query>
+<![CDATA[<QueryList>
   <Query Id="0" Path="Security">
     <Select Path="System">*[System[(EventID='7045')]]</Select>
     <Select Path="Security">
@@ -35,4 +43,13 @@ and
     <Suppress Path="Security">*[EventData[Data[1]="S-1-5-18"]]</Suppress>
     <Suppress Path="Security">*[System[(EventID=4799)]]</Suppress>
   </Query>
-</QueryList>
+</QueryList>]]>
+</Query>
+<ReadExistingEvents>True</ReadExistingEvents>
+<TransportName>http</TransportName>
+<ContentFormat>RenderedText</ContentFormat>
+<Locale Language="en-US"/>
+<LogFile>ForwardedEvents</LogFile>
+<AllowedSourceNonDomainComputers></AllowedSourceNonDomainComputers>
+<AllowedSourceDomainComputers>O:NSG:NSD:(A;;GA;;;DD)</AllowedSourceDomainComputers>
+</Subscription>
