@@ -1,37 +1,38 @@
-<Subscription xmlns="http://schemas.microsoft.com/2006/03/windows/events/subscription">
-<SubscriptionId>Domain Controller Events</SubscriptionId>
-<SubscriptionType>SourceInitiated</SubscriptionType>
-<Description>Important Domain Controller Events</Description>
-<Enabled>True</Enabled>
-<Uri>http://schemas.microsoft.com/wbem/wsman/1/windows/EventLog</Uri>
-<ConfigurationMode>MinLatency</ConfigurationMode>
-<Query>
-<![CDATA[<QueryList>
-<Query Id="0" Path="Security">
-<!-- New Service Installed -->
-<Select Path="System">*[System[(EventID='7045')]]</Select>
-<!-- Member Added or Removed from an AD Domain Local, Universal or  Global Security Group -->
-<Select Path="Security">
+<QueryList>
+  <Query Id="0" Path="Security">
+    <Select Path="System">*[System[(EventID='7045')]]</Select>
+    <Select Path="Security">
 (*[EventData[Data[@Name="TargetUserName"] = "Administrators"]]) or
 (*[EventData[Data[@Name="TargetUserName"] = "Domain Admins"]]) or
 (*[EventData[Data[@Name="TargetUserName"] = "Schema Admins"]]) or
 (*[EventData[Data[@Name="TargetUserName"] = "Enterprise Admins"]]) or
 (*[EventData[Data[@Name="TargetUserName"] =  "Print Operators"]]) or
 (*[EventData[Data[@Name="TargetUserName"] = "Server Operators"]]) or
+(*[EventData[Data[@Name="TargetUserName"] = "DnsAdmins"]]) or
 (*[EventData[Data[@Name="TargetUserName"] = "Backup Operators"]])
 and
 *[System[(EventID='4732') or (EventID='4733') or (EventID='4756') or (EventID='4757') or (EventID='4728') or (EventID='4729')]]
 </Select>
-<!-- Event Log Cleared -->
-<Select Path="Security">*[System[(EventID='1102')]]</Select>
-</Query>
-</QueryList>]]>
-</Query>
-<ReadExistingEvents>True</ReadExistingEvents>
-<TransportName>http</TransportName>
-<ContentFormat>RenderedText</ContentFormat>
-<Locale Language="en-US"/>
-<LogFile>ForwardedEvents</LogFile>
-<AllowedSourceNonDomainComputers></AllowedSourceNonDomainComputers>
-<AllowedSourceDomainComputers>O:NSG:NSD:(A;;GA;;;DD)</AllowedSourceDomainComputers>
-</Subscription>
+    <Suppress Path="Security">*[System[(EventID=4799)]]</Suppress>
+    <Select Path="Security">*[System[(EventID='1102')]]</Select>
+  </Query>
+  <Query Id="1" Path="Security">
+    <!-- For Domain Accounts event is created on DC-->
+    <!-- For Local Accounts event is created locally-->
+    <!-- 4740: Account Lockouts -->
+    <Select Path="Security">*[System[Provider[@Name='Microsoft-Windows-Security-Auditing'] and (Level=4 or Level=0) and EventID=4740]]</Select>
+    <Suppress Path="Security">*[System[(EventID=4799)]]</Suppress>
+  </Query>
+  <Query Id="2" Path="Security">
+    <!-- 4723 4724: Attempt Password Change -->
+    <Select Path="Security">*[System[(EventID='4723')  or (EventID='4724')]]</Select>
+    <Suppress Path="Security">*[System[(EventID=4799)]]</Suppress>
+  </Query>
+  <Query Id="3" Path="Security">
+    <!-- 4649: A replay attack was detected. -->
+    <Select Path="Security">*[System[(EventID=4649)]]</Select>
+    <!-- Suppress SECURITY_LOCAL_SYSTEM_RID A special account used by the OS, noisy -->
+    <Suppress Path="Security">*[EventData[Data[1]="S-1-5-18"]]</Suppress>
+    <Suppress Path="Security">*[System[(EventID=4799)]]</Suppress>
+  </Query>
+</QueryList>
