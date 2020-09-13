@@ -1,34 +1,24 @@
-# Email Information for Notifications
-$From = "do-not-reply@domain.com"
-$To = "itadmin@domain.com"
-$SmtpServer = mail.smtp2go.com
-
-$Hostname = (Get-WmiObject -ClassName Win32_ComputerSystem).Name
-$Domain = (Get-WmiObject -ClassName Win32_ComputerSystem).Domain
-$Server - "$Hostname.$Domain"
-
 $FinalResults= @()
 $Date = Get-Date 
-
-$ConnectionString = "Server=$Server;Database=EventCollections;Integrated Security=True;Connect Timeout=30"
+$ConnectionString = "Server=(localdb);Database=EventCollections;Integrated Security=True;Connect Timeout=30"
 
 # SQL Queries to discover suspicious activity
-$ClearedEventLog = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=1102 AND GeneralEvents.TimeCreated >= DATEADD(day, -1, GETDATE())"
-$CreatedUser = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE RecordID = 19 AND Message NOT LIKE '%WDAGUtilityAccount%' AND GeneralEvents.TimeCreated >= DATEADD(day, -1, GETDATE())"
-$UserAddedToAdminGroup = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4732 OR Id=4756 OR Id=4728 AND GeneralEvents.TimeCreated >= DATEADD(day, -1, GETDATE())"
-$UserRemovedFromAdminGroup = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4733 OR Id=4757 OR Id=4729 AND GeneralEvents.TimeCreated >= DATEADD(day, -1, GETDATE())"
-$UserAccountCreated = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4720 AND GeneralEvents.TimeCreated >= DATEADD(day, -1, GETDATE());"
-$UserAccountDeleted = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4726 AND GeneralEvents.TimeCreated >= DATEADD(day, -1, GETDATE());"
+$ClearedEventLog = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=1102 AND GeneralEvents.TimeCreated >= DATEADD(hour, -1, GETDATE())"
+$PasswordChange = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4723 OR Id = 4724 AND GeneralEvents.TimeCreated >= DATEADD(hour, -1, GETDATE())"
+$UserAddedToAdminGroup = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4732 OR Id=4756 OR Id=4728 AND GeneralEvents.TimeCreated >= DATEADD(hour, -1, GETDATE())"
+$UserRemovedFromAdminGroup = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4733 OR Id=4757 OR Id=4729 AND GeneralEvents.TimeCreated >= DATEADD(hour, -1, GETDATE())"
+$UserAccountCreated = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4720 AND GeneralEvents.TimeCreated >= DATEADD(hour, -1, GETDATE());"
+$UserAccountDeleted = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4726 AND GeneralEvents.TimeCreated >= DATEADD(hour, -1, GETDATE());"
 $NewServiceInstalled = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=7045 AND Message NOT LIKE '%C:\ProgramData\Microsoft\Windows Defender\Definition Updates\%' AND GeneralEvents.TimeCreated >= DATEADD(day, -1, GETDATE());"
-$UserAccountLocked = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4740 AND GeneralEvents.TimeCreated >= DATEADD(day, -1, GETDATE());"
-$UserAccountUnlocked = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4767 AND GeneralEvents.TimeCreated >= DATEADD(day, -1, GETDATE());"
-$SpecialPrivilegeAssigned = "SELECT Id,MachineName,Message,TimeCreated FROM dbo.GeneralEvents WHERE Id=4672 AND Message NOT LIKE '%AccountsThatConnectToLdapBinds%' AND Message NOT LIKE '%DWM-6%' AND Message NOT LIKE '%AdminsAdminAccounts%' AND Message NOT LIKE '%DomainComputerAccounts$%' AND Message NOT LIKE '%dnsdynamic%' AND GeneralEvents.TimeCreated >= DATEADD(day, -1, GETDATE());"
-$ReplayAttack = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4649 AND GeneralEvents.TimeCreated >= DATEADD(day, -1, GETDATE());"
+$UserAccountLocked = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4740 AND GeneralEvents.TimeCreated >= DATEADD(hour, -1, GETDATE());"
+$UserAccountUnlocked = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4767 AND GeneralEvents.TimeCreated >= DATEADD(hour, -1, GETDATE());"
+$SpecialPrivilegeAssigned = "SELECT Id,MachineName,Message,TimeCreated FROM dbo.GeneralEvents WHERE Id=4672 AND Message NOT LIKE '%paessler%' AND GeneralEvents.TimeCreated >= DATEADD(hour, -1, GETDATE());"
+$ReplayAttack = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4649 AND GeneralEvents.TimeCreated >= DATEADD(hour, -1, GETDATE());"
 
-# This is an array of the above SQL Commands to execute
-$Sqls = $ClearedEventLog,$CreatedUser,$UserAddedToAdminGroup,$UserRemovedFromAdminGroup,$UserAccountCreated,$UserAccountDeleted,$NewServiceInstalled,$UserAccountLocked,$UserAccountUnlocked,$SpecialPrivilegeAssigned,$ReplayAttack
+# This is an array of SQL Commands to execute
+$Sqls = $ClearedEventLog,$PasswordChange,$UserAddedToAdminGroup,$UserRemovedFromAdminGroup,$UserAccountCreated,$UserAccountDeleted,$NewServiceInstalled,$UserAccountLocked,$UserAccountUnlocked,$SpecialPrivilegeAssigned,$ReplayAttack
 
-Function Find-IndicationsOfCompromiseFromSQL {
+Function Find-NewlyCreatedLocalAccounts {
     [CmdletBinding()]
         param(
             [Parameter(
@@ -48,7 +38,7 @@ Function Find-IndicationsOfCompromiseFromSQL {
 BEGIN 
 {
 
-    Write-Verbose "[*] Creating connection to SQL database and SQL command to execute"
+    Write-Verbose "Creating connection to SQL database and SQL command"
 
     $Connection = New-Object -TypeName System.Data.SqlClient.SQLConnection($ConnectionString)
     $Connection.Open()
@@ -61,7 +51,7 @@ BEGIN
 PROCESS
 {
 
-    Write-Verbose "[*] Executing SQL Command: $SqlCommand"
+    Write-Verbose "Executing SQL Command: $SqlCommand"
 
     $Adapter.Fill($Dataset) | Out-Null
     $Connection.Close()
@@ -74,13 +64,13 @@ END
 
 }  # End END
 
-}  # End Function Find-IndicationsOfCompromiseFromSQL
+}  # End Function Find-NewlyCreatedLocalAccounts
 
 
 ForEach ($Sql in $Sqls)
 {
 
-    $Results = Find-IndicationsOfCompromiseFromSQL -ConnectionString $ConnectionString -SqlCommand $Sql -Verbose  
+    $Results = Find-NewlyCreatedLocalAccounts -ConnectionString $ConnectionString -SqlCommand $Sql -Verbose  
     
     If ($Results) 
     {
@@ -89,7 +79,7 @@ ForEach ($Sql in $Sqls)
         {
 
             $ClearedEventLog {$Significance = 'Event Log Cleared'}
-            $CreatedUser {$Significance = 'User Created'}
+            $PasswordChange {$Significance = 'Password Change Attempt'}
             $UserAddedToAdminGroup {$Significance = 'User Added to Privileged Group'}
             $UserRemovedFromAdminGroup {$Significance = 'User Removed from Privileged Group'}
             $UserAccountCreated {$Significance = 'User Account Created'}
@@ -146,6 +136,6 @@ td {
     $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
     $MailBody = $FinalResults | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "<br>The below table contains suspicous events that were triggered<br><br><hr><br><br>" | Out-String
 
-    Send-MailMessage -From $From -To $To -Subject "SUSPICIOUS EVENT TRIGGERED" -BodyAsHtml -Body "$MailBody" -SmtpServer $SmtpServer
+    Send-MailMessage -From "alerts@osbornepro.com" -To "admin@osbornepro.com" -Subject "SUSPICIOUS EVENT TRIGGERED" -BodyAsHtml -Body "$MailBody" -SmtpServer mail.smtp2go.com 
     
 }  # End If 
