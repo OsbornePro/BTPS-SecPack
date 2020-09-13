@@ -1,4 +1,5 @@
-# WindowsEventForwarding
+# OsbornePro: The Blue Team PowerShell Security Package
+##### The B.T.P.S. Sec Pack
 This repo contains all the files needed for using Windows Event Forwarding to monitor for intruders. 
 This repo also assumes that you have referenced the Windows Event Logging Cheat Sheet for logging in your environment. Use [LOG-MD](https://www.imfsecurity.com/free) or [CIS-CAT](https://learn.cisecurity.org/benchmarks#:~:text=CIS%20Benchmarks%20are%20the%20only%20consensus-based%2C%20best-practice%20security,and%20accepted%20by%20government%2C%20business%2C%20industry%2C%20and%20academia) to ensure the recommended logging is configured.
 
