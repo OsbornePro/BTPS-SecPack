@@ -1,59 +1,35 @@
 <#
-.NAME
-    Fix-UnquotedServicePath
-
-
 .SYNOPSIS
-    This cmdlet is used to fix any existing unqupted service paths on a local machine.
-    Before reinventing the wheel I discovered ITSecGuy basically did all the hard work.
-    I simply turned his work into a function for myself. To make this my own I may re
-    work this to use Get-ChildItem instead of opening the registry.
-
-    Respect to ITSecGuy for the great job he did.
-    The link to his blog post is in the LINK section of this cmdlet.
+This cmdlet is used to fix any existing unqupted service paths on a local machine. Before reinventing the wheel I discovered ITSecGuy basically did all the hard work. I simply turned his work into a function for myself. To make this my own I may re work this to use Get-ChildItem instead of opening the registry. Respect to ITSecGuy for the great job he did. The link to his blog post is in the LINK section of this cmdlet.
 
 
-.SYNTAX
-    Fix-UnquotedServicePath [-BlackList] [<CommonParameters>]
-
-
-.PARAMETER
-    -BlackList
-        This parameter is used to define the registry location of services that you do not
-        have the permissions to changed or do not wish to change the values of
-
-        Required?                    false
-        Position?                    0
-        Accept pipeline input?       false
-        Default Value                $Null
-        Aliases                      None
-        Dynamic?                     false
-
-    <CommonParameters>
-        This cmdlet supports the common parameters: Verbose, Debug,
-        ErrorAction, ErrorVariable, WarningAction, WarningVariable,
-        OutBuffer, PipelineVariable, and OutVariable. For more information, see
-        about_CommonParameters (https:/go.microsoft.com/fwlink/?LinkID=113216).
+.PARAMETER BlackList
+This parameter is used to define the registry location of services that you do not have the permissions to changed or do not wish to change the values of
 
 
 .NOTES
-    Author: ITSecGuy, Robert H. Osborne
-    Contact: rosborne@osbornepro.com
-    Alias: tobor
+Author: ITSecGuy, Robert H. Osborne
+Contact: rosborne@osbornepro.com
+Alias: tobor
 
 
 .LINK
-    https://www.itsecguy.com/fixing_unquoted/
-    https://roberthosborne.com
+https://roberthsoborne.com
+https://osbornepro.com
+https://github.com/tobor88
+https://gitlab.com/tobor88
+https://www.powershellgallery.com/profiles/tobor
+https://www.linkedin.com/in/roberthosborne/
+https://www.youracclaim.com/users/roberthosborne/badges
+https://www.hackthebox.eu/profile/52286
 
 
 .INPUTS
-    None
-        This cmdlet does not accept any piped values
+None This cmdlet does not accept any piped values
 
 
 .OUTPUTS
-
+None
 
 #>
 Function Fix-UnquotedServicePath {

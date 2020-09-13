@@ -1,88 +1,67 @@
 <#
-.NAME
-    Disable-WeakSSL
-
 .SYNOPSIS
-    Disable-WeakSSL is a cmdlet created to disable weak SSL protocols on an IIS Server
+This cmdlet was created to disable weak SSL protocols on an IIS Server
     
 .DESCRIPTION
-    This cmdlet has the option to disable the weak ciphers such as TipleDES, RC4, and disabled null.
-    SSL 2.0, 3.0, TLS 1.0 are disabled in another option. TLS 1.1 and 1.2 are enabled no matter what.
+This cmdlet has the option to disable the weak ciphers such as TipleDES, RC4, and disabled null. SSL 2.0, 3.0, TLS 1.0 are disabled in another option. TLS 1.1 and 1.2 are enabled no matter what.
 
 .DESCRIPTION
-    Define weak protocols you would like to disable. 
-    You will be given to restart the computer now or later after the cmdlet executes.
+Define weak protocols you would like to disable. You will be given to restart the computer now or later after the cmdlet executes.
 
 .NOTES
-    Author: Rob Osborne
-    Alias: tobor
-    Contact: rosborne@osbornepro.com
-    https://roberthosborne.com
+Author: Robert H. Osborne
+Alias: tobor
+Contact: rosborne@osbornepro.com
 
-.SYNTAX
-    Disable-WeakSSL [-WeakCiphers] [-StrongAES] [-WeakSSLandTLS]
 
-.PARAMETERS
-    -WeakCiphers [<SwitchParameter>]
-            Indicates that you want to disable RC4, TipleDES, and NULL ciphers from being used to encrypt IIS web traffic
+.PARAMETER WeakCiphers
+Indicates that you want to disable RC4, TipleDES, and NULL ciphers from being used to encrypt IIS web traffic
 
-            Required?                    false
-            Position?                    named
-            Default value                False
-            Accept pipeline input?       False
-            Accept wildcard characters?  false
+.PARAMETER StrongAES 
+Indicates that you want to enable AES256 to encrypt IIS web traffic
 
-    -StrongAES [<SwitchParameter>]
-            Indicates that you want to enable AES256 to encrypt IIS web traffic
 
-            Required?                    false
-            Position?                    named
-            Default value                False
-            Accept pipeline input?       False
-            Accept wildcard characters?  false
+.PARAMETER WeakSSLandTLS
+Indicates that you want to disable TLS 1.0, SSL 2.0, and SSL 3.0 from being used to encrypt IIS web traffic
 
-    -WeakSSLandTLS [<SwitchParameter>]
-            Indicates that you want to disable TLS 1.0, SSL 2.0, and SSL 3.0 from being used to encrypt IIS web traffic
-
-            Required?                    false
-            Position?                    named
-            Default value                False
-            Accept pipeline input?       False
-            Accept wildcard characters?  false
-
-    <CommonParameters>
-        This cmdlet supports the common parameters: Verbose, Debug,
-        ErrorAction, ErrorVariable, WarningAction, WarningVariable,
-        OutBuffer, PipelineVariable, and OutVariable. For more information, see
-        about_CommonParameters (https:/go.microsoft.com/fwlink/?LinkID=113216).
 
 .INPUTS
-    You can not pipe objects to this cmdlet. It sets registry settings.
+None
 
 .OUTPUTS
-    There are no objects output from this cmdlet. It sets registry settings.
+None
 
 .EXAMPLE
-    ----------------EXAMPLES------------------
-    Disable-WeakSSL -WeakCiphers -StrongAES -WeakSSLandTLS -Verbose
-    # This exmple uses all of the options available. Weak ciphers and encryption protocols are disabled and strong ones are enabled.
+Disable-WeakSSL -WeakCiphers -StrongAES -WeakSSLandTLS -Verbose
+# This exmple uses all of the options available. Weak ciphers and encryption protocols are disabled and strong ones are enabled.
 
-    Disable-WeakSSL -StrongAES
-    # This example enables all of the strong protocols but does not disable any weak ones.
+.EXAMPLE
+Disable-WeakSSL -StrongAES
+# This example enables all of the strong protocols but does not disable any weak ones.
+
+
+.LINK
+https://roberthsoborne.com
+https://osbornepro.com
+https://github.com/tobor88
+https://gitlab.com/tobor88
+https://www.powershellgallery.com/profiles/tobor
+https://www.linkedin.com/in/roberthosborne/
+https://www.youracclaim.com/users/roberthosborne/badges
+https://www.hackthebox.eu/profile/52286
 
 #>
-Function Disable-WeakSSL
-{
+Function Disable-WeakSSL {
     [CmdletBinding()]
         param(
             [Parameter(Mandatory=$False)]
-            [switch][bool]$WeakCiphers,
+            [Switch][Bool]$WeakCiphers,
 
             [Parameter(Mandatory=$False)]
-            [switch][bool]$StrongAES,
+            [Switch][Bool]$StrongAES,
 
             [Parameter(Mandatory=$False)]
-            [switch][bool]$WeakSSLandTLS
+            [Switch][Bool]$WeakSSLandTLS
         ) # End param
 
 
@@ -112,11 +91,10 @@ Function Disable-WeakSSL
         New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers\RC4 128/128' -name 'Enabled' -value '0' -PropertyType 'DWord' -Force | Out-Null 
 
         # Disable AES 128/128
-        # UNCOMMENT THE BELOW LINES TO DISABLE AES 128
-        #(Get-Item 'HKLM:\').OpenSubKey('SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers', $true).CreateSubKey('AES 128/128') 
-        #New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers\AES 128/128' -name 'Enabled' -value '0' -PropertyType 'DWord' -Force | Out-Null 
+        (Get-Item 'HKLM:\').OpenSubKey('SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers', $true).CreateSubKey('AES 128/128') 
+        New-ItemProperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers\AES 128/128' -name 'Enabled' -value '0' -PropertyType 'DWord' -Force | Out-Null 
 
-    }  # End If WrakCiphers
+    }  # End If WeakCiphers
 
     If ($StrongAES.IsPresent)
     {

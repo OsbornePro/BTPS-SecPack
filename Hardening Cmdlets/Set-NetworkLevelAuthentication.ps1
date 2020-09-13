@@ -1,59 +1,48 @@
 <#
-.NAME
-    Set-NetworkLevelAuthentication
-
-
 .SYNOPSIS
-    This cmdlet is used to enabled Network Level Authentication for RDP on a remote or local device.
+This cmdlet is used to enabled Network Level Authentication for RDP on a remote or local device.
 
 
 .DESCRIPTION
-    Network Level Authentication (NLA) is a feature of Rremote Desktop Protocol (RDP) on Windows which when
-    enabled, requires the user to authenticate themselves before establishing a session with the remote
-    device. Network Level Authentication delegates the user's credentials from the client through a
-    client-side Security Support Provider (CredSSP) and prompts the user to authenticate before establishing
-    a session on the server. This feature prevents some DDoS attacks on the RDP service as well as some
-    Remote Code Execution (RCE) vulnerabilities such as BlueKeep.
+Network Level Authentication (NLA) is a feature of Rremote Desktop Protocol (RDP) on Windows which when enabled, requires the user to authenticate themselves before establishing a session with the remote device. Network Level Authentication delegates the user's credentials from the client through a client-side Security Support Provider (CredSSP) and prompts the user to authenticate before establishing a session on the server. This feature prevents some DDoS attacks on the RDP service as well as some Remote Code Execution (RCE) vulnerabilities such as BlueKeep.
 
 
 .PARAMETER ComputerName
-    Specifies one or more computers. The default is the local computer.
-
-    Type the NETBIOS name, an IP address, or a fully qualified domain name of a remote computer. To specify the
-    local computer, type the computer name, a dot (.), or localhost.
-
-    This parameter does not rely on Windows PowerShell remoting. You can use the ComputerName parameter even if
-    your computer is not configured to run remote commands.
+Specifies one or more computers. The default is the local computer.
+Type the NETBIOS name, an IP address, or a fully qualified domain name of a remote computer. To specify the local computer, type the computer name, a dot (.), or localhost. This parameter does not rely on Windows PowerShell remoting. You can use the ComputerName parameter even if your computer is not configured to run remote commands.
 
 .PARAMETER Undo
-    Specify this switch parameter if you want to undo the changes this function makes to the registry.
-    This will re-enable SMB v3.1.1 Compression in Windows version 1903 and 1909.
+Specify this switch parameter if you want to undo the changes this function makes to the registry. This will re-enable SMB v3.1.1 Compression in Windows version 1903 and 1909.
 
 
 .EXAMPLE
-    -------------------------- EXAMPLE 1 --------------------------
-    PS> Set-NetworkLevelAuthentication
-    This example enables NLA for RDP on the local computer
+Set-NetworkLevelAuthentication
+# This example enables NLA for RDP on the local computer
 
-    -------------------------- EXAMPLE 2 --------------------------
-    PS> Set-NetworkLevelAuthentication -ComputerName Desktop01.domain.com
-    This example enables NLA for RDP on a remote computer; Desktop01.domain.com
+.EXAMPLE
+Set-NetworkLevelAuthentication -ComputerName Desktop01.domain.com
+# This example enables NLA for RDP on a remote computer; Desktop01.domain.com
 
-    -------------------------- EXAMPLE 2 --------------------------
-    PS> Set-NetworkLevelAuthentication -ComputerName Desktop01.domain.com -Undo
-    This example disables NLA for RDP on a remote computer; Desktop01.usav.org
+.EXAMPLE
+Set-NetworkLevelAuthentication -ComputerName Desktop01.domain.com -Undo
+# This example disables NLA for RDP on a remote computer; Desktop01.usav.org
 
 
 .NOTES
-    Author: Robert H. Osborne
-    Alias: tobor
-    Contact: rosborne@osbornepro.com
+Author: Robert H. Osborne
+Alias: tobor
+Contact: rosborne@osbornepro.com
 
 
 .LINK
-    https://github.com/tobor88
-    https://www.powershellgallery.com/profiles/tobor
-    https://roberthosborne.com
+https://roberthsoborne.com
+https://osbornepro.com
+https://github.com/tobor88
+https://gitlab.com/tobor88
+https://www.powershellgallery.com/profiles/tobor
+https://www.linkedin.com/in/roberthosborne/
+https://www.youracclaim.com/users/roberthosborne/badges
+https://www.hackthebox.eu/profile/52286
 
 
 .INPUTS
