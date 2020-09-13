@@ -1,26 +1,23 @@
 <#
 .DESCRIPTION
-  PURPOSE    : Alerts IT admins and the users who have expiring or expired passwords
-  REQUIREMENT: This needs to be run on a Domain Controller and works best when set up as a task
+Alerts IT admins and the users who have expiring or expired passwords. This needs to be run on a Domain Controller and works best when set up as a task
 
 .NOTES
-  Author : Robert H. Osborne
-  Alias  : tobor
-  Contact: rosborne@osbornepro.com
+Author : Robert H. Osborne
+Alias  : tobor
+Contact: rosborne@osbornepro.com
 
 .LINKS
-  https://roberthosborne.com
-  https://osbornepro.com
-  https://github.com/tobor88
-  https://gitlab.com/tobor88
-  https://www.powershellgallery.com/profiles/tobor
+https://roberthsoborne.com
+https://osbornepro.com
+https://github.com/tobor88
+https://gitlab.com/tobor88
+https://www.powershellgallery.com/profiles/tobor
+https://www.linkedin.com/in/roberthosborne/
+https://www.youracclaim.com/users/roberthosborne/badges
+https://www.hackthebox.eu/profile/52286
 
 #>
-
-# Email Variables
-$From = "do-not-reply@$EnvDomain"
-$ToAdmin = "it@$EnvDomain"
-$SmtpServer = mail.smtp2go.com
 
 # Global variables
 [Int32]$MaxPassAge = (Get-ADDefaultDomainPasswordPolicy).MaxPasswordAge.Days
@@ -80,14 +77,14 @@ ForEach ($Users in $UserDetails)
         Try 
         {
 
-            Send-MailMessage -From $From -To $From1 -Subject "ACTION REQUIRED: Your $EnvDomain Password Has Expired" -BodyAsHtml -Body $MailBody1 -SmtpServer $SmtpServer -Priority High
+            Send-MailMessage -From $From -To $From1 -Subject "ACTION REQUIRED: Your Password Has Expired" -BodyAsHtml -Body $MailBody1 -SmtpServer $SmtpServer -Priority High
         
         } # End Try
 
         Catch 
         {
 
-            Send-MailMessage -From $From -To $From1 -Subject "ACTION REQUIRED: Your $EnvDomain Password Has Expired" -BodyAsHtml -Body $MailBody1 -SmtpServer $SmtpServer -Priority High
+            Send-MailMessage -From $From -To $From1 -Subject "ACTION REQUIRED: Your Password Has Expired" -BodyAsHtml -Body $MailBody1 -SmtpServer $SmtpServer -Priority High
 
             Send-MailMessage -From $From -To $ToAdmin -Subject "Forward This Email Alert to $From1. Auto Send Failed" -BodyAsHtml -Body $MailBody1 -SmtpServer $SmtpServer
 

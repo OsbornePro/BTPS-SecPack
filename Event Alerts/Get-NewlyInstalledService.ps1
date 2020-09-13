@@ -1,19 +1,20 @@
 ﻿<# 
 .SYNOPSIS
-    Get-NewlyInstalledService is for identifying a when an unusual service is being run possibly indicating credentials were compromised.
+This cmdlet is for identifying a when an unusual service is being run possibly indicating credentials were compromised.
 
 .DESCRIPTION
-    This is best used as a task that runs in response to event ID 7009 and 7045. The 2 newest events will be sent to the admins as an alert.
+This is best used as a task that runs in response to event ID 7009 and 7045. The 2 newest events will be sent to the admins as an alert.
+
 
 .NOTES
-    Author: Rob Osborne
-    Alias: tobor
-    Contact: rosborne@osbornepro.com
-    https://roberthosborne.com
+Author: Robert H. Osborne
+Alias: tobor
+Contact: rosborne@osbornepro.com
+
 
 .EXAMPLE
-    Get-NewlyInstalledService -SmtpServer mail.smtp2go.com -To alert@osbornepro.com -From alerter@osbornepro.com -Verbose
-    This examples sends the alert to alert@osbornepro.com from the smtp2go server.
+Get-NewlyInstalledService -SmtpServer mail.smtp2go.com -To alert@osbornepro.com -From alerter@osbornepro.com -Verbose
+# This examples sends the alert to an email address when an event ID occurs.
 #>
 
 Function Get-NewlyInstalledService {

@@ -13,7 +13,7 @@ Test-Admin
 
 
 .NOTES
-Author: Rob Osborne
+Author: Robert H. Osborne
 Alias: tobor
 Contact: rosborne@osbornepro.com
 
@@ -83,7 +83,7 @@ New-FirewallLogFile -Path C:\Windows\Temp
 
 
 .NOTES
-Author: Rob Osborne
+Author: Robert H. Osborne
 Alias: tobor
 Contact: rosborne@osbornepro.com
 
@@ -142,7 +142,7 @@ PROCESS
   $Acl.SetAccessRuleProtection($True, $False)
 
 
-  $PermittedUsers = @('NT AUTHORITY\SYSTEM', 'BUILTIN\Administrators', 'BUILTIN\Network Configuration Operators', 'NT SERVICE\MpsSvc', 'USAV\sour.pell')
+  $PermittedUsers = @('NT AUTHORITY\SYSTEM', 'BUILTIN\Administrators', 'BUILTIN\Network Configuration Operators', 'NT SERVICE\MpsSvc', "$BatchUser")
   ForEach ($User in $PermittedUsers) 
   {
 
@@ -186,7 +186,7 @@ This example enables the windows firewall, enables logging of traffic blocked by
 
 
 .NOTES
-Author: Rob Osborne
+Author: Robert H. Osborne
 Alias: tobor
 Contact: rosborne@osbornepro.com
 
@@ -315,7 +315,7 @@ This example creates a firewall rule that blocks inbound and outbound connection
 
 
 .NOTES
-Author: Rob Osborne
+Author: Robert H. Osborne
 Alias: tobor
 Contact: rosborne@osbornepro.com
 
@@ -435,7 +435,7 @@ Watch-PortScan -EmailAlert -ExcludeAddresses '10.10.10.10.', '10.10.10.11' -Doma
 
 
 .NOTES
-Author: Rob Osborne
+Author: Robert H. Osborne
 Alias: tobor
 Contact: rosborne@osbornepro.com
 

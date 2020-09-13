@@ -10,10 +10,6 @@
 $CsvInformation = Import-Csv -Path "$env:USERPROFILE\Documents\UserComputerList.csv" -Delimiter ',' 
 $UserList = $CsvInformation | Select-Object -Property Name -Unique
 
-# Who should receive the email alerts
-$SmtpServer = 'smtp.outlook.com'
-$AlertEmail = 'alertingemail@domain.com'
-
 # Array of Shared Computer Names is for excluding computers that may be shared such as conference room computers that may be signed into
 $SharedComputerIPs = @('10.0.1.1','10.0.2.2','10.0.3.3')
 
@@ -27,28 +23,33 @@ $FinalResult = @()
 
 <#
 .SYNOPSIS
-    This PowerShell script is useful in an environment where users can log into any computer but are assigned maybe 1, 2, or 3+ 
-    computers.
+This PowerShell script is useful in an environment where users can log into any computer but are assigned maybe 1, 2, or 3+ computers.
     
 .DESCRIPTION
- What this script does is query the event log for the last 24 hours. Anywhere a successful logon happens (Event ID 4624) 
- the IP Address is noted and compared to the assigned IP Address list located in a CSV File you create.
- You can then have it notify you of the sign in by email.
-
- This is a little niche to a smaller environment. I learned a lot writing this one and will do a blog on it at https://powershell.org
+What this script does is query the event log for the last 24 hours. Anywhere a successful logon happens (Event ID 4624) the IP Address is noted and compared to the assigned IP Address list located in a CSV File you create. You can then have it notify you of the sign in by email. This is a little niche to a smaller environment. I learned a lot writing this one and will do a blog on it at https://powershell.org
  
- IMPORTANT: For this to work you will need a CSV file containing the user and their assigned devices.
+IMPORTANT: For this to work you will need a CSV file containing the user and their assigned devices.
   
   That info is imported from the CSV before it can be worked with.
   
 .NOTES
-    Author: Rob Osborne
-    Alias: tobor
-    CONTACT: rosborne@osbornepro.com
-    https://roberthosborne.com
+Author: Robert H. Osborne
+Alias: tobor
+Contact: rosborne@osbornepro.com
+
+
+.LINK
+https://roberthsoborne.com
+https://osbornepro.com
+https://github.com/tobor88
+https://gitlab.com/tobor88
+https://www.powershellgallery.com/profiles/tobor
+https://www.linkedin.com/in/roberthosborne/
+https://www.youracclaim.com/users/roberthosborne/badges
+https://www.hackthebox.eu/profile/52286
+
 #>
-Function Get-UserSid
-{
+Function Get-UserSid {
     [CmdletBinding()]
         param(
             [Parameter(Mandatory = $True,
@@ -247,4 +248,4 @@ $NoteLine = "This Message was Sent on $(Get-Date -Format 'MM/dd/yyyy HH:mm:ss')"
 $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
 $MailBody = $FinalResult | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "<br>The below table contains information on users who have signed into devices they are not assigned in the last 24 hours<br><br><hr><br><br>" | Out-String
 
-Send-MailMessage -From $AlertEmail -To $AlertEmail -Subject "Unusual Login Occurred" -BodyAsHtml -Body "$MailBody" -SmtpServer $SmtpServer
+Send-MailMessage -From $From -To $To -Subject "Unusual Login Occurred" -BodyAsHtml -Body "$MailBody" -SmtpServer $SmtpServer

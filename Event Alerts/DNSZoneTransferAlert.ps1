@@ -12,6 +12,6 @@ Else
 {
 
     $MailBody = $Event.Message + "`r`n`t" + $Event.TimeGenerated | Format-List -Property * | Out-String
-    Send-Mailmessage -From "alerts@osbornepro.com" -To "me@osbornepro.com" -Subject "DNS Zone Transfer Occured" -Body $MailBody -SmtpServer mail.smtp2go.com
+    Send-Mailmessage -From $From -To $To -Subject "DNS Zone Transfer Occured" -Body $MailBody -SmtpServer $SmtpServer
 
 }  # End Else
