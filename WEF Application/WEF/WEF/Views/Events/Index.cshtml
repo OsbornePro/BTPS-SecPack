@@ -1,0 +1,154 @@
+﻿@model PaginatedListCollection<WEF.Models.GeneralEvents>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<form asp-controller="Events" asp-action="Index" method="get">
+    <p>
+        <input style="text-align:left" type="text" name="SearchString" class="btn btn-dark" value="@ViewData[" CurrentFilter"]" />
+        <input type="submit" value="Search" class="btn btn-dark" />
+        <a asp-action="Index" style="color:#A6192E">Back to Full List</a>
+    </p>
+</form>
+
+<div>
+<table class="table-responsive table-striped table-bordered" border="1" cellspacing="8" title="Event Logs" cellpadding="8">
+    <thead>
+        <tr>
+            <th style="color:#A6192E">
+                <a asp-action="Index" asp-route-sortOrder="@ViewData[" Id"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Event Id</a>
+            </th>
+            <th style="color:#A6192E">
+                <a asp-action="Index" asp-route-sortOrder="@ViewData[" LevelDisplayNameParam"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">LevelDisplayName</a>
+            </th>
+            <th style="color:#A6192E">
+                <a asp-action="Index" asp-route-sortOrder="@ViewData[" LogNameParam"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">LogName</a>
+            </th>
+            <th style="color:#A6192E">
+                <a asp-action="Index" asp-route-sortOrder="@ViewData[" MachineNameParam"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">MachineName</a>
+            </th>
+            <th style="color:#A6192E">
+                <a asp-action="Index" asp-route-sortOrder="@ViewData[" Message"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Message</a>
+            </th>
+            <!-- Uncomment these lines if you wish to display all available event information in the SQL table. This info will currently only be displayed after clicking the Details button
+            <th style="color:#A6192E">
+                <a asp-action="Index" asp-route-sortOrder="@@ViewData[" ProviderNameParam"]" asp-route-currentFilter="@@ViewData["CurrentFilter"]">ProviderName</a>
+            </th>
+                <th style="color:#A6192E">
+                    <a asp-action="Index" asp-route-sortOrder="@@ViewData[" RecordIdParam"]" asp-route-currentFilter="@@ViewData["CurrentFilter"]">RecordId</a>
+                </th>
+                <th style="color:#A6192E">
+                    <a asp-action="Index" asp-route-sortOrder="@@ViewData[" TaskDisplayNameParam"]" asp-route-currentFilter="@@ViewData["CurrentFilter"]">TaskDisplayName</a>
+                </th>
+            -->
+            <th style="color:#A6192E">
+                <a asp-action="Index" asp-route-sortOrder="@ViewData[" TimeCreated"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">TimeCreated</a>
+            </th>
+            <th style="color:#A6192E">
+                Options
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LevelDisplayName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LogName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.MachineName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Message)
+                </td>
+                <!-- I removed these lines for a more readable table. Use the details button to view this information
+                <td>
+                    @@Html.DisplayFor(modelItem => item.ProviderName)
+                </td>
+                <td>
+                    @@Html.DisplayFor(modelItem => item.RecordId)
+                </td>
+                <td>
+                    @@Html.DisplayFor(modelItem => item.TaskDisplayName)
+                </td>
+                -->
+                <td>
+                    @Html.DisplayFor(modelItem => item.TimeCreated)
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.Id" style="color:#A6192E">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id" style="color:#A6192E">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+</div>
+
+
+<div style="float:right">
+    <br />
+    <p><strong>Page @(Model.PageIndex) of @(Model.TotalPages)</strong></p>
+    <p><strong>@(Model.Count) Devices Displayed</strong></p>
+</div>
+<p>
+    <div>
+        <hr />
+        @{
+            var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+            var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+        }
+        <a asp-action="Index"
+           asp-route-sortOrder="@ViewData["CurrentSort"]"
+           asp-route-pageNumber="@((Model.PageIndex - Model.PageIndex) + 1)"
+           asp-route-currentFilter="@ViewData["CurrentFilter"]"
+           class="btn btn-dark @prevDisabled">
+            First Page
+        </a>
+        <a asp-action="Index"
+           asp-route-sortOrder="@ViewData["CurrentSort"]"
+           asp-route-pageNumber="@(Model.PageIndex - 2)"
+           asp-route-currentFilter="@ViewData["CurrentFilter"]"
+           class="btn btn-dark @prevDisabled">
+            <<
+        </a>
+        <a asp-action="Index"
+           asp-route-sortOrder="@ViewData["CurrentSort"]"
+           asp-route-pageNumber="@(Model.PageIndex - 1)"
+           asp-route-currentFilter="@ViewData["CurrentFilter"]"
+           class="btn btn-dark @prevDisabled">
+            Previous
+        </a>
+        <a asp-action="Index"
+           asp-route-sortOrder="@ViewData["CurrentSort"]"
+           asp-route-pageNumber="@(Model.PageIndex + 1)"
+           asp-route-currentFilter="@ViewData["CurrentFilter"]"
+           class="btn btn-dark @nextDisabled">
+            Next
+        </a>
+        <a asp-action="Index"
+           asp-route-sortOrder="@ViewData["CurrentSort"]"
+           asp-route-pageNumber="@(Model.PageIndex + 2)"
+           asp-route-currentFilter="@ViewData["CurrentFilter"]"
+           class="btn btn-dark @nextDisabled">
+            >>
+        </a>
+        <a asp-action="Index"
+           asp-route-sortOrder="@ViewData["CurrentSort"]"
+           asp-route-pageNumber="@(Model.PageIndex + (Model.TotalPages - Model.PageIndex))"
+           asp-route-currentFilter="@ViewData["CurrentFilter"]"
+           class="btn btn-dark @nextDisabled">
+            Last Page
+        </a>
+    </div>
+</p>
