@@ -1,3 +1,8 @@
+# Email Variables
+$To = ""
+$From = ""
+$SmtpServer = ""
+
 $FinalResults= @()
 $Date = Get-Date 
 $ConnectionString = "Server=(localdb);Database=EventCollections;Integrated Security=True;Connect Timeout=30"
@@ -138,6 +143,6 @@ td {
     $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
     $MailBody = $FinalResults | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "<br>The below table contains suspicous events that were triggered<br><br><hr><br><br>" | Out-String
 
-    Send-MailMessage -From "alerts@osbornepro.com" -To "admin@osbornepro.com" -Subject "SUSPICIOUS EVENT TRIGGERED" -BodyAsHtml -Body "$MailBody" -SmtpServer mail.smtp2go.com 
+    Send-MailMessage -From $From -To $To -Subject "SUSPICIOUS EVENT TRIGGERED" -BodyAsHtml -Body "$MailBody" -SmtpServer $SmtpServer
     
 }  # End If 
