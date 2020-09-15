@@ -3,17 +3,17 @@ $Date = Get-Date
 $ConnectionString = "Server=(localdb);Database=EventCollections;Integrated Security=True;Connect Timeout=30"
 
 # SQL Queries to discover suspicious activity
-$ClearedEventLog = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=1102 AND GeneralEvents.TimeCreated >= DATEADD(hour, -1, GETDATE())"
-$PasswordChange = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4723 OR Id = 4724 AND GeneralEvents.TimeCreated >= DATEADD(hour, -1, GETDATE())"
-$UserAddedToAdminGroup = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4732 OR Id=4756 OR Id=4728 AND GeneralEvents.TimeCreated >= DATEADD(hour, -1, GETDATE())"
-$UserRemovedFromAdminGroup = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4733 OR Id=4757 OR Id=4729 AND GeneralEvents.TimeCreated >= DATEADD(hour, -1, GETDATE())"
-$UserAccountCreated = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4720 AND GeneralEvents.TimeCreated >= DATEADD(hour, -1, GETDATE());"
-$UserAccountDeleted = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4726 AND GeneralEvents.TimeCreated >= DATEADD(hour, -1, GETDATE());"
-$NewServiceInstalled = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=7045 AND Message NOT LIKE '%C:\ProgramData\Microsoft\Windows Defender\Definition Updates\%' AND GeneralEvents.TimeCreated >= DATEADD(day, -1, GETDATE());"
-$UserAccountLocked = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4740 AND GeneralEvents.TimeCreated >= DATEADD(hour, -1, GETDATE());"
-$UserAccountUnlocked = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4767 AND GeneralEvents.TimeCreated >= DATEADD(hour, -1, GETDATE());"
-$SpecialPrivilegeAssigned = "SELECT Id,MachineName,Message,TimeCreated FROM dbo.GeneralEvents WHERE Id=4672 AND Message NOT LIKE '%paessler%' AND GeneralEvents.TimeCreated >= DATEADD(hour, -1, GETDATE());"
-$ReplayAttack = "SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE Id=4649 AND GeneralEvents.TimeCreated >= DATEADD(hour, -1, GETDATE());"
+$ClearedEventLog = "Id=1102"
+$PasswordChange = "Id=4723 OR Id = 4724"
+$UserAddedToAdminGroup = "Id=4732 OR Id=4756 OR Id=4728"
+$UserRemovedFromAdminGroup = "Id=4733 OR Id=4757 OR Id=4729"
+$UserAccountCreated = "Id=4720"
+$UserAccountDeleted = "Id=4726"
+$NewServiceInstalled = "Id=7045 AND Message NOT LIKE '%C:\ProgramData\Microsoft\Windows Defender\Definition Updates\%'"
+$UserAccountLocked = "Id=4740"
+$UserAccountUnlocked = "Id=4767"
+$SpecialPrivilegeAssigned = "Id=4672 AND Message NOT LIKE '%paessler%' AND Message NOT LIKE '%dnsdynamic%' AND Message NOT LIKE '%nessus.admin%'"
+$ReplayAttack = "Id=4649"
 
 # This is an array of SQL Commands to execute
 $Sqls = $ClearedEventLog,$PasswordChange,$UserAddedToAdminGroup,$UserRemovedFromAdminGroup,$UserAccountCreated,$UserAccountDeleted,$NewServiceInstalled,$UserAccountLocked,$UserAccountUnlocked,$SpecialPrivilegeAssigned,$ReplayAttack
@@ -70,7 +70,9 @@ END
 ForEach ($Sql in $Sqls)
 {
 
-    $Results = Find-NewlyCreatedLocalAccounts -ConnectionString $ConnectionString -SqlCommand $Sql -Verbose  
+    $SqlCommand = "DECLARE @CurHour DATETIME, @PrevHour DATETIME; SET @CurHour = DATEADD(hour, DATEDIFF(hour,'20110101',CURRENT_TIMESTAMP),'20110101'); SET @PrevHour = DATEADD(hour,-1, @CurHour); SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE TimeCreated >= @PrevHour and TimeCreated < @CurHour AND $Sql ORDER BY TimeCreated DESC"
+    
+    $Results = Find-NewlyCreatedLocalAccounts -ConnectionString $ConnectionString -SqlCommand $SqlCommand -Verbose  
     
     If ($Results) 
     {
