@@ -1,4 +1,14 @@
-﻿<#
+# This script can be used to monitor for internal port scans on domain and/or private and/or public networks using the firewall logs. 
+# After the permissions are set correctly on the directory your firewall logs are stored in you may need to restart the device to apply them.
+# This can be used to receive an email alert when port scans happen as well as automatically blacklist the ip address performing the port scan
+# on the localhost.
+
+    # SET THESE VALUES TO RECEIVE EMAIL ALERTS WHEN DEFINING THE -EmailAlert SWITCH PARMETER
+    $To = "alertme@osbornepro.com"
+    $From = "do-not-reply@osbornepro.com"
+    $SmtpServer = "mail.smtp2go.com"
+
+<#
 .SYNOPSIS
 This cmdlet is used to verify functions are being executed with administrative privileges.
 
@@ -13,7 +23,7 @@ Test-Admin
 
 
 .NOTES
-Author: Robert H. Osborne
+Author: Rob Osborne
 Alias: tobor
 Contact: rosborne@osbornepro.com
 
@@ -83,7 +93,7 @@ New-FirewallLogFile -Path C:\Windows\Temp
 
 
 .NOTES
-Author: Robert H. Osborne
+Author: Rob Osborne
 Alias: tobor
 Contact: rosborne@osbornepro.com
 
@@ -142,7 +152,7 @@ PROCESS
   $Acl.SetAccessRuleProtection($True, $False)
 
 
-  $PermittedUsers = @('NT AUTHORITY\SYSTEM', 'BUILTIN\Administrators', 'BUILTIN\Network Configuration Operators', 'NT SERVICE\MpsSvc', "$BatchUser")
+  $PermittedUsers = @('NT AUTHORITY\SYSTEM', 'BUILTIN\Administrators', 'BUILTIN\Network Configuration Operators', 'NT SERVICE\MpsSvc')
   ForEach ($User in $PermittedUsers) 
   {
 
@@ -186,7 +196,7 @@ This example enables the windows firewall, enables logging of traffic blocked by
 
 
 .NOTES
-Author: Robert H. Osborne
+Author: Rob Osborne
 Alias: tobor
 Contact: rosborne@osbornepro.com
 
@@ -239,8 +249,8 @@ Function Enable-FirewallLogging {
 
             Write-Output "[*] Firewall has been enabled"
             
-            "[*] FW PROFILE : " + $Re.Name
-            "[*] LOG ENABLE : " + $Re.Enabled
+            $Re.Name
+            $Re.Enabled
 
         }   # End If
         ElseIf (($Re.Enabled) -eq 'False')
@@ -248,16 +258,14 @@ Function Enable-FirewallLogging {
 
             Write-Output "[x] Firewall is disabled. This may because of group policy settings. Your current settings are below"
             
-            "[*] FW PROFILE : " + $Re.Name
-            "[*] LOG ENABLE : " + $Re.Enabled
+            $Re.Name
+            $Re.Enabled
 
         }  # End ElseIf
 
     }  # End ForEach
 
-
     Write-Verbose "Enable logging for blocked connections"
-
     Set-NetFirewallProfile -Name Domain -LogAllowed True -LogBlocked True -LogFileName "$Path\domainfw.log"
     Set-NetFirewallProfile -Name Private -LogAllowed True -LogBlocked True -LogFileName "$Path\privatefw.log"
     Set-NetFirewallProfile -Name Public -LogAllowed False -LogBlocked True -LogFileName "$Path\publicfw.log"
@@ -272,8 +280,8 @@ Function Enable-FirewallLogging {
 
             Write-Output "[*] Firewall logging of blocked connections has been enabled"
 
-            "[*] FW PROFILE: " + $R.Name
-            "[*] LOG RULE  : " + $R.LogBlocked
+            $R.Name
+            $R.LogBlocked
 
         }   # End If
         ElseIf (($R.LogBlocked) -eq 'False')
@@ -281,13 +289,12 @@ Function Enable-FirewallLogging {
 
             Write-Output "[x] Firewall logging of blocked connectiosn was NOT enabled"
 
-            "[*] FW PROFILE: " + $R.Name
-            "[*] LOG RULE  : " + $R.Logblocked
+            $R.Name
+            $R.Logblocked
 
         }  # End ElseIf
 
     }  # End ForEach
-
 }  # End Function 
 
 
@@ -315,7 +322,7 @@ This example creates a firewall rule that blocks inbound and outbound connection
 
 
 .NOTES
-Author: Robert H. Osborne
+Author: Rob Osborne
 Alias: tobor
 Contact: rosborne@osbornepro.com
 
@@ -388,6 +395,117 @@ Function Block-IPAddress {
 
 }  # End Function Block-IPAddress
 
+<#
+.SYNOPSIS
+This cmdlet is used to extract all of the unique IPv4 addresses out from each line of a log file
+
+
+.DESCRIPTION
+Use a ForEach type statement to extract unique IPv4 address out from each line of a log file
+
+
+.PARAMETER String
+Defines the string of text that the regular expression of an IPv4 address should be tested for
+
+.PARAMETER Path
+Defines the path to a file you want to grab unique IP addresses out out
+
+
+.EXAMPLE
+ForEach ($Line in (Get-Content -Path C:\Temp\firewall.log)) { Get-ValidIPAddressFromString -String $Line }
+# This example parses the text file firewall.log and lists any IPv4 Addresses found on each line
+
+.EXAMPLE
+Get-ValidIpAddressFromString -Path C:\Windows\System32\LogFiles\Firewall\domainfw.log
+
+
+.NOTES
+Author: Robert H. Osborne
+Alias: tobor
+Contact: rosborne@osbornepro.com
+
+
+.LINK
+https://roberthsoborne.com
+https://osbornepro.com
+https://github.com/tobor88
+https://gitlab.com/tobor88
+https://www.powershellgallery.com/profiles/tobor
+https://www.linkedin.com/in/roberthosborne/
+https://www.youracclaim.com/users/roberthosborne/badges
+https://www.hackthebox.eu/profile/52286
+
+
+.INPUTS
+System.String
+
+
+.OUTPUTS
+System.String
+
+#>
+Function Get-ValidIPAddressFromString {
+    [CmdletBinding(DefaultParameterSetName="Line")]
+        param(
+            [Parameter(
+                ParameterSetName="Line",
+                Position=0,
+                Mandatory=$True,
+                ValueFromPipeline=$True,
+                ValueFromPipelineByPropertyName=$False,
+                HelpMessage="`n[H] Enter a string to extract the IPv4 address out of `n[E] EXAMPLE: Log File 8/6/2020 10.10.10.10. DENY TCP")]  # End Parameter
+            [String]$String,
+        
+            [Parameter(
+                ParameterSetName="File",
+                Mandatory=$True,
+                ValueFromPipeline=$False)]  # End Parameter
+            [String]$Path)  # End param
+       
+
+    $Obj = @()
+    $Regex=‘(?<Address>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))’
+
+    Switch ($PsCmdlet.ParameterSetName)
+    {
+        'File' {
+
+            $FileContents = Get-Content -Path $Path -Tail 5000
+            ForEach ($Line in $FileContents)
+            {
+
+                If (($Line -Match $Regex) -and ($Obj -notcontains $Matches.Address))
+                {
+    
+                        $Obj += $Matches.Address
+        
+                }  # End If
+
+
+
+            }  # End ForEach
+            
+            Return $Obj
+        
+        }  # End File Switch
+
+        'Line' {
+        
+            If ($String -Match $Regex)
+            {
+                
+                $Obj = $Matches.Address
+
+            }  # End If
+
+            $Obj
+
+        }  # End Default Switch
+
+    }  # End Switch 
+
+}  # End Function Get-ValidIPAddressFromString
+
 
 <#
 .SYNOPSIS
@@ -435,7 +553,7 @@ Watch-PortScan -EmailAlert -ExcludeAddresses '10.10.10.10.', '10.10.10.11' -Doma
 
 
 .NOTES
-Author: Robert H. Osborne
+Author: Rob Osborne
 Alias: tobor
 Contact: rosborne@osbornepro.com
 
@@ -515,12 +633,12 @@ Function Watch-PortScan {
 
     # Defining IP Addresses to filter out normal traffic flows to help prevent false positives
     $IPs = [System.Net.Dns]::GetHostAddresses("$env:COMPUTERNAME").Where({$_.AddressFamily -eq 'InterNetwork'}).IpAddressToString
-    $DnsServers = Get-CimInstance -ClassName "Win32_NetworkAdapterConfiguration" | ForEach-Object -MemberName "DNSServerSearchOrder"
+    $DnsServers = Get-DnsClientServerAddress -AddressFamily 2 | Select-Object -ExpandProperty ServerAddresses -Unique
     $DnsServers += $ExcludeAddresses
 
     # Objects that will be used to check for consecutive IP address connections
-    $CurrentEntryObject = New-Object -TypeName PSCustomObject -Property @{Date=""; Time=""; Action=""; Protocol=""; SourceIP=""; DestinationIP=""}
-    $PreviousEntryObject = New-Object -TypeName PSCustomObject -Property @{Date=""; Time=""; Action=""; Protocol=""; SourceIP=""; DestinationIP=""}
+    $CurrentEntryObject = New-Object -TypeName PSCustomObject -Property @{Date=""; Time=""; Action=""; Protocol=""; SourceIP=""; DestinationIP=""; SourcePort=""; DestinationPort=""; SYN=""; ACK=""}
+    $PreviousEntryObject = New-Object -TypeName PSCustomObject -Property @{Date=""; Time=""; Action=""; Protocol=""; SourceIP=""; DestinationIP=""; SourcePort=""; DestinationPort=""; SYN=""; ACK=""}
 
 
     If ((Test-Path -Path $LogFile) -and ($FileName -like "*.log"))
@@ -542,7 +660,6 @@ Function Watch-PortScan {
     New-Item -Path $TempLogname,$PreserveLocation -ItemType File -Force -ErrorAction SilentlyContinue | Out-Null
  
 
-@"
     Write-Verbose "Getting a list of all the firewall rule names"
     $FirewallRule = New-Object -ComObject HNetCfg.FwPolicy2
     $FwRuleNames = $FirewallRule.Rules | Select-Object -Property "Name"
@@ -611,7 +728,6 @@ Function Watch-PortScan {
 
     }  # End ForEach
     
-"@
 
     $Now = (Get-Date).Ticks
     $LastMinute = ((Get-Date -DisplayHint Time).AddSeconds((-100)).Ticks)
@@ -623,102 +739,141 @@ Function Watch-PortScan {
         Write-Output "[*] Checking log entries for scanning attempts"
        
         $Logs = Get-Content -Path $LogFile -Tail 5000
-   
-        ForEach ($Log in $Logs)
+        $IPList = Get-ValidIPAddressFromString -Path "$LogFile"
+        
+        $ArrayList = New-Object -TypeName System.Collections.ArrayList(,$IPList)
+
+        Write-Verbose "Removing excluded addresses from radar"
+        ForEach ($EA in $ExcludeAddresses)
         {
 
-            $Entry = $Log.Split()
- 
-            $PreviousEntryObject = $CurrentEntryObject
-            
-            $StrDate = $Entry[0]
-            $StrTime = $Entry[1] 
-            $StrDateTime = "$StrDate $StrTime"
+            $ArrayList.Remove("$EA")
 
-            Try 
-            {
-                
-                $CurrentEntryObjectDate = ([Datetime]::ParseExact($StrDateTime, 'yyyy-MM-dd HH:mm:ss', $Null)).Ticks
-
-            }  # End Try
-            Catch 
-            {
-
-                Continue
-
-            }  # End Catch
-    
-            $CurrentEntryObject.Date = $Entry[0]
-            $CurrentEntryObject.Time = $Entry[1]
-            $CurrentEntryObject.Action = $Entry[2]
-            $CurrentEntryObject.Protocol = $Entry[3]
-            $CurrentEntryObject.SourceIP = $Entry[4]
-            $CurrentEntryObject.DestinationIP = $Entry[5]
-
-                  # Destination IP is this machine                        # The traffic is not from the local machine          # The Source IP is not on allowed list                      # Resutls from the last minute
-            If (($IPs -Contains $CurrentEntryObject.DestinationIP) -and ($IPs -NotContains $CurrentEntryObject.SourceIP) -and ($DnsServers -NotContains $CurrentEntryObject.SourceIP) -and (($CurrentEntryObjectDate -le $Now) -and ($CurrentEntryObjectDate -ge $LastMinute)))
-            {
-
-                Write-Output "[*] A match has been found, checking to see if the address has been repeated"
-                
-                If ($CurrentEntryObject.SourceIP -eq $PreviousEntryObject.SourceIP)
-                {
-
-                    $ScanCounter++
-
-                    Write-Verbose "Alert limit is set to $Limit consecutive unsolicited packets from the same source IP"
-                    If ($ScanCounter -ge $Limit)
-                    {
-  
-                        Write-Output "[!] Alert Limit Has Been Reached"
-                        $ScanCounter = 0
-                        $ScanFound = $True
-
-                        $IPForEmail = ($CurrentEntryObject.SourceIP).ToString()
-                        $DestinationForEmail = ($CurrentEntryObject.DestinationIP).ToString()
-                        $ProtocolForEmail = ($CurrentEntryObject.Protocol).ToString()
-                        $DateTimeForEmail = ($CurrentEntryObject.Date).ToString() + " " + ($CurrentEntryObject.Time).ToString()
-
-                        If ($EmailAlert.IsPresent)
-                        {
-
-                            Write-Output "[*] Alerting admins"
-
-                            $Body = " =======================================================`n PORT SCAN DETECTED: $env:COMPUTERNAME `n=======================================================`n`nSUMMARY: `nA possible port scan was discovered on $env:COMPUTERAME. To examine these results further the firewall logs to review are in C:\Windows\System32\LogFiles\firewall\Keep_For_Analysis. `n`nSCAN INFO: `nSOURCE IP: $IPForEmail `nDESTINATION: $DestinationForEmail `nPROTOCOL: $ProtocolForEmail `nDATE TIME: $DateTimeForEmail`n"
-                
-                            Send-MailMessage -To $To -From $From -SmtpServer $SmtpServer -Priority High -Subject "ALERT: Attempted Port Scan $env:COMPUTERNAME" -Body $Body
-
-                        }  # End If
-                        
-                        If ($PSBoundParameters.Key -eq "ActiveBlockList")
-                        {
-
-                            If ($BlockIps -NotContains $CurrentEntryObject.SourceIP)
-                            {
-
-                                $BadGuyIP = $CurrentEntryObject.SourceIP
-
-                                Write-Output "[*] Scan detected: Adding $BadGuyIP to the block list. If -ActiveBlockList was specified the IP will be blocked shortly"
-                                $BlockIps.Add($BadGuyIP)
-    
-                            }  # End If
-
-                        }  # End If
-  
-                    }  # End If
-  
-                }  # End 
-  
-            }  # End If
-            Else
-            {
-  
-                $ScanCounter = 0
-            
-            }  # End Else
-  
         }  # End ForEach
+
+
+        ForEach ($V in $ArrayList)
+        {
+
+            $DeniedResults = @()
+            $DeniedResults = $Logs | Select-String -Pattern "$V"
+            $DropResults = ($DeniedResults | Select-String -Pattern "DROP").Count
+            $AllowResults = ($DeniedResults | Select-String -Pattern "ALLOW").Count
+            
+            If (($DeniedResults.Count -ge $Limit) -and ($DropResults -gt $AllowResults))
+            {
+                
+                Write-Verbose "Five or more packets were denied from $V"
+
+                ForEach ($DenyResult in $DeniedResults)
+                {
+            
+                    $DR = $DenyResult.ToString()
+                    $Entry = $DR.Split()
+
+                    $PreviousEntryObject = $CurrentEntryObject
+            
+                    $StrDate = $Entry[0]
+                    $StrTime = $Entry[1] 
+                    $StrDateTime = "$StrDate $StrTime"
+
+                    Try 
+                    {
+                
+                        $CurrentEntryObjectDate = ([Datetime]::ParseExact($StrDateTime, 'yyyy-MM-dd HH:mm:ss', $Null)).Ticks
+
+                    }  # End Try
+                    Catch 
+                    {
+
+                        Continue
+
+                    }  # End Catch
+
+                    $CurrentEntryObject.Date = $Entry[0]
+                    $CurrentEntryObject.Time = $Entry[1]
+                    $CurrentEntryObject.Action = $Entry[2]
+                    $CurrentEntryObject.Protocol = $Entry[3]
+                    $CurrentEntryObject.SourceIP = $Entry[4]
+                    $CurrentEntryObject.DestinationIP = $Entry[5]
+                    $CurrentEntryObject.SourcePort = $Entry[6]
+                    $CurrentEntryObject.DestinationPort = $Entry[7]
+                    $CurrentEntryObject.SYN = $Entry[10]
+                    $CurrentEntryObject.ACK = $Entry[11]
+
+                    If (($CurrentEntryObjectDate -le $Now) -and ($CurrentEntryObjectDate -ge $LastMinute))
+                    {
+
+                                        # Destination IP is this machine                           # The traffic is not from the local machine         # The Source IP is not on allowed list
+                        If (($IPs -Contains $CurrentEntryObject.DestinationIP) -and ($IPs -NotContains $CurrentEntryObject.SourceIP) -and ($DnsServers -NotContains $CurrentEntryObject.SourceIP))
+                        {
+
+                            Write-Output "[*] A match has been found, checking to see if the address has been repeated"
+                            $ScanCounter++
+
+                            Write-Verbose "Alert limit is set to $Limit consecutive unsolicited packets from the same source IP"
+                            If ($ScanCounter -ge $Limit)
+                            {
+  
+                                Write-Output "[!] Alert Limit Has Been Reached"
+                                $ScanCounter = 0
+                                $ScanFound = $True
+
+                                $IPForEmail = ($CurrentEntryObject.SourceIP).ToString()
+                                $DestinationForEmail = ($CurrentEntryObject.DestinationIP).ToString()
+                                $ProtocolForEmail = ($CurrentEntryObject.Protocol).ToString()
+                                $SrcPortEmail = ($CurrentEntryObject.SourcePort).ToString()
+                                $DestPortEmail = ($CurrentEntryObject.DestinationPort).ToString()
+                                $SYNEmail = ($CurrentEntryObject.SYN).ToString()
+                                $ACKEmail = ($CurrentEntryObject.ACK).ToString()
+                                $DateTimeForEmail = ($CurrentEntryObject.Date).ToString() + " " + ($CurrentEntryObject.Time).ToString()
+
+                                    If ($EmailAlert.IsPresent)
+                                    {
+
+                                        Write-Output "[*] Alerting admins"
+
+                                        $Body = " =======================================================`n PORT SCAN DETECTED: $env:COMPUTERNAME `n=======================================================`n`nSUMMARY: `nA possible port scan was discovered on $env:COMPUTERAME. To examine these results further the firewall logs to review are in C:\Windows\System32\LogFiles\firewall\Keep_For_Analysis. `n`nLAST DROPPED PACKET INFO: `nSOURCE IP: $IPForEmail `nDESTINATION: $DestinationForEmail `nPROTOCOL: $ProtocolForEmail `nSOURCE PORT: $SrcPortEmail `nDESTINATION PORT: $DestPortEmail `nSYN: $SYNEmail `nACK: $ACKEmail `nDATE TIME: $DateTimeForEmail`n"
+                
+                                        Send-MailMessage -To $To -From $From -SmtpServer $SmtpServer -Priority High -Subject "ALERT: Attempted Port Scan $env:COMPUTERNAME" -Body $Body
+
+                                    }  # End If
+                        
+                                    If ($PSBoundParameters.Key -eq "ActiveBlockList")
+                                    {
+
+                                        If ($BlockIps -NotContains $CurrentEntryObject.SourceIP)
+                                        {
+
+                                            $BadGuyIP = $CurrentEntryObject.SourceIP
+
+                                            Write-Output "[*] Scan detected: Adding $BadGuyIP to the block list. If -ActiveBlockList was specified the IP will be blocked shortly"
+                                            $BlockIps.Add($BadGuyIP)
     
+                                        }  # End If
+
+                                    }  # End If
+  
+                            }  # End If
+  
+                        }  # End If
+                        Else
+                        {
+  
+                            $ScanCounter = 0
+            
+                        }  # End Else
+  
+
+                    }  # End If
+                    
+                }  # End ForEach
+            
+            }  # End If
+
+        }  # End ForEach
+
+
         If ($ScanFound -eq $True)
         {
 
@@ -747,8 +902,8 @@ Function Watch-PortScan {
 
 }  # End Function Watch-PortScan
 
-Write-Output "[*] Removing Firewall Rules Created by the last run of this script"
-Remove-NetFirewallRule -Description "Blocks inbound ports * - *P" -Direction Inbound
+Write-Output "[*] Removing firewall rules created the last time this was run"
+Remove-NetFirewallRule -Description "Blocks inbound ports * - *P" -Direction Inbound | Out-Null
 
 $LogPath = "C:\Windows\System32\LogFiles\Firewall"
 $OpenPorts = ((Get-NetTcpConnection -State Listen,Established,FinWait1,FinWait2,Bound,CloseWait,Closing -ErrorAction SilentlyContinue).LocalPort | Select-Object -Unique | Sort-Object) 
@@ -762,4 +917,4 @@ Enable-FirewallLogging -Path $LogPath
 
 Write-Output "[*] Monitoring for port scans on localhost"
 
-Watch-PortScan -OpenPorts $OpenPorts -LogFile "$LogPath\domainfw.log" -Limit 5 -EmailAlert
+Watch-PortScan -OpenPorts $OpenPorts -LogFile "$LogPath\domainfw.log" -Limit 5 -EmailAlert -Verbose
