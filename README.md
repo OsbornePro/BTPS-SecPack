@@ -1,4 +1,5 @@
 # OsbornePro: The Blue Team PowerShell Security Package
+![OsbornePro](https://raw.githubusercontent.com/tobor88/OsbornePro-The-Blue-Team-PowerShell-Security-Package/master/WEF%20Application/WEF/WEF/wwwroot/images/osborneprologo.png)
 ##### The B.T.P.S. Sec Pack
 This repo contains a collection of PowerShell tools that can be utilized to protect defend an environment based Microsoft's recommendations. 
 <br>
