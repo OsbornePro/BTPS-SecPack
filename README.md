@@ -1,6 +1,6 @@
 # OsbornePro: The Blue Team PowerShell Security Package
 ![OsbornePro](https://raw.githubusercontent.com/tobor88/OsbornePro-The-Blue-Team-PowerShell-Security-Package/master/WEF%20Application/WEF/WEF/wwwroot/images/osborneprologo.png)
-### The B.T.P.S. Sec Pack
+# The B.T.P.S. Sec Pack
 This repo contains a collection of PowerShell tools that can be utilized to protect defend an environment based Microsoft's recommendations. 
 <br>
 This repo also assumes that you have referenced the Windows Event Logging Cheat Sheet for logging in your environment. Use [LOG-MD](https://www.imfsecurity.com/free) or [CIS-CAT](https://learn.cisecurity.org/benchmarks#:~:text=CIS%20Benchmarks%20are%20the%20only%20consensus-based%2C%20best-practice%20security,and%20accepted%20by%20government%2C%20business%2C%20industry%2C%20and%20academia) to ensure the recommended logging is configured.
