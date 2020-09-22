@@ -1,5 +1,6 @@
 # The B.T.P.S. Sec Pack
-<img align="left" alt="The B.T.P.S. Sec Pack" src="https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/WEF%20Application/WEF/WEF/wwwroot/images/thebtpssecpacklogo.jpg">
+<img align="left" alt="The B.T.P.S. Sec Pack" src="https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/WEF%20Application/WEF/WEF/wwwroot/images/thebtpssecpacklogo.jpg"><br>
+
 ### SUMMARY: 
 This repository contains a collection of PowerShell tools that can be utilized to protect and defend an environment based on the recommendations of multiple cyber security researchers at Microsoft. These tools were created with a small to medium size enterprise environment in mind as smaller organizations do not always have the type of funding available to overly spend on security. This repository assumes that you have referenced the Windows Event Logging Cheat Sheet for logging in your environment. Use [LOG-MD](https://www.imfsecurity.com/free) or [CIS-CAT](https://learn.cisecurity.org/benchmarks) to ensure the recommended logging is configured.<br>
 <br>
