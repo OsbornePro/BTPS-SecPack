@@ -78,3 +78,6 @@ PrincipalName: $($Member.PrincipalName)
     }  # End ForEach-Object
 
 }  # End ForEach-Object
+
+Write-Verbose "Creating a CSV File containing autoruns information for the day"
+$AutoRunsArray | Export-Csv -Path $AutorunsCsv -Delimiter ',' -NoTypeInformation -Force
