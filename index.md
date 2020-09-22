@@ -1,10 +1,18 @@
 # The B.T.P.S. Sec Pack
-![The B.T.P.S. Sec Pack](https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/WEF%20Application/WEF/WEF/wwwroot/images/thebtpssecpacklogo.jpg)
-This repository contains a collection of PowerShell tools that can be utilized to protect and defend an environment based on the recommendations of multiple cyber security researchers at Microsoft. 
+![The B.T.P.S. Sec Pack](https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/WEF%20Application/WEF/WEF/wwwroot/images/thebtpssecpacklogo.jpg)<br>
+__SUMMARY:__ This repository contains a collection of PowerShell tools that can be utilized to protect and defend an environment based on the recommendations of multiple cyber security researchers at Microsoft. These tools were created with a small to medium size enterprise environment in mind as smaller organizations do not always have the type of funding available to overly spend on security. This repository assumes that you have referenced the Windows Event Logging Cheat Sheet for logging in your environment. Use [LOG-MD](https://www.imfsecurity.com/free) or [CIS-CAT](https://learn.cisecurity.org/benchmarks) to ensure the recommended logging is configured.
 <br>
-This repo also assumes that you have referenced the Windows Event Logging Cheat Sheet for logging in your environment. Use [LOG-MD](https://www.imfsecurity.com/free) or [CIS-CAT](https://learn.cisecurity.org/benchmarks#:~:text=CIS%20Benchmarks%20are%20the%20only%20consensus-based%2C%20best-practice%20security,and%20accepted%20by%20government%2C%20business%2C%20industry%2C%20and%20academia) to ensure the recommended logging is configured.
+__GOALS:__ The goal of this project is to help add value to an smaller organizations security by creating more visibility for the average IT Administrator. Organizations with 1,000's of devices may find that this entire suite does not apply to them. One such alert would be "Device Checker". This uses the DHCP server and a CSV file to discover any new devices that join a network. The "__Unusual User Sign In Alert__" may also only be useful in smaller environments as it checks the event logs on a domain controller for users who have signed into devices that they are not assigned. 
+<br>
+### STILL IN DEVELOPMENT
+I am always open to suggestions and ideas as well as contributions if anyone wishes to help add to this pacakge. Credit will of course be given where credit is due.
+- [ ] Install Script to easily set up the B.T.P.S Security Package in any environment
+- [ ] Add more functionality to the WEF Application so it is more than just for visibility
+- [ ] Create custom events to centralize to the WEF application
+<br>
 
-##### NOTE: I am working on building an install script to automatically set up as much of these protections automatically as possible. Most of these scripts are email alerts and will require you to currently define the $From, $To, and $SmtpServer vairables in order to utilize the alerts and receive emails.
+##### NOTE: 
+> I am working on building an install script to automatically set up as much of these protections automatically as possible. Most of these scripts are email alerts and will require you to currently define the $From, $To, and $SmtpServer vairables in order to utilize the alerts and receive emails.
 
 ### What Protections Are Included?
 - __Account and Password Alerts__
