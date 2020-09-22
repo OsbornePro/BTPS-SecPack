@@ -18,7 +18,7 @@ Find-NewDevices was made to discover new devices to have joined the network base
 
 
 .NOTES
-Author: Rob Osborne
+Author: Robert H. Osborne
 Contact: rosborne@osbornepro.com
 Alias: tobor
 
@@ -252,7 +252,7 @@ td {
             If ($Table) 
             {
 
-                Send-MailMessage -From $From -To $To -Subject "INFO EVENT: New Device Check $DhcpServer" -BodyAsHtml -Body $MailBody -SmtpServer $SmtpServer
+                Send-MailMessage -From $From -To $To -Subject "AD Event: New Device Check $DhcpServer" -BodyAsHtml -Body $MailBody -SmtpServer $SmtpServer
 
                 Write-Verbose 'Email sent.'
 
