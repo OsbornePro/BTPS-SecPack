@@ -1,5 +1,5 @@
 # This alert is used to alert IT when a failed password attempt occurs on a server
-$Event = Get-WinEvent -LogName Security -FilterXPath '*[System[EventID=4725 and TimeCreated[timediff(@SystemTime) <= 120000]]]' -MaxEvents 1
+$Event = Get-WinEvent -LogName Security -FilterXPath '*[System[EventID=4625 and TimeCreated[timediff(@SystemTime) <= 120000]]]' -MaxEvents 1
 
 $Results = $Event | ForEach-Object {
 
