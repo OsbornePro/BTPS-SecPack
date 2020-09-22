@@ -11,7 +11,6 @@ I am always open to suggestions and ideas as well as contributions if anyone wis
 - [ ] Install Script to easily set up the B.T.P.S Security Package in any environment
 - [ ] Add more functionality to the WEF Application so it is more than just for visibility
 - [ ] Create custom events to centralize to the WEF application
-<br>
 
 ##### NOTE: 
 > I am working on building an install script to automatically set up as much of these protections automatically as possible. Most of these scripts are email alerts and will require you to currently define the $From, $To, and $SmtpServer vairables in order to utilize the alerts and receive emails.
