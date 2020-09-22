@@ -1,13 +1,4 @@
-﻿############################################################################
-#                                                                          #
-# This is an alert for IT whenever an account Expires                      #
-#                                                                          #
-# Rob Osborne                                                              #
-#                                                                          #
-# Last Updated 9/3/2019                                                    #
-#                                                                          #
-############################################################################
-
+# This is an alert for IT whenever an account Expires
 $Accounts = Search-ADAccount -AccountExpiring -TimeSpan "10.00:00:00" | Select-Object -Property AccountExpirationDate, Name, @{ 
                                                                                                    Label = "Manager"
                                                                                                    E = { (Get-Aduser(Get-AdUser $_ -Property Manager).Manager).Name } 
@@ -44,7 +35,7 @@ td {
 "@
 
     $PreContent = "<Title>Expiring Users (Next 10 Days)</Title>"
-    $NoteLine = "$(Get-Date -format 'MM/dd/yyyy HH:mm:ss')"
+    $NoteLine = "$(Get-Date -Format 'MM/dd/yyyy HH:mm:ss')"
     $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
     $Body = $Accounts | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent | Out-String
 
