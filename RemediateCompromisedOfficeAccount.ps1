@@ -1,3 +1,5 @@
+# I built this off of a Microsoft suggested script. I will add the link if it is ever sent to me or I find it
+#
 # This script is used to remediate a compromised Office365 account by performing the Microsoft recommended actions.
 #
 # The following actions will be performed.
