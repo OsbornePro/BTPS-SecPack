@@ -8,6 +8,7 @@ This repo also assumes that you have referenced the Windows Event Logging Cheat 
 ##### NOTE: I am working on building an  install script to automatically set up as much of these protections automatically as possible. Most of these scripts are email alerts and will require you to currently define the $From, $To, and $SmtpServer vairables in order to utilize the alerts and receive emails.
 
 ### What Protections Are Included?
+- RemediateCompromisedOfficeAccount.ps1 is used to respond to a user whose Office365 password has been comrpomised. This will Reset password (which kills the session). Remove mailbox delegates. Remove mailforwarding rules to external domains. Remove global mailforwarding property on mailbox. Set password complexity on the account to be high. Enable mailbox auditing. Produce Audit Log for the admin to review.
 - Account and Password Alerts
     - Receive alerts when an account is expiring in 2 weeks or less
     - Receive alert containing a table of all users whose passwords are expiring in two weeks or less
