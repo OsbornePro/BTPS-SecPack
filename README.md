@@ -35,6 +35,7 @@ This repo also assumes that you have referenced the Windows Event Logging Cheat 
     - Rotate the Kerberos keys used in an online exchange environment
     - Enable RDP Network Level Authentication to prevent not domain computers from RDPing into a client
     - Update any available driver updates on a local or remote machine
+    - Add a notification banner to emails that users receive in Outlook when the sender name matches a name in the company and the email address is not from the internal domain
 - Local Port Scan Monitor
     - Receive an alert when a port scan is detected on a local device
     - Receive an alert for when a bind shell is opened and keep a record of all established connections to a device including the port and protocols used
