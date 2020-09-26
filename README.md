@@ -4,6 +4,8 @@
 ### DONATIONS
 If you wish to donate to this project to help me keep a nice looking site for the documentation your donations will be graciously accepted.
 <img src="https://img.shields.io/liberapay/goal/tobor.svg?logo=liberapay">
+[![](https://img.shields.io/badge/PayPal-BTPSSecPack-blue)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=AGKU5LWZA67XC&currency_code=USD&source=url)
+
 
 # The B.T.P.S. Sec Pack
 This repo contains a collection of PowerShell tools that can be utilized to protect defend an environment based Microsoft's recommendations. 
