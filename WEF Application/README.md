@@ -76,10 +76,12 @@ Create the SQL database schema and table.
 
 #### (STEP 3 and STEP 4's tasks can be created by executing the ImportTheScheduledTasks.ps1 script after downloading this git)
 <br>
+
 #### STEP 3.)
 Create Scheduled Task to Import Events into SQL Database
 1. Place the powershell script __Import-EventsHourly.ps1__ into C:\Users\Public\Documents (_this is to match the Task Template in this repo_) or wherever you prefer to store this script. Be sure to sign it with a trusted Code Signing Certificate in your environment _(Import Code Signing Cert Info __"Trusted Publishers"__ store in certmgr.msc)_ to prevent it from running malicious code. Modify the permissions so only administrators can modify the script. Have this run every hour on minute 55. This leaves time for the events to get imported into the SQL database. Then on the hour, have the next task run.
-2. Create a scheduled task that runs once an hour. You can use my template __TaskImportFile.xml__. Import this task and you should only need to define the user with Batch and Service permissions to run the script.
+1. Create a scheduled task that runs once an hour. You can use my template __TaskImportFile.xml__. Import this task and you should only need to define the user with Batch and Service permissions to run the script.
+
 ```powershell
 # PowerShell Command to use code signing certificate
 Set-AuthenticodeSignature C:\Users\Public\Documents\Import-EventsHourly.ps1 @(Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert)[0]
