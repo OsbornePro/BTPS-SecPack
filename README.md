@@ -16,8 +16,8 @@ This repo also assumes that you have referenced the Windows Event Logging Cheat 
 ##### NOTE: I am working on building an  install script to automatically set up as much of these protections automatically as possible. Most of these scripts are email alerts and will require you to currently define the $From, $To, and $SmtpServer vairables in order to utilize the alerts and receive emails.
 
 ### What Protections Are Included?
-- RemediateCompromisedOfficeAccount.ps1 is used to respond to a user whose Office365 password has been comrpomised. This will Reset password (which kills the session). Remove mailbox delegates. Remove mailforwarding rules to external domains. Remove global mailforwarding property on mailbox. Set password complexity on the account to be high. Enable mailbox auditing. Produce Audit Log for the admin to review.
-- Account and Password Alerts
+- __RemediateCompromisedOfficeAccount.ps1__ is used to respond to a user whose Office365 password has been comrpomised. This will Reset password (which kills the session). Remove mailbox delegates. Remove mailforwarding rules to external domains. Remove global mailforwarding property on mailbox. Set password complexity on the account to be high. Enable mailbox auditing. Produce Audit Log for the admin to review.
+- __Account and Password Alerts__
     - Receive alerts when an account is expiring in 2 weeks or less
     - Receive alert containing a table of all users whose passwords are expiring in two weeks or less
     - Receive an alert when a user attempts to change their password
@@ -26,16 +26,16 @@ This repo also assumes that you have referenced the Windows Event Logging Cheat 
     - Receive an alert when a new user account is created
     - Receive an alert when a user account is locked out
     - Receive an alert when a user account has been unlocked
--AutoRunsToWinEvent [ORIGINAL](https://github.com/palantir/windows-event-forwarding/tree/master/AutorunsToWinEventLog)
+- __AutoRunsToWinEvent__ [ORIGINAL](https://github.com/palantir/windows-event-forwarding/tree/master/AutorunsToWinEventLog)
     - This basically takes creates an event log entry in event viewer containig AutoRuns hashes. I am not the author of this. I am only including this in the package as it is an important thing to keep track of
 - Device Discovery
     - Receive an alert any time a device that has never been connected to your network before receives an IP address from one of your DHCP servers. 
-- Event Alerts
+- __Event Alerts__
     - Receive an alert when a DNS Zone Transfer occurs
     - Receive an alert when a new service is installed on a device that is not a Windows Defender upgrade
     - Receive an alert when an insecure LDAP bind occurs (When Bind is not LDAP over SSL)
     - Receive an alert when a user signs into a device they were not assigned 
-- Hardening Cmdlets
+- __Hardening Cmdlets__
     - Disable weak TLS and SSL protocols on a Client or IIS Server
     - Enable DNS over HTTPS when available
     - Fix any service paths that contain spaces in the directory names but no quotations used to prevent the execution of injected payloads
@@ -45,15 +45,15 @@ This repo also assumes that you have referenced the Windows Event Logging Cheat 
     - Enable RDP Network Level Authentication to prevent not domain computers from RDPing into a client
     - Update any available driver updates on a local or remote machine
     - Add a notification banner to emails that users receive in Outlook when the sender name matches a name in the company and the email address is not from the internal domain
-- Local Port Scan Monitor
+- __Local Port Scan Monitor__
     - Receive an alert when a port scan is detected on a local device
     - Receive an alert for when a bind shell is opened and keep a record of all established connections to a device including the port and protocols used
-- WEF Application
+- __WEF Application__
     - Configure Windows Event Forwarding to collect events that are clear indications of compromise
     - Receive alerts when the Centralized Windows Event Collector logs any indicators of compromise
     - View the log files inside an application to prevent needing to sign into the server to view the collected alerts
-- Windows Update Cmdlets
+- __Windows Update Cmdlets__
     - Cmdlets that can be used to install all available windows updates
     - Cmdlet that can remove a single KB update that is not updating for whatever reason. Once removed you can use Update-Windows to reinstall the issued update.
-- Import-ScheduledTaslk
+- __Import-ScheduledTask__
     - This is a cmdlet I am going to be using when I complete the Install.ps1 file that can be used to configure all of the above. For now use the READMEs I have provided to install the desired functionalitys.
