@@ -28,7 +28,7 @@ This repo also assumes that you have referenced the Windows Event Logging Cheat 
     - Receive an alert when a user account has been unlocked
 - __AutoRunsToWinEvent__ [ORIGINAL](https://github.com/palantir/windows-event-forwarding/tree/master/AutorunsToWinEventLog) [VIEW](https://github.com/tobor88/BTPS-SecPack/tree/master/AutoRunsToWinEvent)
     - This basically takes creates an event log entry in event viewer containig AutoRuns hashes. I am not the author of this. I am only including this in the package as it is an important thing to keep track of
-- Device Discovery
+- __Device Discovery__
     - Receive an alert any time a device that has never been connected to your network before receives an IP address from one of your DHCP servers. 
 - __Event Alerts__ [VIEW](https://github.com/tobor88/BTPS-SecPack/tree/master/Event%20Alerts)
     - Receive an alert when a DNS Zone Transfer occurs
