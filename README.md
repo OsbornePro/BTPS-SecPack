@@ -3,7 +3,7 @@
 
 ### DONATIONS
 If you wish to donate to this project to help me keep a nice looking site for the documentation your donations will be graciously accepted.
-[![](https://img.shields.io/liberapay/goal/tobor.svg?logo=liberapay")](https://liberapay.com/tobor/donate)
+[![](https://img.shields.io/badge/LiberaPay-BTPSSecPack-yellow")](https://liberapay.com/tobor/donate)
 [![](https://img.shields.io/badge/PayPal-BTPSSecPack-blue)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=AGKU5LWZA67XC&currency_code=USD&source=url)
 
 
