@@ -1,6 +1,8 @@
 # OsbornePro: The Blue Team PowerShell Security Package
 ![OsbornePro](https://raw.githubusercontent.com/tobor88/OsbornePro-The-Blue-Team-PowerShell-Security-Package/master/WEF%20Application/WEF/WEF/wwwroot/images/osborneprologo.png)
 
+### DONATIONS
+If you wish to donate to this project to help me keep a nice looking site for the documentation your donations will be graciously accepted.
 <img src="https://img.shields.io/liberapay/goal/tobor.svg?logo=liberapay">
 
 # The B.T.P.S. Sec Pack
