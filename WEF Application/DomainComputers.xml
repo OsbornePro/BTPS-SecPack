@@ -7,20 +7,20 @@
 <ConfigurationMode>MinLatency</ConfigurationMode>
 <Query>
 <![CDATA[<QueryList>
-<Query Id="0" Path="Security">
-<!-- Local Admins Changed -->
-<Select Path="Security">
-*[EventData[Data[@Name='TargetUserName'] and (Data='Administrators')]]
+  <Query Id="0" Path="Security">
+    <Select Path="Security">
+*[EventData[Data[@Name="TargetUserName"] and (Data="Administrators")]]
 and
-*[System[(EventID='4732') or (EventID='4733')]]
+*[System[(EventID="4732") or (EventID="4733")]]
 </Select>
-<!-- Local user created or deleted -->
-<Select Path="Security">*[System[(EventID='4720') or (EventID='4726')]]</Select>
-<!-- Event Log Cleared -->
-<Select Path="Security">*[System[(EventID='1102')]]</Select>
-<!-- New Service Installed -->
-<Select Path="Security">*[System[(EventID='7045')]]</Select>
-</Query>
+    <Select Path="Security">*[System[(EventID="4720") or (EventID="4726")]]</Select>
+    <Select Path="Security">*[System[(EventID="1102")]]</Select>
+    <Select Path="System">*[System[(EventID="7045")]]</Select>
+  </Query>
+  <Query Id="1" Path="Security">
+    <Select Path="Security">*[System[Provider[@Name='Microsoft-Windows-Security-Auditing'] and (Level=4 or Level=0) and EventID=4740]]</Select>
+    <Suppress Path="Security">*[System[(EventID=4799)]]</Suppress>
+  </Query>
 </QueryList>]]>
 </Query>
 <ReadExistingEvents>true</ReadExistingEvents>
