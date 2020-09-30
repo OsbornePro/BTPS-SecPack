@@ -1,3 +1,5 @@
+# GET YOUR API KEY FROM https://user.whoisxmlapi.com/
+
 <#
 .SYNOPSIS
 This cmdlet is used to extract all of the unique IPv4 addresses out from each line of a log file
@@ -109,12 +111,88 @@ Function Get-ValidIPAddressFromString {
 
 }  # End Function Get-ValidIPAddressFromString
 
+
+Function Get-WhoIsLookupInfo {
+    [CmdletBinding()]
+        param (
+            [Parameter(
+                Mandatory=$True)]  # End Parameter
+            [String]$APIKey,
+    
+            [Parameter(
+                Mandatory=$True)]  # End Parameter
+            [String[]]$DomainName)  # End param
+
+
+    $Responses = @()
+
+    $DomainName | ForEach-Object {
+
+        $RequestUri = "https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=$APIKey&domainName=$_&outputFormat=JSON"
+
+        $Responses += Invoke-RestMethod -Method GET -Uri $RequestUri
+
+    }  # End ForEach-Object
+
+
+    Function Get-ValidDate {
+        [CmdletBinding()]
+            param(
+                [Parameter(
+                    Position=0)]  # End Parameter
+                [String]$Value, 
+            
+                [Parameter(
+                    Position=1)]  # End Parameter
+                [String]$Date)  # End param
+             
+        $DefaultDate = $Value."$($Date)Date"
+        $NormalizedDate = $Value.RegistryData."$($Date)DateNormalized"
+
+        If (![String]::IsNullOrEmpty($DefaultDate)) 
+        {
+
+            Get-Date -Date $DefaultDate
+
+        }  # End If
+    
+        Return [DateTime]::ParseExact($NormalizedDate, "yyyy-MM-dd HH:mm:ss UTC", $Null)
+     
+    }  # End Function Get-ValidDate
+ 
+    $Properties = "DomainName", "DomainNameExt",
+    @{N = "CreatedDate"; E = { Get-ValidDate $_ "Created" } },
+    @{N = "UpdatedDate"; E = { Get-ValidDate $_ "Updated" } },
+    @{N = "ExpiresDate"; E = { Get-ValidDate $_ "Expires" } },
+    "RegistrarName",
+    "ContactEmail",
+    "EstimatedDomainAge",
+    @{N = "Contact"; E = { ($_.Registrant | Select-Object -Property * -ExcludeProperty RawText ).PSObject.Properties.Value -Join ", " } }
+
+    $WhoIsInfo = $Responses.WhoisRecord | Select-Object -Property $Properties
+    $WhoIsInfo | Format-Table -AutoSize
+
+}  # End Function Get-WhoIsLookupInfo
+
+
 $TmpEventFile = "C:\Windows\Temp\SysmonEvents.txt"
 $IPFile = 'C:\Program Files (x86)\NirSoft\IPNetInfo\IPs.txt'
 
-Get-WinEvent -FilterHashTable @{LogName="Microsoft-Windows-Sysmon/Operational"; Id=3; StartTime=(Get-Date).AddHours(-1)} | Select-Object -ExpandProperty Message | Out-File -FilePath $TmpEventFile
-Get-ValidIPAddressFromString -Path $TmpEventFile | Out-File -FilePath $IPFile
 
-Set-Location -Path 'C:\Program Files (x86)\NirSoft\IPNetInfo'
+# Get-WinEvent -FilterHashTable @{LogName="Microsoft-Windows-Sysmon/Operational"; Id=3; StartTime=(Get-Date).AddHours(-1)} | Select-Object -ExpandProperty Message | Out-File -FilePath $TmpEventFile
 
-cmd /c ipnetinfo.exe /ipfile "$IPFile"
+$IPList = Get-ValidIPAddressFromString -Path C:\Users\Public\Documents\ConnectionHistory.csv # $TmpEventFile
+ForEach ($IP in $IPList)
+{
+
+    $DomainName = Resolve-DnsName -Name $IP -Server 1.1.1.1 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty NameHost -ErrorAction SilentlyContinue
+
+    If ($DomainName)
+    {
+        
+        $Results += Get-WhoIsLookupInfo -APIKey <Your API Key Here> -DomainName $DomainName -ErrorAction SilentlyContinue
+
+    }  # End If
+
+
+}  # End ForEach  
