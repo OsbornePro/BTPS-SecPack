@@ -10,7 +10,7 @@ This page is used to set up [Sysmon](https://docs.microsoft.com/en-us/sysinterna
 __REFERENCE:__ [https://github.com/SwiftOnSecurity/sysmon-config/blob/master/sysmonconfig-export.xml](https://github.com/SwiftOnSecurity/sysmon-config/blob/master/sysmonconfig-export.xml)
 
 ## SETUP INSTRUCTIONS
-__REFERENCE:__ [Link to Resource](https://www.syspanda.com/index.php/2017/02/28/deploying-sysmon-through-gpo/#:~:text=Launch%20your%20group%20policy%20utility%20and%20perform%20the,here%20Provide%20a%20name%20%28Sysmon%20Deployment%29%2C%20hit%20OK)
+__REFERENCE:__ [Link to Resource](https://www.syspanda.com/index.php/2017/02/28/deploying-sysmon-through-gpo/#:~:text=Launch%20your%20group%20policy%20utility%20and%20perform%20the,here%20Provide%20a%20name%20%28Sysmon%20Deployment%29%2C%20hit%20OK) <br>
 The above link contains the instructions that can be followed to set up [Sysmon](https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon) in your environment.
 __Step 1.)__ On your domain controller you will need to place the files sysmon.exe, Eula.txt, sysmon.bat, and sysmon.xml inside the network share \\\\<YourDCHere.domain.com>\\NETLOGON\\
 __Step 2.)__ In the sysmon.bat script you will need to change "DomainControllerHostname" on lines 2 and 16 so it is the hostname of your Domain Controller that is hosting these files
