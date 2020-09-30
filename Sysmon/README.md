@@ -7,6 +7,7 @@ This page is used to set up [Sysmon](https://docs.microsoft.com/en-us/sysinterna
 - __sysmon.bat__ This is a start up script that will copy the sysmon.xml configuration file to a local location and use it set up your [Sysmon](https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon) configuration. This will require you to add the name of your Domain Controller. __NOTE:__ On your domain controller you will need to place the files sysmon.exe, Eula.txt, sysmon.bat, and sysmon.xml inside the network share \\\\<YourDCHere.domain.com>\\NETLOGON\\
 - __sysmon.exe__ This is the [Sysmon](https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon) executable terminal application that is used to enable and start the [Sysmon](https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon) process
 - __sysmon.xml__ This is the configuration file used as the starting point for this [Sysmon](https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon) configuration. Feel free to better customize this to your environment.
+- __MaliciousIPChecker.ps1__ This is the PowerShell script that is used to execute IPNetInfo against a list a sysmon connections from the last hour. This opens the GUI for IPNetInfo which is not going to work for my plan. I am still working this area out.
 __REFERENCE:__ [https://github.com/SwiftOnSecurity/sysmon-config/blob/master/sysmonconfig-export.xml](https://github.com/SwiftOnSecurity/sysmon-config/blob/master/sysmonconfig-export.xml)
 
 ## SETUP INSTRUCTIONS
