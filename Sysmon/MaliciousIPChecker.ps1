@@ -1,4 +1,7 @@
 # GET YOUR API KEY FROM https://user.whoisxmlapi.com/
+$APIKey = "<Your API Key Here>"
+$Server = 1.1.1.1
+
 
 <#
 .SYNOPSIS
@@ -111,6 +114,25 @@ Function Get-ValidIPAddressFromString {
 
 }  # End Function Get-ValidIPAddressFromString
 
+# Reference https://itsallinthecode.com/powershell-get-whois-information/
+Function Get-ValidDate ($Value, $Date) {
+    $DefaultDate = $Value."$($Date)Date"
+    $NormalizedDate = $Value.RegistryData."$($Date)DateNormalized"
+             
+    $DefaultDate = $Value."$($Date)Date"
+    $NormalizedDate = $Value.RegistryData."$($Date)DateNormalized"
+
+    If (![String]::IsNullOrEmpty($DefaultDate)) 
+    {
+
+        Get-Date -Date $DefaultDate
+
+    }  # End If
+    
+    Return [DateTime]::ParseExact($NormalizedDate, "yyyy-MM-dd HH:mm:ss UTC", $Null)
+     
+}  # End Function Get-ValidDate
+
 
 Function Get-WhoIsLookupInfo {
     [CmdletBinding()]
@@ -134,65 +156,39 @@ Function Get-WhoIsLookupInfo {
 
     }  # End ForEach-Object
 
-
-    Function Get-ValidDate {
-        [CmdletBinding()]
-            param(
-                [Parameter(
-                    Position=0)]  # End Parameter
-                [String]$Value, 
-            
-                [Parameter(
-                    Position=1)]  # End Parameter
-                [String]$Date)  # End param
-             
-        $DefaultDate = $Value."$($Date)Date"
-        $NormalizedDate = $Value.RegistryData."$($Date)DateNormalized"
-
-        If (![String]::IsNullOrEmpty($DefaultDate)) 
-        {
-
-            Get-Date -Date $DefaultDate
-
-        }  # End If
-    
-        Return [DateTime]::ParseExact($NormalizedDate, "yyyy-MM-dd HH:mm:ss UTC", $Null)
-     
-    }  # End Function Get-ValidDate
- 
     $Properties = "DomainName", "DomainNameExt",
-    @{N = "CreatedDate"; E = { Get-ValidDate $_ "Created" } },
-    @{N = "UpdatedDate"; E = { Get-ValidDate $_ "Updated" } },
-    @{N = "ExpiresDate"; E = { Get-ValidDate $_ "Expires" } },
-    "RegistrarName",
-    "ContactEmail",
-    "EstimatedDomainAge",
-    @{N = "Contact"; E = { ($_.Registrant | Select-Object -Property * -ExcludeProperty RawText ).PSObject.Properties.Value -Join ", " } }
+        @{N = "CreatedDate"; E = { Get-ValidDate -Value $_ "Created" } },
+        @{N = "UpdatedDate"; E = { Get-ValidDate -Value $_ "Updated" } },
+        @{N = "ExpiresDate"; E = { Get-ValidDate -Value $_ "Expires" } },
+        "RegistrarName",
+        "ContactEmail",
+        "EstimatedDomainAge",
+        @{N = "Contact"; E = { ($_.Registrant | Select-Object -Property * -ExcludeProperty RawText ).PSObject.Properties.Value -Join ", " } }
 
     $WhoIsInfo = $Responses.WhoisRecord | Select-Object -Property $Properties
-    $WhoIsInfo | Format-Table -AutoSize
+    
+    Return $WhoIsInfo
 
 }  # End Function Get-WhoIsLookupInfo
 
 
+$Results = @()
 $TmpEventFile = "C:\Windows\Temp\SysmonEvents.txt"
-$IPFile = 'C:\Program Files (x86)\NirSoft\IPNetInfo\IPs.txt'
 
+Get-WinEvent -FilterHashTable @{LogName="Microsoft-Windows-Sysmon/Operational"; Id=3; StartTime=(Get-Date).AddHours(-1)} | Select-Object -ExpandProperty Message | Out-File -FilePath $TmpEventFile
 
-# Get-WinEvent -FilterHashTable @{LogName="Microsoft-Windows-Sysmon/Operational"; Id=3; StartTime=(Get-Date).AddHours(-1)} | Select-Object -ExpandProperty Message | Out-File -FilePath $TmpEventFile
-
-$IPList = Get-ValidIPAddressFromString -Path C:\Users\Public\Documents\ConnectionHistory.csv # $TmpEventFile
+$IPList = Get-ValidIPAddressFromString -Path $TmpEventFile
 ForEach ($IP in $IPList)
 {
 
-    $DomainName = Resolve-DnsName -Name $IP -Server 1.1.1.1 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty NameHost -ErrorAction SilentlyContinue
-
+    $DomainName = Resolve-DnsName -Name $IP -Server $Server -ErrorAction SilentlyContinue | Select-Object -ExpandProperty NameHost -ErrorAction SilentlyContinue
     If ($DomainName)
     {
         
-        $Results += Get-WhoIsLookupInfo -APIKey <Your API Key Here> -DomainName $DomainName -ErrorAction SilentlyContinue
+        $Results += Get-WhoIsLookupInfo -APIKey $APIKey -DomainName $DomainName -ErrorAction SilentlyContinue
 
     }  # End If
 
+    $Results
 
 }  # End ForEach  
