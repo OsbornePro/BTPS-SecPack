@@ -625,9 +625,6 @@ Function Watch-PortScan {
 
     # Log files that are used to keep information for later analysis
     $FileName =  $LogFile.Split('\') | Select-Object -Index (($LogFile.Split('\').Count) - 1)
-    $DirectoryName = $LogFile.Replace("\$FileName","")
-    $TempLogname = "$DirectoryName\" + ($FileName.TrimEnd('.log')) + "_temp.log"
-    $LogDirectory = "$DirectoryName\Keep_For_Analysis"
 
     # Variables used for a loop later on
     $ScanFound = $False
@@ -641,9 +638,6 @@ Function Watch-PortScan {
     $DnsServers = Get-DnsClientServerAddress -AddressFamily 2 | Select-Object -ExpandProperty ServerAddresses -Unique
     $DnsServers += $ExcludeAddresses
 
-    # Objects that will be used to check for consecutive IP address connections
-    $CurrentEntryObject = New-Object -TypeName PSCustomObject -Property @{Date=""; Time=""; Action=""; Protocol=""; SourceIP=""; DestinationIP=""; SourcePort=""; DestinationPort=""; SYN=""; ACK=""}
-
     If (!((Test-Path -Path $LogFile) -and ($FileName -like "*.log")))
     {
  
@@ -656,7 +650,6 @@ Function Watch-PortScan {
            
         Write-Verbose "Checking log entries for scanning attempts"
        
-        $Logs = Get-Content -Path $LogFile -Tail $Tail
         $IPList = Get-ValidIPAddressFromString -Path "$LogFile"
         
         $ArrayList = New-Object -TypeName System.Collections.ArrayList(,$IPList)
