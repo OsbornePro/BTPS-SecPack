@@ -50,7 +50,8 @@ This repo also assumes that you have referenced the Windows Event Logging Cheat 
     - Receive an alert for when a bind shell is opened and keep a record of all established connections to a device including the port and protocols used
 - __Sysmon__ [VIEW](https://github.com/tobor88/BTPS-SecPack/tree/master/Sysmon)
     - Enable Sysmon loggging in an environment using a default customized sysmon configuration file 
-    - Use WHOIS domain lookup to discover IP addresses that were connected too that have been possibly identified as malicious 
+    - Use WHOIS domain lookup to discover domains that were connected to less than 2 years old and receive an alert when a client connection happens
+    - Perform a blacklist check on IP addresses that were connected too and receive alerts when a client connection happens
 - __WEF Application__ [VIEW](https://github.com/tobor88/BTPS-SecPack/tree/master/WEF%20Application)
     - Configure Windows Event Forwarding to collect events that are clear indications of compromise
     - Receive alerts when the Centralized Windows Event Collector logs any indicators of compromise
