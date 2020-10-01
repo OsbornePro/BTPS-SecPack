@@ -1,8 +1,3 @@
-# GET YOUR API KEY FROM https://user.whoisxmlapi.com/
-$APIKey = "<Your API Key Here>"
-$Server = 1.1.1.1
-
-
 <#
 .SYNOPSIS
 This cmdlet is used to extract all of the unique IPv4 addresses out from each line of a log file
@@ -114,62 +109,132 @@ Function Get-ValidIPAddressFromString {
 
 }  # End Function Get-ValidIPAddressFromString
 
-# Reference https://itsallinthecode.com/powershell-get-whois-information/
-Function Get-ValidDate ($Value, $Date) {
-    $DefaultDate = $Value."$($Date)Date"
-    $NormalizedDate = $Value.RegistryData."$($Date)DateNormalized"
-             
-    $DefaultDate = $Value."$($Date)Date"
-    $NormalizedDate = $Value.RegistryData."$($Date)DateNormalized"
 
-    If (![String]::IsNullOrEmpty($DefaultDate)) 
-    {
-
-        Get-Date -Date $DefaultDate
-
-    }  # End If
-    
-    Return [DateTime]::ParseExact($NormalizedDate, "yyyy-MM-dd HH:mm:ss UTC", $Null)
-     
-}  # End Function Get-ValidDate
-
-
-Function Get-WhoIsLookupInfo {
+# REFERNCE: https://www.kittell.net/code/powershell-domain-whois/
+    #.Synopsis
+    #   Does a raw WHOIS query and returns the results
+    #.Example
+    #   whois poshcode.org
+    #
+    #   The simplest whois search
+    #.Example
+    #   whois poshcode.com
+    #
+    #   This example is one that forwards to a second whois server ...
+    #.Example
+    #   whois poshcode.com -NoForward
+    #
+    #   Returns the partial results you get when you don't follow forwarding to a new whois server
+    #.Example
+    #   whois domain google.com
+    #
+    #   Shows an example of sending a command as part of the search.
+    #   This example does a search for an exact domain (the "domain" command works on crsnic.net for .com and .net domains)
+    #
+    #   The google.com domain has a lot of look-alike domains, the least offensive ones are actually Google's domains (like "GOOGLE.COM.BR"), but in general, if you want to look up the actual "google.com" you need to search for the exact domain.
+    #.Example
+    #   whois n 129.21.1.82 -server whois.arin.net
+    # 
+    #   Does an ip lookup at arin.net
+    #.Notes
+    # Future development should look at http://cvs.savannah.gnu.org/viewvc/jwhois/jwhois/example/jwhois.conf?view=markup
+    # v0.3 Added documentation, examples, error handling for ip lookups, etc.
+    # v0.2 Now strips command prefixes off when forwarding queries (if you want to send the prefix to the forwarded server, specify that server with the original query).
+    # v0.1 Now able to re-query the correct whois for .com and .org to get the full information!
+ function Get-WhoIs {
     [CmdletBinding()]
-        param (
-            [Parameter(
-                Mandatory=$True)]  # End Parameter
-            [String]$APIKey,
-    
-            [Parameter(
-                Mandatory=$True)]  # End Parameter
-            [String[]]$DomainName)  # End param
-
-
-    $Responses = @()
-
-    $DomainName | ForEach-Object {
-
-        $RequestUri = "https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=$APIKey&domainName=$_&outputFormat=JSON"
-
-        $Responses += Invoke-RestMethod -Method GET -Uri $RequestUri
-
-    }  # End ForEach-Object
-
-    $Properties = "DomainName", "DomainNameExt",
-        @{N = "CreatedDate"; E = { Get-ValidDate -Value $_ "Created" } },
-        @{N = "UpdatedDate"; E = { Get-ValidDate -Value $_ "Updated" } },
-        @{N = "ExpiresDate"; E = { Get-ValidDate -Value $_ "Expires" } },
-        "RegistrarName",
-        "ContactEmail",
-        "EstimatedDomainAge",
-        @{N = "Contact"; E = { ($_.Registrant | Select-Object -Property * -ExcludeProperty RawText ).PSObject.Properties.Value -Join ", " } }
-
-    $WhoIsInfo = $Responses.WhoisRecord | Select-Object -Property $Properties
-    
-    Return $WhoIsInfo
-
-}  # End Function Get-WhoIsLookupInfo
+    param(
+        # The query to send to WHOIS servers
+        [Parameter(Position=0, ValueFromRemainingArguments=$true)]
+        [string]$query,
+ 
+        # A specific whois server to search
+        [string]$server,
+ 
+        # Disable forwarding to new whois servers
+        [switch]$NoForward
+    )
+    end {
+        $TLDs = DATA {
+          @{
+            ".br.com"="whois.centralnic.net"
+            ".cn.com"="whois.centralnic.net"
+            ".eu.org"="whois.eu.org"
+            ".com"="whois.crsnic.net"
+            ".net"="whois.crsnic.net"
+            ".org"="whois.publicinterestregistry.net"
+            ".edu"="whois.educause.net"
+            ".gov"="whois.nic.gov"
+          }
+        }
+ 
+        $EAP, $ErrorActionPreference = $ErrorActionPreference, "Stop"
+ 
+        $query = $query.Trim()
+ 
+        if($query -match "(?:\d{1,3}\.){3}\d{1,3}") {
+            Write-Verbose "IP Lookup!"
+            if($query -notmatch " ") {
+                $query = "n $query"
+            }
+            if(!$server) { $server = "whois.arin.net" }
+        } elseif(!$server) {
+            $server = $TLDs.GetEnumerator() |
+                Where { $query -like  ("*"+$_.name) } |
+                Select -Expand Value -First 1
+        }
+ 
+        if(!$server) { $server = "whois.arin.net" }
+        $maxRequery = 3
+ 
+        do {
+            Write-Verbose "Connecting to $server"
+            $client = New-Object System.Net.Sockets.TcpClient $server, 43
+ 
+            try {
+                $stream = $client.GetStream()
+ 
+                Write-Verbose "Sending Query: $query"
+                $data = [System.Text.Encoding]::Ascii.GetBytes( $query + "`r`n" )
+                $stream.Write($data, 0, $data.Length)
+ 
+                Write-Verbose "Reading Response:"
+                $reader = New-Object System.IO.StreamReader $stream, [System.Text.Encoding]::ASCII
+ 
+                $result = $reader.ReadToEnd()
+ 
+                if($result -match "(?s)Whois Server:\s*(\S+)\s*") {
+                    Write-Warning "Recommended WHOIS server: ${server}"
+                    if(!$NoForward) {
+                        Write-verbose "Non-Authoritative Results:`n${result}"
+                        # cache, in case we can't get an answer at the forwarder
+                        if(!$cachedResult) {
+                            $cachedResult = $result
+                            $cachedServer = $server
+                        }
+                        $server = $matches[1]
+                        $query = ($query -split " ")[-1]
+                        $maxRequery--
+                    } else { $maxRequery = 0 }
+                } else { $maxRequery = 0 }
+            } finally {
+                if($stream) {
+                    $stream.Close()
+                    $stream.Dispose()
+                }
+            }
+        } while ($maxRequery -gt 0)
+ 
+        $result
+ 
+        if($cachedResult -and ($result -split "`n").count -lt 5) {
+            Write-Warning "Original Result from ${cachedServer}:"
+            $cachedResult
+        }
+ 
+        $ErrorActionPreference = $EAP
+    }
+ }  # End Function Get-WhoIs
 
 
 # REFERENCE https://community.spiceworks.com/scripts/show/2428-powershell-rbl-blacklist-check-with-email-alerts
@@ -321,7 +386,6 @@ Function Invoke-IPBlacklistCheck {
 }  # End Function Invoke-IPBlacklistCheck
 
 
-$Results = @()
 $TmpEventFile = "C:\Windows\Temp\SysmonEvents.txt"
 
 Get-WinEvent -FilterHashTable @{LogName="Microsoft-Windows-Sysmon/Operational"; Id=3; StartTime=(Get-Date).AddHours(-1)} | Select-Object -ExpandProperty Message | Out-File -FilePath $TmpEventFile
@@ -330,28 +394,18 @@ $IPList = Get-ValidIPAddressFromString -Path $TmpEventFile
 ForEach ($IP in $IPList)
 {
 
-    $DomainName = Resolve-DnsName -Name $IP -Server $Server -ErrorAction SilentlyContinue | Select-Object -ExpandProperty NameHost -ErrorAction SilentlyContinue
-    If ($DomainName)
+    $Results = Get-WhoIs -Query $IP -ErrorAction SilentlyContinue
+    $ResultsDate = $Results | Select-String -Pattern "Creation Date:"
+    $DateLimit = (Get-Date).Year
+    
+    If (($DateLimit - ($ResultsDate.CreatedDate).Year) -le 2) # This part is NOT working just yet
     {
         
-        $Results += Get-WhoIsLookupInfo -APIKey $APIKey -DomainName $DomainName -ErrorAction SilentlyContinue
+        Write-Verbose "Creating an event in MaliciousIPs Event Viewer Tree for a young domain"
 
+        $Message = Write-Output "Domain was found to be less than a year old. WHOIS Information is below: `n" + ($Results  | Out-String -Width 1000)
+        Write-EventLog -LogName MaliciousIPs -Source MaliciousIPs -EntryType Information -EventId 2 -Message $Message
+        
     }  # End If
-
-    ForEach ($Result in $Results)
-    {
-    
-        $DateLimit = (Get-Date).Year
-        If (($DateLimit - ($Result.CreatedDate).Year) -le 2)
-        {
-        
-            Write-Verbose "Creating an event in MaliciousIPs Event Viewer Tree for a young domain"
-
-            $Message = Write-Output "Domain was found to be less than a year old: `n" + ($Result  | Out-String -Width 1000)
-            Write-EventLog -LogName MaliciousIPs -Source MaliciousIPs -EntryType Information -EventId 2 -Message $Message
-        
-        }  # End If
-    
-    }  # End ForEach
 
 }  # End ForEach  
