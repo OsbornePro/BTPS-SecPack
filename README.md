@@ -26,6 +26,7 @@ This repo also assumes that you have referenced the Windows Event Logging Cheat 
     - Receive an alert when a new user account is created
     - Receive an alert when a user account is locked out
     - Receive an alert when a user account has been unlocked
+    - Receive an alert when administrator credentials are used to execute a process with elevated privileges. This is really only meant to monitor users who may have been given administrator credentials against IT's recommendations. It can be used to monitor an administrator for malicious activity as well if desired. Chances are you will not need to implement __MonitorAdminEscalation.ps1__
 - __AutoRunsToWinEvent__ [ORIGINAL](https://github.com/palantir/windows-event-forwarding/tree/master/AutorunsToWinEventLog) [VIEW](https://github.com/tobor88/BTPS-SecPack/tree/master/AutoRunsToWinEvent)
     - This basically takes creates an event log entry in event viewer containig AutoRuns hashes. I am not the author of this. I am only including this in the package as it is an important thing to keep track of
 - __Device Discovery__ [VIEW](https://github.com/tobor88/BTPS-SecPack/tree/master/Device%20Discovery)
