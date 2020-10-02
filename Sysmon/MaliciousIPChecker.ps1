@@ -217,7 +217,7 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
  
         Do {
 
-            Write-Verbose "Connecting to $server"
+            Write-Verbose "Connecting to $Server"
             $Client = New-Object -TypeName System.Net.Sockets.TcpClient $Server, 43
  
             Try {
@@ -239,7 +239,7 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
 
                     If (!$NoForward) 
                     {
-                        Write-verbose "Non-Authoritative Results:`n${result}"
+                        Write-verbose "Non-Authoritative Results:`n${Result}"
                         # cache, in case we can't get an answer at the forwarder
                         If (!$CachedResult) 
                         {
@@ -294,7 +294,8 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
         }  # End If
  
         $ErrorActionPreference = $EAP
-    }# End If 
+
+    }  # End If 
 
   } # End END
 
@@ -311,21 +312,12 @@ Function Invoke-IPBlacklistCheck {
             [String[]]$IPAddress)  # End Param
 
 
-    $LogfileExists = Get-Eventlog -List | Where-Object {$_.logdisplayname -eq "BlacklistedIPs"}
+    $LogfileExists = Get-WinEvent -ListLog "MaliciousIPs" -ErrorAction SilentlyContinue
     If (!($LogfileExists))
     {
 
-        Write-Verbose "Creating MaliciousIPs event log tree"
-        If (!(Get-EventLog -LogName MaliciousIPs -ErrorAction SilentlyContinue)) 
-        { 
-        
-            New-EventLog -LogName MaliciousIPs -Source MaliciousIPs -ErrorAction SilentlyContinue
-        }  # End If
-
+        New-EventLog -LogName MaliciousIPs -Source MaliciousIPs
         Limit-EventLog -LogName "MaliciousIPs" -OverflowAction OverWriteAsNeeded -MaximumSize 64KB
-        
-        Write-Verbose "Creating directory to save log info"
-        New-Item -Path "C:\Program Files\BlacklistedIPs" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
     }  # End If
 
@@ -434,7 +426,7 @@ Function Invoke-IPBlacklistCheck {
             If ($BlacklistedOn.Count -gt 0)
             {
 
-                Write-Verbose "Create an event in BlacklistIPs Event Viewer Tree"
+                Write-Verbose "Create an event in MaliciousIPs in Event Viewer Tree"
                 Foreach ($Item in $BlacklistedOn) 
                 {
 
