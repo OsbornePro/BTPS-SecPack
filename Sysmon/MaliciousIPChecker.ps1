@@ -456,7 +456,7 @@ $Now = Get-Date
 $TmpEventFile = "C:\Windows\Temp\SysmonEvents.txt"
 $Dateregex = "(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)[0-9]{2}"
 
-Get-WinEvent -FilterHashTable @{LogName="Microsoft-Windows-Sysmon/Operational"; Id=3; StartTime=(Get-Date).AddHours(-1)} | Select-Object -ExpandProperty Message | Out-File -FilePath $TmpEventFile
+Get-WinEvent -FilterHashTable @{LogName="Microsoft-Windows-Sysmon/Operational"; Id=3; StartTime=(Get-Date).AddHours(-1.2)} | Select-Object -ExpandProperty Message | Out-File -FilePath $TmpEventFile
 
 $IPList = Get-ValidIPAddressFromString -Path $TmpEventFile
 ForEach ($IP in $IPList)
