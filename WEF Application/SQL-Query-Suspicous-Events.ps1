@@ -3,6 +3,15 @@ $To = ""
 $From = ""
 $SmtpServer = ""
 
+# Applications that are filtered from triggering alerts
+# DEFENDER : C:\ProgramData\Microsoft\Windows Defender\Definition Updates\
+# SYSMON   : C:\Windows\SysmonDrv.sys C:\Windows\Sysmon.exe \SystemRoot\SysmonDrv.sys
+# FIREFOX  : C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
+# ONEDRIVE : C:\Program Files (x86)\Microsoft OneDrive\20.124.0621.0006\FileSyncHelper.exe C:\Program Files (x86)\Microsoft OneDrive\%\OneDriveUpdaterService.exe
+# EDGE     : C:\Program Files (x86)\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe C:\Program Files (x86)\Microsoft\Edge\Application\%\elevation_service.exe
+# ADOBE    : C:\Program Files (x86)\Common Files\Adobe\AdobeGCClient\AGSService.exe C:\Program Files (x86)\Common Files\Adobe\AdobeGCClient\AGMService.exe C:\Program Files (x86)\Common Files\Adobe\Adobe Desktop Common\ElevationManager\AdobeUpdateService.exe C:\Program Files (x86)\Common Files\Adobe\ARM\1.0\armsvc.exe
+# CHROME   : C:\Program Files (x86)\Google\Update\GoogleUpdate.exe C:\Program Files (x86)\Google\Chrome\Application\77.0.3865.120\elevation_service.exe
+
 $FinalResults= @()
 $Date = Get-Date 
 $ConnectionString = "Server=(localdb);Database=EventCollections;Integrated Security=True;Connect Timeout=30"
@@ -14,14 +23,15 @@ $UserAddedToAdminGroup = "Id=4732 OR Id=4756 OR Id=4728"
 $UserRemovedFromAdminGroup = "Id=4733 OR Id=4757 OR Id=4729"
 $UserAccountCreated = "Id=4720"
 $UserAccountDeleted = "Id=4726"
-$NewServiceInstalled = "Id=7045 AND Message NOT LIKE '%C:\ProgramData\Microsoft\Windows Defender\Definition Updates\%'"
+$NewServiceInstalled = "Id=7045 AND Message NOT LIKE '%C:\Program Files (x86)\Common Files\Adobe\Adobe Desktop Common\ElevationManager\AdobeUpdateService.exe%' AND Message NOT LIKE '%C:\Program Files (x86)\Common Files\Adobe\ARM\1.0\armsvc.exe%' AND Message NOT LIKE '%C:\Program Files (x86)\Common Files\Adobe\AdobeGCClient\AGMService.exe%' AND Message NOT LIKE '%C:\Program Files (x86)\Common Files\Adobe\AdobeGCClient\AGSService.exe%' AND Message NOT LIKE '%C:\Program Files (x86)\Google\Chrome\Application\77.0.3865.120\elevation_service.exe%' AND Message NOT LIKE '%C:\Program Files (x86)\Google\Update\GoogleUpdate.exe%' AND Message NOT LIKE '%C:\Program Files (x86)\Microsoft\Edge\Application\%\elevation_service.exe%' AND Message NOT LIKE '%C:\Program Files (x86)\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe%' AND Message NOT LIKE '%C:\Program Files (x86)\Microsoft OneDrive\%\OneDriveUpdaterService.exe%' AND Message NOT LIKE '%C:\Program Files (x86)\Microsoft OneDrive\20.124.0621.0006\FileSyncHelper.exe%' AND Message NOT LIKE '%C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe%' AND Message NOT LIKE '%C:\Windows\SysmonDrv.sys%' AND Message NOT LIKE '%C:\Windows\Sysmon.exe%' AND Message NOT LIKE '%\SystemRoot\SysmonDrv.sys%' AND Message NOT LIKE '%C:\ProgramData\Microsoft\Windows Defender\Definition Updates\%'"
 $UserAccountLocked = "Id=4740"
 $UserAccountUnlocked = "Id=4767"
 $SpecialPrivilegeAssigned = "Id=4672 AND Message NOT LIKE '%paessler%' AND Message NOT LIKE '%dnsdynamic%' AND Message NOT LIKE '%nessus.admin%'"
 $ReplayAttack = "Id=4649"
+$MaliciousIPCheck = "Id=1 OR Id=2"
 
 # This is an array of SQL Commands to execute
-$Sqls = $ClearedEventLog,$PasswordChange,$UserAddedToAdminGroup,$UserRemovedFromAdminGroup,$UserAccountCreated,$UserAccountDeleted,$NewServiceInstalled,$UserAccountLocked,$UserAccountUnlocked,$SpecialPrivilegeAssigned,$ReplayAttack
+$Sqls = $MaliciousIPCheck,$ClearedEventLog,$PasswordChange,$UserAddedToAdminGroup,$UserRemovedFromAdminGroup,$UserAccountCreated,$UserAccountDeleted,$NewServiceInstalled,$UserAccountLocked,$UserAccountUnlocked,$SpecialPrivilegeAssigned,$ReplayAttack
 
 Function Find-NewlyCreatedLocalAccounts {
     [CmdletBinding()]
@@ -96,6 +106,7 @@ ForEach ($Sql in $Sqls)
             $UserAccountUnlocked {$Significance = 'Account Unlocked'}
             $SpecialPrivilegeAssigned {$Significance = 'Special Privileges Assigned'}
             $ReplayAttack {$Significance = 'Replay Attack Detected'}
+            $MaliciousIPCheck { $Significance = "Connection to an IP that is on a blacklist or a domain less than 2 years old"}
 
         }  # End Switch
 
