@@ -1,3 +1,5 @@
+# This will need to be run as an Administrator
+
 <#
 .SYNOPSIS
 This cmdlet is used to extract all of the unique IPv4 addresses out from each line of a log file
@@ -111,50 +113,52 @@ Function Get-ValidIPAddressFromString {
 
 
 # REFERNCE: https://www.kittell.net/code/powershell-domain-whois/
-    #.Synopsis
-    #   Does a raw WHOIS query and returns the results
-    #.Example
-    #   whois poshcode.org
-    #
-    #   The simplest whois search
-    #.Example
-    #   whois poshcode.com
-    #
-    #   This example is one that forwards to a second whois server ...
-    #.Example
-    #   whois poshcode.com -NoForward
-    #
-    #   Returns the partial results you get when you don't follow forwarding to a new whois server
-    #.Example
-    #   whois domain google.com
-    #
-    #   Shows an example of sending a command as part of the search.
-    #   This example does a search for an exact domain (the "domain" command works on crsnic.net for .com and .net domains)
-    #
-    #   The google.com domain has a lot of look-alike domains, the least offensive ones are actually Google's domains (like "GOOGLE.COM.BR"), but in general, if you want to look up the actual "google.com" you need to search for the exact domain.
-    #.Example
-    #   whois n 129.21.1.82 -server whois.arin.net
-    # 
-    #   Does an ip lookup at arin.net
-    #.Notes
-    # Future development should look at http://cvs.savannah.gnu.org/viewvc/jwhois/jwhois/example/jwhois.conf?view=markup
-    # v0.3 Added documentation, examples, error handling for ip lookups, etc.
-    # v0.2 Now strips command prefixes off when forwarding queries (if you want to send the prefix to the forwarded server, specify that server with the original query).
-    # v0.1 Now able to re-query the correct whois for .com and .org to get the full information!
- function Get-WhoIs {
+<# 
+.SYNOPSIS
+Does a raw WHOIS query and returns the results
+
+
+.EXAMPLE
+Get-WhoIs -Query poshcode.org
+# The simplest whois search
+
+.EXAMPLE
+Get-Whois poshcode.com
+   This example is one that forwards to a second whois server ...
+
+.EXAMPLE
+# Get-Whois poshcode.com -NoForward
+# Returns the partial results you get when you don't follow forwarding to a new whois server
+
+.EXAMPLE
+Get-whois Domain Google.com
+# Shows an example of sending a command as part of the search.
+# This example does a search for an exact domain (the "domain" command works on crsnic.net for .com and .net domains)
+# The google.com domain has a lot of look-alike domains, the least offensive ones are actually Google's domains (like "GOOGLE.COM.BR"), but in general, if you want to look up the actual "google.com" you need to search for the exact domain.
+
+.EXAMPLE
+Get-WhoIs n 129.21.1.82 -Server whois.arin.net
+# Does an ip lookup at arin.net
+
+.NOTES
+Future development should look at http://cvs.savannah.gnu.org/viewvc/jwhois/jwhois/example/jwhois.conf?view=markup
+v0.3 Added documentation, examples, error handling for ip lookups, etc.
+v0.2 Now strips command prefixes off when forwarding queries (if you want to send the prefix to the forwarded server, specify that server with the original query).
+v0.1 Now able to re-query the correct whois for .com and .org to get the full information!
+ #>
+ Function Get-WhoIs {
     [CmdletBinding()]
-    param(
-        # The query to send to WHOIS servers
-        [Parameter(Position=0, ValueFromRemainingArguments=$true)]
-        [string]$query,
+        param(
+            # The query to send to WHOIS servers
+            [Parameter(Position=0, ValueFromRemainingArguments=$True)]
+            [String]$Query,
  
-        # A specific whois server to search
-        [string]$server,
+            # A specific whois server to search
+            [String]$Server,
  
-        # Disable forwarding to new whois servers
-        [switch]$NoForward
-    )
-    end {
+            # Disable forwarding to new whois servers
+            [Switch]$NoForward)  # End param
+    END {
         $TLDs = DATA {
           @{
             ".br.com"="whois.centralnic.net"
@@ -170,67 +174,118 @@ Function Get-ValidIPAddressFromString {
  
         $EAP, $ErrorActionPreference = $ErrorActionPreference, "Stop"
  
-        $query = $query.Trim()
+        $Query = $Query.Trim()
  
-        if($query -match "(?:\d{1,3}\.){3}\d{1,3}") {
+        If ($Query -Match "(?:\d{1,3}\.){3}\d{1,3}") 
+        {
+
             Write-Verbose "IP Lookup!"
-            if($query -notmatch " ") {
-                $query = "n $query"
-            }
-            if(!$server) { $server = "whois.arin.net" }
-        } elseif(!$server) {
-            $server = $TLDs.GetEnumerator() |
-                Where { $query -like  ("*"+$_.name) } |
-                Select -Expand Value -First 1
-        }
+            If ($Query -NotMatch " ") 
+            {
+
+                $Query = "n $Query"
+
+            }  # End If
+            If (!$Server) 
+            { 
+            
+                $Server = "whois.arin.net" 
+                
+            }  # End If
+        }  # End If
+        ElseIf (!$Server) 
+        {
+
+            $Server = $TLDs.GetEnumerator() | Where-Object { $Query -like  ("*"+$_.Name) } | Select-Object -ExpandProperty Value -First 1
+
+        }  # End ElseIf
  
-        if(!$server) { $server = "whois.arin.net" }
-        $maxRequery = 3
+        If (!$Server) 
+        { 
+        
+            $Server = "whois.arin.net" 
+            
+        }  # End If
+
+        $MaxRequery = 3
  
-        do {
+        Do {
+
             Write-Verbose "Connecting to $server"
-            $client = New-Object System.Net.Sockets.TcpClient $server, 43
+            $Client = New-Object -TypeName System.Net.Sockets.TcpClient $Server, 43
  
-            try {
-                $stream = $client.GetStream()
+            Try {
+                $Stream = $Client.GetStream()
  
                 Write-Verbose "Sending Query: $query"
-                $data = [System.Text.Encoding]::Ascii.GetBytes( $query + "`r`n" )
-                $stream.Write($data, 0, $data.Length)
+                $Data = [System.Text.Encoding]::Ascii.GetBytes( $query + "`r`n" )
+                $Stream.Write($Data, 0, $Data.Length)
  
                 Write-Verbose "Reading Response:"
-                $reader = New-Object System.IO.StreamReader $stream, [System.Text.Encoding]::ASCII
+                $Reader = New-Object -TypeName System.IO.StreamReader $Stream, [System.Text.Encoding]::ASCII
  
-                $result = $reader.ReadToEnd()
+                $Result = $Reader.ReadToEnd()
  
-                if($result -match "(?s)Whois Server:\s*(\S+)\s*") {
-                    Write-Warning "Recommended WHOIS server: ${server}"
-                    if(!$NoForward) {
+                If ($Result -Match "(?s)Whois Server:\s*(\S+)\s*") 
+                {
+
+                    Write-Warning "Recommended WHOIS server: ${Server}"
+
+                    If (!$NoForward) 
+                    {
                         Write-verbose "Non-Authoritative Results:`n${result}"
                         # cache, in case we can't get an answer at the forwarder
-                        if(!$cachedResult) {
-                            $cachedResult = $result
-                            $cachedServer = $server
-                        }
-                        $server = $matches[1]
-                        $query = ($query -split " ")[-1]
-                        $maxRequery--
-                    } else { $maxRequery = 0 }
-                } else { $maxRequery = 0 }
-            } finally {
-                if($stream) {
-                    $stream.Close()
-                    $stream.Dispose()
-                }
-            }
-        } while ($maxRequery -gt 0)
+                        If (!$CachedResult) 
+                        {
+
+                            $CachedResult = $Result
+                            $CachedServer = $Server
+
+                        }  # End If
+
+                        $Server = $Matches[1]
+                        $Query = ($Query -Split " ")[-1]
+                        $MaxRequery--
+
+                    }  # End If
+                    Else 
+                    { 
+
+                        $MaxRequery = 0 
+
+                    }  # End Else
+                }   # End If
+                Else 
+                { 
+
+                    $MaxRequery = 0 
+
+                }  # End Else
+
+            }  # End Try
+            Finally 
+            {
+
+                If ($Stream) 
+                {
+
+                    $Stream.Close()
+                    $Stream.Dispose()
+
+                }  # End If
+
+            }  # End Finally
+        } While ($MaxRequery -gt 0)
  
-        $result
+        $Result
  
-        if($cachedResult -and ($result -split "`n").count -lt 5) {
+        If ($CachedResult -and ($Result -Split "`n").Count -lt 5) 
+        {
+
             Write-Warning "Original Result from ${cachedServer}:"
-            $cachedResult
-        }
+            $CachedResult
+
+        }  # End If
  
         $ErrorActionPreference = $EAP
     }
@@ -274,11 +329,10 @@ Function Invoke-IPBlacklistCheck {
             $BlacklistedOn = @()
             $ReversedIP = ($IP -Split '\.')[3..0] -Join '.'
 
-            # Removed these Blacklist Servers ForOverly Sensitive Results : 'bl.emailbasura.org','tor.ahbl.org','dynip.rothen.com','bl.spamcannibal.org','dnsbl.ahbl.org','spam.spamrats.com'
+            # Removed these Blacklist Servers ForOverly Sensitive Results. : 'pbl.spamhaus.org','noptr.spamrats.com','bl.emailbasura.org','tor.ahbl.org','dynip.rothen.com','bl.spamcannibal.org','dnsbl.ahbl.org','spam.spamrats.com','sbl.spamhaus.org','zen.spamhaus.org'
             $BlacklistServers = @(
                 'b.barracudacentral.org'
                 'spam.rbl.msrbl.net'
-                'zen.spamhaus.org'
                 'bl.deadbeef.com'  
                 'bl.spamcop.net'
                 'blackholes.five-ten-sg.com'
@@ -308,7 +362,6 @@ Function Invoke-IPBlacklistCheck {
                 'ix.dnsbl.manitu.net'
                 'korea.services.net'
                 'misc.dnsbl.sorbs.net'
-                'noptr.spamrats.com'
                 'ohps.dnsbl.net.au'
                 'omrs.dnsbl.net.au'
                 'orvedb.aupads.org'
@@ -316,7 +369,6 @@ Function Invoke-IPBlacklistCheck {
                 'osrs.dnsbl.net.au'
                 'owfs.dnsbl.net.au'
                 'owps.dnsbl.net.au'
-                'pbl.spamhaus.org'
                 'phishing.rbl.msrbl.net'
                 'probes.dnsbl.net.au'
                 'proxy.bl.gweep.ca'
@@ -330,7 +382,6 @@ Function Invoke-IPBlacklistCheck {
                 'residential.block.transip.nl'
                 'ricn.dnsbl.net.au'
                 'rmst.dnsbl.net.au'
-                'sbl.spamhaus.org'
                 'short.rbl.jp'
                 'smtp.dnsbl.sorbs.net'
                 'socks.dnsbl.sorbs.net'
@@ -391,8 +442,10 @@ Function Invoke-IPBlacklistCheck {
 
 }  # End Function Invoke-IPBlacklistCheck
 
-
+$Results = @()
+$Now = Get-Date
 $TmpEventFile = "C:\Windows\Temp\SysmonEvents.txt"
+$Dateregex = "(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)[0-9]{2}"
 
 Get-WinEvent -FilterHashTable @{LogName="Microsoft-Windows-Sysmon/Operational"; Id=3; StartTime=(Get-Date).AddHours(-1)} | Select-Object -ExpandProperty Message | Out-File -FilePath $TmpEventFile
 
@@ -400,16 +453,19 @@ $IPList = Get-ValidIPAddressFromString -Path $TmpEventFile
 ForEach ($IP in $IPList)
 {
 
-    $Results = Get-WhoIs -Query $IP -ErrorAction SilentlyContinue
-    $ResultsDate = $Results | Select-String -Pattern "Creation Date:"
-    $DateLimit = (Get-Date).Year
-    
-    If (($DateLimit - ($ResultsDate.CreatedDate).Year) -le 2) # This part is NOT working just yet
+    Write-Verbose "Checking $IP against blacklists"
+    Invoke-IPBlacklistCheck -IPAddress $IP -Verbose
+
+    Write-Verbose "Checking $IP domain creation date"
+    $Creation = (((Get-WhoIs -Query $IP).Split(' ') | Select-String -Pattern $DateRegex)[0] -Replace 'Comment:','').Trim()
+    $CreationDate = [Datetime]::ParseExact("$Creation", 'yyyy-MM-dd', $Null)
+
+    If (($Creation) -and (($Now.AddYears(-2) -le $CreationDate)))
     {
-        
+      
         Write-Verbose "Creating an event in MaliciousIPs Event Viewer Tree for a young domain"
 
-        $Message = Write-Output "Domain was found to be less than a year old. WHOIS Information is below: `n" + ($Results  | Out-String -Width 1000)
+        $Message = Write-Output "Domain was found to be less than a year old. WHOIS Information is below: `n" + (Write-Output $Results  | Out-String -Width 1000)
         Write-EventLog -LogName MaliciousIPs -Source MaliciousIPs -EntryType Information -EventId 2 -Message $Message
         
     }  # End If
