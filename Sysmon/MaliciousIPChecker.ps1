@@ -466,7 +466,7 @@ ForEach ($IP in $IPList)
     Invoke-IPBlacklistCheck -IPAddress $IP -Verbose
 
     Write-Verbose "Checking $IP domain creation date"
-    $Creation = (((Get-WhoIs -Query $IP).Split(' ') | Select-String -Pattern $DateRegex)[0] -Replace 'Comment:','').Trim()
+    $Creation = Try { (((Get-WhoIs -Query $IP).Split(' ') | Select-String -Pattern $DateRegex)[0] -Replace 'Comment:','').Trim() } Catch { Clear-Variable -Name Creation }
     $CreationDate = [Datetime]::ParseExact("$Creation", 'yyyy-MM-dd', $Null)
 
     If (($Creation) -and (($Now.AddYears(-2) -le $CreationDate)))
@@ -480,4 +480,3 @@ ForEach ($IP in $IPList)
     }  # End If
 
 }  # End ForEach  
-
