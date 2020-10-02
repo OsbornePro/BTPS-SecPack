@@ -154,11 +154,17 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
             [String]$Query,
  
             # A specific whois server to search
-            [String]$Server,
+            [string]$Server,
  
             # Disable forwarding to new whois servers
             [Switch]$NoForward)  # End param
+
+
     END {
+
+    If (($Query -NotLike "127.0.0.*") -and ($Query -NotLike "192.168.*.*") -and ($Query -NotLike "10.*.*.*") -and ($Query -NotLike "172.16.*.*") -and ($Query -NotLike "169.254.*.*"))
+    {
+
         $TLDs = DATA {
           @{
             ".br.com"="whois.centralnic.net"
@@ -288,8 +294,11 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
         }  # End If
  
         $ErrorActionPreference = $EAP
-    }
- }  # End Function Get-WhoIs
+    }# End If 
+
+  } # End END
+
+}  # End Function Get-WhoIs
 
 
 # REFERENCE https://community.spiceworks.com/scripts/show/2428-powershell-rbl-blacklist-check-with-email-alerts
@@ -465,9 +474,10 @@ ForEach ($IP in $IPList)
       
         Write-Verbose "Creating an event in MaliciousIPs Event Viewer Tree for a young domain"
 
-        $Message = Write-Output "Domain was found to be less than a year old. WHOIS Information is below: `n" + (Write-Output $Results  | Out-String -Width 1000)
+        $Message = Write-Output "Domain was found to be less than a year old. WHOIS Information is below: `n" + ($Results  | Out-String -Width 1000)
         Write-EventLog -LogName MaliciousIPs -Source MaliciousIPs -EntryType Information -EventId 2 -Message $Message
         
     }  # End If
 
 }  # End ForEach  
+
