@@ -9,6 +9,7 @@ This page is used to set up [Sysmon](https://docs.microsoft.com/en-us/sysinterna
 - __sysmon.xml__ This is the configuration file used as the starting point for this [Sysmon](https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon) configuration. Feel free to better customize this to your environment.
 - __MaliciousIPChecker.ps1__ This is the PowerShell script that is used to execute against a list a sysmon connections from the last hour. 
 __REFERENCE:__ [https://github.com/SwiftOnSecurity/sysmon-config/blob/master/sysmonconfig-export.xml](https://github.com/SwiftOnSecurity/sysmon-config/blob/master/sysmonconfig-export.xml)
+- __MaliciousIPChecker.xml__ This is a file that can be imported into Task Scheduler to created the scheduled task that checks for malicious IP address connections once an hour.
 
 ## SETUP INSTRUCTIONS
 __REFERENCE:__ [Link to Resource](https://www.syspanda.com/index.php/2017/02/28/deploying-sysmon-through-gpo/#:~:text=Launch%20your%20group%20policy%20utility%20and%20perform%20the,here%20Provide%20a%20name%20%28Sysmon%20Deployment%29%2C%20hit%20OK) <br>
