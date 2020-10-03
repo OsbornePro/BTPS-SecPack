@@ -13,7 +13,7 @@ You will need to make enter a few variable values to get this to work in your en
 - **$MacVendorps1** parameter is the file path to the other script included in the project entitled Get-MacVendor.ps1.
 
 ### TASK SCHEDULER
-The Find-NewDevices.ps1 file should be configured in a task that runs at least once a day on a dhcp server. It will require a user with "Log on As Batch Job" permissions to run the task as this cmdlet issues commands on remote DHCP servers which requires network permissions. The user must also be a DHCP administrator. Use the following in the "Actions" pane of Windows Task Scheduler to run the script.
+I have added an XML file that can be imported to created the required task. This can __NOT__ be run as SYSTEM and will need to be run as a user with "__Run as batch job__" permissions. The Find-NewDevices.ps1 file should be configured in a task that runs at least once a day on a dhcp server. It will require a user with "Log on As Batch Job" permissions to run the task as this cmdlet issues commands on remote DHCP servers which requires network permissions. The user must also be a DHCP administrator. Use the following in the "Actions" pane of Windows Task Scheduler to run the script.
 ```
 Program/script: powershell.exe
 Add Arguments: -NoLogo -NonInteractive -WindowStyle Hidden .\Find-NewDevices.ps1
