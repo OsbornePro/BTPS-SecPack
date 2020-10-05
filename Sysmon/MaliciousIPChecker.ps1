@@ -430,8 +430,9 @@ Function Invoke-IPBlacklistCheck {
                 Foreach ($Item in $BlacklistedOn) 
                 {
 
-                    $EventMessage = Get-WinEvent -MaxEvents 1 -FilterHashtable @{LogName="Microsoft-Windows-Sysmon/Operational"; Id=3} | Where-Object -Property Message -like "*$Item*" | Select-Object -ExpandProperty Message
+                    $EventMessage = Get-WinEvent -FilterHashtable @{LogName="Microsoft-Windows-Sysmon/Operational"; Id=3} | Where-Object -Property Message -like "*$IP*" | Select-Object -First 1 -ExpandProperty Message | Out-String
                     $Message = "IP Address was found to be on the following Blacklists: `n`nIP Address: $IP`nBlacklist: " + (Write-Output $Item  | Out-String -Width 1000) + "`n`n" + (Write-Output $EventMessage | Out-String -Width 1000)
+                    
                     Write-EventLog -LogName MaliciousIPs -Source MaliciousIPs -EntryType Information -EventId 1 -Message $Message
 
                 }  # End ForEach
