@@ -223,8 +223,8 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
             Try {
                 $Stream = $Client.GetStream()
  
-                Write-Verbose "Sending Query: $query"
-                $Data = [System.Text.Encoding]::Ascii.GetBytes( $query + "`r`n" )
+                Write-Verbose "Sending Query: $Query"
+                $Data = [System.Text.Encoding]::Ascii.GetBytes( $Query + "`r`n" )
                 $Stream.Write($Data, 0, $Data.Length)
  
                 Write-Verbose "Reading Response:"
@@ -288,7 +288,7 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
         If ($CachedResult -and ($Result -Split "`n").Count -lt 5) 
         {
 
-            Write-Warning "Original Result from ${cachedServer}:"
+            Write-Warning "Original Result from ${CachedServer}:"
             $CachedResult
 
         }  # End If
@@ -430,7 +430,8 @@ Function Invoke-IPBlacklistCheck {
                 Foreach ($Item in $BlacklistedOn) 
                 {
 
-                    $Message = "IP Address was found to be on the following Blacklists: `n`nIP Address: $IP`nBlacklist: " + (Write-Output $Item  | Out-String -Width 1000)
+                    $EventMessage = Get-WinEvent -MaxEvents 1 -FilterHashtable @{LogName="Microsoft-Windows-Sysmon/Operational"; Id=3; Keywords="$Item"} | Select-Object -ExpandProperty Message
+                    $Message = "IP Address was found to be on the following Blacklists: `n`nIP Address: $IP`nBlacklist: " + (Write-Output $Item  | Out-String -Width 1000) + "`n`n" + (Write-Output $EventMessage | Out-String -Width 1000)
                     Write-EventLog -LogName MaliciousIPs -Source MaliciousIPs -EntryType Information -EventId 1 -Message $Message
 
                 }  # End ForEach
