@@ -423,7 +423,7 @@ Function Invoke-IPBlacklistCheck {
 
             }  # End ForEach
 
-            If ($BlacklistedOn.Count -gt 0)
+            If ($BlacklistedOn.Count -gt 3)
             {
 
                 Write-Verbose "Create an event in MaliciousIPs in Event Viewer Tree"
