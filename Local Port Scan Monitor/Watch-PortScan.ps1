@@ -358,7 +358,6 @@ Function Block-IPAddress {
                 ValueFromPipelineByPropertyName=$False,
                 HelpMessage="[H] Define an IP address or multiple IP addresses separating multiple values with a comma. `n[E] EXAMPLE: '10.10.10.10','10.12.12.12'"            
             )]  # End Parameter
-            [ValidateScript({$Ipaddress | ForEach-Object {[System.Net.IPAddress]$_}})]
             [String[]]$IPAddress
         )  # End param
 
