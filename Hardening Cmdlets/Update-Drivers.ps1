@@ -190,7 +190,7 @@ PROCESS
 
             Write-Output "[*] Downloading Drivers..."
             $UpdatesToDownload = New-Object -ComObject Microsoft.Update.UpdateColl
-            ForEach-Object -InputObject $Updates -Process { $UpdatesToDownload.Add($_) | Out-Null }
+            $Updates | ForEach-Object -Process { $UpdatesToDownload.Add($_) | Out-Null }
 
             Write-Verbose "Starting download"
             $UpdateSession = New-Object -Com Microsoft.Update.Session
