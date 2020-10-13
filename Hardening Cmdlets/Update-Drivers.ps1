@@ -150,7 +150,7 @@ PROCESS
     ElseIf ($Updates.Count -gt 0)
     {
     
-        $UpdateDriverList = Select-Object -InputObject $Updates -Property "Title","DriverModel","DriverVerDate","Driverclass","DriverManufacturer" | Format-Table -AutoSize -Wrap
+        $UpdateDriverList = $Updates | Select-Object -Property "Title","DriverModel","DriverVerDate","Driverclass","DriverManufacturer" | Format-Table -AutoSize -Wrap
 
     }  # End If
     Else
