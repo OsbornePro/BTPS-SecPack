@@ -141,7 +141,7 @@ PROCESS
         Write-Output "[*] All drivers are up to date" 
 
     }  # End If 
-    ElseIf (($Updates.Count -gt 0) -and ($SearchResult.Updates.Where({$_.Filter -like $Name})))
+    ElseIf (($Updates.Count -gt 0) -and ($SearchResult.Updates | Where-Object {$_.Filter -like $Name}))
     {
 
         Write-Verbose "Searching for $Name in available updates"
