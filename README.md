@@ -1,4 +1,4 @@
-# OsbornePro: The Blue Team PowerShell Security Package
+The Blue Team PowerShell Security Package
 ![OsbornePro](https://raw.githubusercontent.com/tobor88/OsbornePro-The-Blue-Team-PowerShell-Security-Package/master/WEF%20Application/WEF/WEF/wwwroot/images/osborneprologo.png)
 
 ### DONATIONS
