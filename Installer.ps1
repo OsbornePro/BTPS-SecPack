@@ -1,3 +1,4 @@
+
 Function Test-Admin {
     [CmdletBinding()]
         param()  # End param
@@ -22,7 +23,12 @@ Function Test-Admin {
 Write-Output "[*] Ensuring install script is executing with administator privileges"
 Test-Admin 
 
-Write-Output "OsbornePro : The B.T.P.S. Security Package https://www.btps-secpack.com `n[*] Beginning the installation of the B.T.P.S Security Package`n`n"
+Write-Output "==============================================================================================================================="
+Write-Output "|                                                     OsbornePro                                                              |"
+Write-Output "|                                         The B.T.P.S. Security Package                                                       |"
+Write-Output "|                      https://www.btps-secpack.com Beginning the installation of the B.T.P.S Security Package                |"
+Write-Output "==============================================================================================================================="
+Write-Output "[i] Suggestions and feedback are always appreciated"
 
 $DomainObj = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
 $Domain = New-Object -TypeName System.DirectoryServices.DirectoryEntry
@@ -608,6 +614,73 @@ If ($MiscAnswer -like "y*")
 
 }  # End If
 
+
+
 Write-Output "============== WEF Application ============="
-Write-Output "[*] To install the WEF Application you will need to follow my tutorial setup guide at https://btps-secpack.com/wef-application "
+Write-Output "[*] To install the WEF Application you will need to follow my tutorial setup guide at https://btps-secpack.com/wef-application. If you have not yet I suggest setting up WinRM over HTTPS first. https://btps-secpack.com/winrm-over-https"
 Pause 
+
+Write-Output "=============== Remove PowerShell v2 =============="
+$PS2Answer = Read-Host -Prompt "Would you like to remove the legacy version of PowerShell from the servers in your environment [y/N]"
+$PS2Computer = Read-Host -Prompt "Would you like to remove the legacy version of PowerShell from client computers? [y/N]"
+
+$RemovePowerShellFrom = @()
+If ($PS2Answer -like "y*")
+{
+
+    $RemovePowerShellFrom += $Servers
+
+}  # End If
+
+If ($PS2Computer -like "y*")
+{
+
+    $RemovePowerShellFrom += $ComputerNames
+
+}  # End If
+
+If ($RemovePowerShellFrom.Count -gt 0)
+{
+
+    ."$BTPSHome\Hardening Cmdlets\Remove-PowerShellV2"
+    ForEach ($Computer in $RemovePowerShellFrom)
+    {
+
+        Remove-PowerShellV2 -ComputerName $Computer -ErrorAction Continue 
+        
+    }  # End ForEach
+
+}  # End If
+
+
+Write-Output "============= ENABLE DNS OVER HTTPS =============="
+$PS2Server = Read-Host -Prompt "Would you like to enabled DNS over HTTPS on the servers in your environment [y/N]"
+$PS2Client = Read-Host -Prompt "Would you like to enable DNS over HTTPS on the client computers in your environment? [y/N]"
+
+$EnableDoHOn = @()
+If ($PS2Server -like "y*")
+{
+
+    $EnableDoHOn += $Servers
+
+}  # End If
+
+If ($PS2Client -like "y*")
+{
+
+    $EnableDoHOn += $ComputerNames
+
+}  # End If
+
+If ($EnableDoHOn.Count -gt 0)
+{
+
+    ."$BTPSHome\Hardening Cmdlets\Remove-PowerShellV2"
+    ForEach ($Device in $EnableDoHOn)
+    {
+
+        Remove-PowerShellV2 -ComputerName $Computer -ErrorAction Continue 
+        
+    }  # End ForEach
+
+}  # End If
