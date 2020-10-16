@@ -1,5 +1,3 @@
-# NOT COMPLETED YET
-
 Function Test-Admin {
     [CmdletBinding()]
         param()  # End param
