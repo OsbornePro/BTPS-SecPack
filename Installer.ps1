@@ -115,7 +115,6 @@ Else
 
         Write-Output "[*] Setting SMTP server to mail.smtp2go.com and port to 2525"
         $SmtpServer = 'mail.smtp2go.com'
-        $SmtpPort = 2525
         $To = Read-Host -Prompt "What is the email address that alerts should be sent to? EXAMPLE: $env:USERNAME@$env:USERDNSDOMAIN"
         $From = Read-Host -Prompt "Define the email address the alerts should be sent from. I usually have an email account email itself though this is not required. EXAMPLE: $env:USERNAME@$env:USERDNSDOMAIN"
 
@@ -162,9 +161,10 @@ $AlertFiles = (Get-ChildItem -Path $BTPSHome -Filter "*.ps1" -Exclude "Enable-Do
 ForEach ($AlertFile in $AlertFiles)
 {
 
-    (Get-Content -Path $AlertFile -Raw) -Replace "To","$To"
-    (Get-Content -Path $AlertFile -Raw) -Replace "From","$From"
-    (Get-Content -Path $AlertFile -Raw) -Replace "SmtpServer","$SmtpServer"
+    (Get-Content -Path $AlertFile -Raw) -Replace "ToEmail","$To"
+    (Get-Content -Path $AlertFile -Raw) -Replace "FromEmail","$From"
+    (Get-Content -Path $AlertFile -Raw) -Replace "UseSmtpServer","$SmtpServer"
+    
     If (!($CredFile))
     {
 
@@ -174,7 +174,7 @@ ForEach ($AlertFile in $AlertFiles)
     ElseIf (Test-Path -Path $CredFile)
     {
 
-        (Get-Content -Path $AlertFile -Raw) -Replace "-Credential `$Credential",""
+        (Get-Content -Path $AlertFile -Raw) -Replace "-Credential `$Credential","-Credential (Import-CliXml -Path $CredFile)"
 
     }  # End ElseIf
 
