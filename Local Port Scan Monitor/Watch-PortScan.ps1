@@ -2,12 +2,6 @@
 # After the permissions are set correctly on the directory your firewall logs are stored in you may need to restart the device to apply them.
 # This can be used to receive an email alert when port scans happen as well as automatically blacklist the ip address performing the port scan
 # on the localhost.
-
-    # SET THESE VALUES TO RECEIVE EMAIL ALERTS WHEN DEFINING THE -EmailAlert SWITCH PARMETER
-    $To = "alertme@osbornepro.com"
-    $From = "do-not-reply@osbornepro.com"
-    $SmtpServer = "mail.smtp2go.com"
-
 <#
 .SYNOPSIS
 This cmdlet is used to verify functions are being executed with administrative privileges.
@@ -794,7 +788,7 @@ td {
                     $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
                     $MailBody = $TableInfo | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "=======================================================<br> PORT SCAN DETECTED: $env:COMPUTERNAME <br>=======================================================<br><br>SUMMARY: <br>A possible port scan was discovered on $env:COMPUTERNAME.<br>" | Out-String
             
-                    Send-MailMessage -To $To -From $From -SmtpServer $SmtpServer -Priority High -Subject "ALERT: Attempted Port Scan $env:COMPUTERNAME" -BodyAsHtml -Body $MailBody
+                    Send-MailMessage -To ToEmail -From FromEmail -SmtpServer UseSmtpServer -Credential $Credential -UseSSL -Port 587 -Priority High -Subject "ALERT: Attempted Port Scan $env:COMPUTERNAME" -BodyAsHtml -Body $MailBody
 
                 }  # End If
                         

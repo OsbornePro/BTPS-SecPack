@@ -94,7 +94,7 @@ td {
 
         Write-Verbose "Creating email body and placing info into a neat looking table"
 
-        Send-MailMessage -From $From -To $To -Subject "$env:COMPUTERNAME Had New Service Installed" -BodyAsHtml -Body $MailBody -SmtpServer $SmtpServer
+        Send-MailMessage -From FromEmail -To ToEmail -Subject "$env:COMPUTERNAME Had New Service Installed" -BodyAsHtml -Body $MailBody -SmtpServer UseSmtpServer -Credential $Credential -UseSSL -Port 587
 
         } # End If
 

@@ -51,6 +51,6 @@ td {
     $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
     $MailBody = $Results | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "<br>The below table contains information on the user whose account was locked out.<br><br><hr><br><br>" | Out-String
 
-   Send-MailMessage -From $From -To $To -Subject "AD Event: Account Lockout" -BodyAsHtml -Body "$MailBody" -SmtpServer $SmtpServer
+   Send-MailMessage -From FromEmail -To ToEmail -Subject "AD Event: Account Lockout" -BodyAsHtml -Body "$MailBody" -SmtpServer UseSmtpServer -UseSSL -Port 587 -Credential $Credential
 
 }  # End If

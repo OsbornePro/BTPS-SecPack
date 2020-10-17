@@ -252,7 +252,7 @@ td {
             If ($Table) 
             {
 
-                Send-MailMessage -From $From -To $To -Subject "AD Event: New Device Check $DhcpServer" -BodyAsHtml -Body $MailBody -SmtpServer $SmtpServer
+                Send-MailMessage -From FromEmail -To ToEmail -Subject "AD Event: New Device Check $DhcpServer" -BodyAsHtml -Body $MailBody -SmtpServer UseSmtpServer -UseSSL -Port 587  -Credential $Credential
 
                 Write-Verbose 'Email sent.'
 

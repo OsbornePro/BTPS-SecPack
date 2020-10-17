@@ -50,6 +50,6 @@ td {
     $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
     $MailBody = $Results | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "<br>The below table contains information on a user whose password was changed.<br><br><hr><br><br>" | Out-String
 
-    Send-MailMessage -From $From -To $To -Subject "AD Event: Password Change Attempt" -BodyAsHtml -Body "$MailBody" -SmtpServer $SmtpServer
+    Send-MailMessage -From FromEmail -To ToEmail -Subject "AD Event: Password Change Attempt" -BodyAsHtml -Body "$MailBody" -SmtpServer UseSmtpServer -Credential $Credential -UseSSL -Port 587
 
 }  # End If

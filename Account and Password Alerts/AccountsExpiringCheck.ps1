@@ -39,6 +39,6 @@ td {
     $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
     $Body = $Accounts | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent | Out-String
 
-    Send-MailMessage -From $From -To $To -Subject "AD Event: Accounts Expiring" -BodyAsHtml -Body $Body -SmtpServer $SmtpServer
+    Send-MailMessage -From FromEmail -To ToEmail -Subject "AD Event: Accounts Expiring" -BodyAsHtml -Body $Body -SmtpServer UseSmtpServer -Credential $Credential -UseSSL -Port 587
 
 } # End If

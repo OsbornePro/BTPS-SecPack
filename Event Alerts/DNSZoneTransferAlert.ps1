@@ -52,7 +52,7 @@ td {
         $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
         $MailBody = $Results | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "<br>A DNS Zone transfer has occured. Details are below.<br><br><hr><br><br>" | Out-String
 
-        Send-MailMessage -From $From -To $To -Subject "AD Event: DNS Zone Transfer Occured" -BodyAsHtml -Body "$MailBody" -SmtpServer $SmtpServer
+        Send-MailMessage -From FromEmail -To ToEmail -Subject "AD Event: DNS Zone Transfer Occured" -BodyAsHtml -Body "$MailBody" -SmtpServer UseSmtpServer -UseSsl -Port 587 -Credential $Credential
 
     }  # End If
 

@@ -1,9 +1,7 @@
 # This alert was meant to be used in cases where a user in your environment who should not have administrator credentials was given administrator credentials. It will alert you whenever their credentials are used to execute a process with higher privilege
 
 $MonitorAdmin = ''
-$From = ''
-$To = ''
-$SmtpServer = ''
+
 Get-Credential | Export-CliXml -Path "${env:\userprofile}\MonitorAdmin.Cred"
 $Cred = Import-CliXml -Path "${env:\userprofile}\MonitorAdmin.Cred"
 
@@ -101,7 +99,7 @@ If (Get-WinEvent -FilterXml $XMLConsent | Select-Object -Property * -First 1)
                 $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
                 $MailBody = $Results | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "<br>The below table contains information on the process that was created after $Admin executed it successfully using administrator credentials.<br><br><hr><br><br>" | Out-String
             
-               Send-MailMessage -From $From -To $To -Subject "AD Event: $Admin Executed and Eleveated Process" -BodyAsHtml -Body "$MailBody" -SmtpServer $SmtpServer -UseSsl -Port 587 -Credential $Cred
+               Send-MailMessage -From FromEmail -To ToEmail -Subject "AD Event: $Admin Executed and Eleveated Process" -BodyAsHtml -Body "$MailBody" -SmtpServer UseSmtpServer -UseSsl -Port 587 -Credential $Credential
             
             }  # End If
             

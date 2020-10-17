@@ -70,16 +70,16 @@ ForEach ($Users in $UserDetails)
         Try 
         {
 
-            Send-MailMessage -From $From -To $From1 -Subject "ACTION REQUIRED: Your Password Has Expired" -BodyAsHtml -Body $MailBody1 -SmtpServer $SmtpServer -Priority High
+            Send-MailMessage -From FromEmail -To $From1 -Subject "ACTION REQUIRED: Your Password Has Expired" -BodyAsHtml -Body $MailBody1 -SmtpServer UseSmtpServer -Priority High -UseSSL -Port 587 -Credential $Credential
         
         } # End Try
 
         Catch 
         {
 
-            Send-MailMessage -From $From -To $From1 -Subject "ACTION REQUIRED: Your Password Has Expired" -BodyAsHtml -Body $MailBody1 -SmtpServer $SmtpServer -Priority High
+            Send-MailMessage -From FromEmail -To $From1 -Subject "ACTION REQUIRED: Your Password Has Expired" -BodyAsHtml -Body $MailBody1 -SmtpServer UseSmtpServer -Priority High -UseSSL -Port 587 -Credential $Credential
 
-            Send-MailMessage -From $From -To $To -Subject "Forward This Email Alert to $From1. Auto Send Failed" -BodyAsHtml -Body $MailBody1 -SmtpServer $SmtpServer
+            Send-MailMessage -From FromEmail -To ToEmail -Subject "Forward This Email Alert to $From1. Auto Send Failed" -BodyAsHtml -Body $MailBody1 -SmtpServer UseSmtpServer -UseSSL -Port 587 -Credential $Credential
 
         } # End Catch
   
@@ -102,16 +102,16 @@ ForEach ($Users in $UserDetails)
         Try 
         {
 
-            Send-MailMessage -From $From -To $From1 -Subject "ACTION REQUIRED: Your $EnvDomain Password is Expiring Soon" -BodyAsHtml -Body $MailBody -SmtpServer $SmptServer -Priority Normal
+            Send-MailMessage -From FromEmail -To $From1 -Subject "ACTION REQUIRED: Your $EnvDomain Password is Expiring Soon" -BodyAsHtml -Body $MailBody -SmtpServer UseSmptServer -Priority Normal -UseSSL -Port 587 -Credential $Credential
         
         } # End Try
 
         Catch 
         {
 
-            Send-MailMessage -From $From -To $From1 -Subject "ACTION REUQIRED: Your $EnvDomain Password is Expiring Soon" -BodyAsHtml -Body $MailBody -SmtpServer $SmptServer -Priority Normal
+            Send-MailMessage -From FromEmail -To $From1 -Subject "ACTION REUQIRED: Your $EnvDomain Password is Expiring Soon" -BodyAsHtml -Body $MailBody -SmtpServer UseSmptServer -Priority Normal -UseSSL -Port 587 -Credential $Credential
 
-            Send-MailMessage -From $From -To $To -Subject "Forward This email to $From1. Auto Send Failed" -BodyAsHtml -Body $MailBody -SmtpServer $SmptServer
+            Send-MailMessage -From FromEmail -To ToEmail -Subject "Forward This email to $From1. Auto Send Failed" -BodyAsHtml -Body $MailBody -SmtpServer UseSmptServer -UseSSL -Port 587 -Credential $Credential
 
         } # End Catch
 
@@ -131,7 +131,7 @@ If ($ExpiredPasswords)
 {
 
     $MBody1 = $ExpiredPasswords | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "FYI, <br><br>The below table contains info on the users who have received a password has expired notification.<br><br><hr><br>" | Out-String 
-    Send-MailMessage -From $From -To $To -Subject "Users Whos Passwords Have Expired" -BodyAsHtml -Body $MBody1 -SmtpServer $SmtpServer
+    Send-MailMessage -From FromEmail -To ToEmail -Subject "Users Whos Passwords Have Expired" -BodyAsHtml -Body $MBody1 -SmtpServer UseSmtpServer -UseSSL -Port 587 -Credential $Credential
   
 } # End if
        
@@ -140,6 +140,6 @@ If ($ExpiringSoon)
 {    
         
     $MBody = $ExpiringSoon | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "FYI, <br><br>The below table contains info on the users who have received a password exipring notification.<br><br><hr><br>" | Out-String 
-    Send-MailMessage -From $From -To $To -Subject "Users Who Received Password Expiring Notifications" -BodyAsHtml -Body $MBody -SmtpServer $SmptServer
+    Send-MailMessage -From FromEmail -To ToEmail -Subject "Users Who Received Password Expiring Notifications" -BodyAsHtml -Body $MBody -SmtpServer UseSmptServer -UseSSL -Port 587 -Credential $Credential
 
 } # End If

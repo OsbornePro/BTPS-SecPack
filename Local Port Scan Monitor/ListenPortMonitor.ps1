@@ -21,7 +21,7 @@ If ($PreviouslyOpenPorts -lt $CurrentlyOpenPorts.Count)
 {
 
     $Body = "If you have received this email it is because a new port was opened $nev:COMPUTERNAME. If this was due to a user configuration or new application you may disregard. Otherwise verify that a Bind Shell connection has not been established to this device."
-    Send-MailMessage -From $From -To $To -Body $Body -Subject "AD Event: New Listen Port Opened on $env:COMPUTERNAME" -SmtpServer $SmtpServer -Priority Normal 
+    Send-MailMessage -From FromEmail -To ToEmail -Body $Body -Subject "AD Event: New Listen Port Opened on $env:COMPUTERNAME" -SmtpServer UseSmtpServer -Priority Normal -Credential $Credential -UseSSL -Port 587
 
 }  # End If
 

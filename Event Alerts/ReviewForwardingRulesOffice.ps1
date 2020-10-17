@@ -55,7 +55,7 @@ Catch
     ForEach ($Report in $Attach) 
     {
     
-        Send-MailMessage -From $From -To $To -Attachments $Report -Priority Normal -Subject 'Weekly Check Office365 Mailbox Forwarding Rules' -Body 'Microsoft suggests reviewing this information once a week to ensure Outlooks forwarding rules are not configured in a malicious or unusual manner.' -SmtpServer $SmtpServer
+        Send-MailMessage -From FromEmail -To ToEmail -Attachments $Report -Priority Normal -Subject 'Weekly Check Office365 Mailbox Forwarding Rules' -Body 'Microsoft suggests reviewing this information once a week to ensure Outlooks forwarding rules are not configured in a malicious or unusual manner.' -SmtpServer UseSmtpServer -Credential $Credential -UseSsl -Port 587  -Credential $Credential
         
     } # End ForEach
 
