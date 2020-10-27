@@ -46,6 +46,7 @@ I wrote an initial install script to automatically set up as much of these prote
     - Uninstall PowerShell version 2 from a remote or local machine(s)
     - Remove an email reported as spam from all inboxes that receive the email
     - Rotate the Kerberos keys used in an online exchange environment
+    - Enable or Disable SMB signing on a device as well as disable or enable SMBv1 or SMBv2 and SMBv3
     - Enable RDP Network Level Authentication to prevent not domain computers from RDPing into a client
     - Update any available driver updates on a local or remote machine
     - Add a notification banner to emails that users receive in Outlook when the sender name matches a name in the company and the email address is not from the internal domain
