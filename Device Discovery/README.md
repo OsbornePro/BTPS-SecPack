@@ -28,10 +28,14 @@ I obtained my MAC vendor list from https://macaddress.io/database-download
 To have this list fit the format required make the following changes.
 ```powershell
 # This will replace the ":" between MAC values. If this is not removed you will not have any matches
-(Get-Content -Path .\MAC.Vendor.List.csv).Replace(':','') | Out-File -FilePath .\MACVendorList.csv
+(Get-Content -Path .\macaddress.io-db.csv).Replace(':','') | Out-File -FilePath .\MAC.Vendor.List.csv
 ```
 Modify the headers. The 6 characters representing the vendor info should be labeled with the header "Assignment"
-The company name should be labeled with the header "Organziation Name". 
+The company name should be labeled with the header "Organziation Name". If it makes things easier replace the first line of MAC.Vendor.List.csv with the below line
+```
+Assignment,isPrivate,Organization Name,Organization Address,countryCode,assignmentBlockSize,dateCreated,dateUpdated
+```
+
 As Metallica said "Nothing Else Matters"
 
 If you need help setting this up for whatever reason feel free to contact me at rosborne@osbornepro.com and I can help with whatever part you are struggling with.
