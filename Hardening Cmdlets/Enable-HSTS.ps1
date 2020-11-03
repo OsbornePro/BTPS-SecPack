@@ -38,6 +38,14 @@ Enable-HSTS -MaxAge (New-TimeSpan -Days 365).TotalSeconds -ForceHTTPS
 Enable-HSTS
 # This example enables HSTS on all IIS server sites and sets the max-age attribute to 2 years
 
+.EXAMPLE
+Enable-HSTS -ComputerName Site.domain.com,WebServer.domain.com -ForceHTTPS
+# This example enables HSTS and sets the Force HTTPS attribute on remote machines Site.domain.com and WebServer.domain.com using WinRM and sets the Max Age attribute to 2 years
+
+.EXAMPLE
+Enable-HSTS -ComputerName Site.domain.com,WebServer.domain.com -UseSSL -ForceHTTPS
+# This example enables HSTS and sets the Force HTTPS attribute on remote machines Site.domain.com and WebServer.domain.com using WinRM over HTTPS and sets the Max Age attribute to 2 years
+
 
 .NOTES
 Author: Robert H. Osborne
