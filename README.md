@@ -36,6 +36,7 @@ I wrote an initial install script to automatically set up as much of these prote
 - __Event Alerts__ [VIEW](https://github.com/tobor88/BTPS-SecPack/tree/master/Event%20Alerts)
     - Receive an alert when a DNS Zone Transfer occurs
     - Receive an alert when a new service is installed on a device that is not a Windows Defender upgrade
+    - Receive an alert when a new computer is joined to the domain
     - Receive an alert when an insecure LDAP bind occurs (When Bind is not LDAP over SSL)
     - Receive an alert when a user signs into a device they were not assigned
 - __Hardening Cmdlets__ [VIEW](https://github.com/tobor88/BTPS-SecPack/tree/master/Hardening%20Cmdlets)

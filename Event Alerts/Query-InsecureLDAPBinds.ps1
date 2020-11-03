@@ -50,6 +50,13 @@ Function Find-InsecureLDAPBinds {
                 Position=1)]
             [Int]$Hours = 24)
 
+If ((Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics").'16 LDAP Interface Events' -eq 0)
+{
+
+	Write-Verbose "Insecure LDAP Binds are not currently being logged. Enabling logging of insecure LDAP Binds."
+	New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics" -Name '16 LDAP Interface Events' -Value 2 -Force
+
+}  # End If
 $InsecureLDAPBinds = @()
 
 Write-Verbose "[*] Searching Event Log for ID 2889"
@@ -60,7 +67,7 @@ ForEach ($Event in $Events)
 
 	$EventXML = [xml]$Event.ToXml()
 	
-    $Client = ($EventXML.Event.EventData.Data[0])
+        $Client = ($EventXML.Event.EventData.Data[0])
 	$IPAddress = $Client.SubString(0,$Client.LastIndexOf(":")) #Accomodates for IPV6 Addresses
 	$Port = $Client.SubString($Client.LastIndexOf(":")+1) #Accomodates for IPV6 Addresses
 	$User = $EventXML.Event.EventData.Data[1]
