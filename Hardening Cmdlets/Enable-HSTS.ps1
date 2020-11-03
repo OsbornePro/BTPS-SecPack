@@ -7,6 +7,15 @@ This cmdlet is used to easily enable the Hypertext Strict Transport Security (HS
 Enabling Hypertext Strict Transport Security (HSTS) is done to prevent SSL striping and encryption downgrade attacks.
 
 
+.PARAMETER ComputerName
+Define remote computer(s) you wish to enable HSTS on
+
+.PARAMETER UseSSL
+Indicates you wish to use WinRM over HTTPS for remote connections instead of plain WinRM
+
+.PARAMETER SiteName
+Define the site(s) on the remote device to apply your HSTS values too. If this is not defined the changes will be applied to every IIS hosted site
+
 .PARAMETER MaxAge
 Defines the max age value for a certifiate in seconds. The default value I have set is 2 years. The minimum value allowed is 1 year or 31536000 seconds
 
@@ -56,9 +65,28 @@ https://www.youracclaim.com/users/roberthosborne/badges
 https://www.hackthebox.eu/profile/52286
 #>
 Function Enable-HSTS {
-    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = "Medium")]
+    [CmdletBinding(
+        DefaultParameterSetName='Local',
+        SupportsShouldProcess, ConfirmImpact = "Medium")]  # End CmdletBinding
     [OutputType([System.Array])]
         param(
+            [Parameter(
+                ParameterSetName='Remote',
+                Mandatory=$True,
+                ValueFromPipeline=$False,
+                HelpMessage="`n[H] Enter a computer FQDN or hostname you wish to enable HSTS on. Separte multiple values with a comma. WinRM must be enabled for this too work. `n[E] EXAMPLE: 'DC01.domain.com','DHCP.domain.com'")]  # End Parameter
+            [String[]]$ComputerName,
+
+            [Parameter(
+                Mandatory=$False,
+                ValueFromPipeline=$False)]  # End Parameter
+            [String[]]$Site,
+
+            [Parameter(
+                ParameterSetName='Remote',
+                Mandatory=$False)]  # End Parameter
+            [Switch][Bool]$UseSSL,
+
             [Parameter(
                 Mandatory=$False,
                 ValueFromPipeline=$False)]  # End Parameter
@@ -76,122 +104,321 @@ Function Enable-HSTS {
             [Switch][Bool]$ForceHTTPS
         )  # End param
 
-    Import-Module -Name IISAdministration -ErrorAction Stop
-    Start-IISCommitDelay
-    
-    $Count = 0
-    $Obj = @()
-    $SiteElements = @()
-    $HstsElements = @()
 
-
-    Write-Verbose "Getting Site Collection Information"
-    $SiteCollection = Get-IISConfigSection -SectionPath "system.applicationHost/sites" | Get-IISConfigCollection
-
-
-    Write-Verbose "Obtaining all available Site Names"
-    $SiteNames = ($SiteCollection | Select-Object -ExpandProperty RawAttributes).name
-
-
-    Write-Verbose "Obtaining site elements"
-    ForEach ($SiteName in $SiteNames)
+    If ($PSCmdlet.ParameterSetName -eq 'Remote')
     {
 
-        New-Variable -Name ("$Site" + $Count.ToString()) -Value $SiteName
-        $Count++
-
-        Write-Verbose "Building element from $SiteName"
-        $SiteElements += Get-IISConfigCollectionElement -ConfigCollection $SiteCollection -ConfigAttribute @{"name"="$SiteName"}
-
-    }  # End ForEach
-
-
-    Write-Verbose "Evaluating current HSTS Setting"
-    ForEach ($SiteElement in $SiteElements)
-    {
-
-        $HstsElements += Get-IISConfigElement -ConfigElement $SiteElement -ChildElementName "hsts"
-
-    }  # End
-
-    $Count = 0
-
-    If ($PSCmdlet.ShouldProcess($MaxAge, 'Modify HSTS settings and attributes for IIS sites'))
-    {
-
-        Write-Output "[*] Enabling HSTS on available sites"
-        ForEach ($HstsElement in $HstsElements)
+        $Bool = $False
+        If ($UseSSL.IsPresent)
         {
 
-            If ($HstsElement.RawAttributes.enabled -eq 'False')
+            $Bool = $True
+
+        }  # End If
+
+
+        ForEach ($C in $ComputerName)
+        {
+
+            Write-Warning "This does not work yet. I am still trying to trouble shoot the issue here"
+            If ($UseSSL.IsPresent -and $C -notlike "*.$env:USERDNSDOMAIN")
+            { 
+
+                $C = $C + ".$env:USERDNSDOMAIN"
+
+            }  # End If
+
+            $Session = New-PSSession -ComputerName $C -Name $C -EnableNetworkAccess -UseSSL:$Bool
+
+            Invoke-Command -ArgumentList $MaxAge,$IncludeSubDomains,$ForceHTTPS,$Site -Session $Session -ScriptBlock {
+
+                $MaxAge = $Args[0]
+                $IncludeSubDomains = $Args[1]
+                $ForceHTTPS = $Args[2]
+                If ($Args[3]) { $Site = $Args[3] }
+
+                $Count = 0
+                $Obj = @()
+                $SiteElements = @()
+                $HstsElements = @()
+
+                Import-Module -Name IISAdministration -ErrorAction Stop
+                Start-IISCommitDelay
+
+                Write-Verbose "Getting Site Collection Information"
+                $SiteCollection = Get-IISConfigSection -SectionPath "system.applicationHost/sites" | Get-IISConfigCollection
+
+                If (!($Site))
+                {
+
+                    Write-Verbose "Obtaining all available Site Names"
+                    $SiteNames = ($SiteCollection | Select-Object -ExpandProperty RawAttributes).name
+
+                }  # End If
+                Else
+                {
+
+                    $SiteNames = $Site
+
+                }  # End If
+
+                Write-Verbose "Obtaining site elements"
+                ForEach ($SiteName in $SiteNames)
+                {
+
+                    New-Variable -Name ("$Site" + $Count.ToString()) -Value $SiteName
+                    $Count++
+
+                    Write-Verbose "Building element from $SiteName"
+                    $SiteElements += Get-IISConfigCollectionElement -ConfigCollection $SiteCollection -ConfigAttribute @{"name"="$SiteName"}
+
+                }  # End ForEach
+
+
+                Write-Verbose "Evaluating current HSTS Setting"
+                ForEach ($SiteElement in $SiteElements)
+                {
+
+                    $HstsElements += Get-IISConfigElement -ConfigElement $SiteElement -ChildElementName "hsts"
+
+                }  # End
+
+                $Count = 0
+
+                If ($PSCmdlet.ShouldProcess($MaxAge, 'Modify HSTS settings and attributes for IIS sites'))
+                {
+
+                    Write-Output "[*] Enabling HSTS on available sites"
+                    ForEach ($HstsElement in $HstsElements)
+                    {
+
+                        If ($HstsElement.RawAttributes.enabled -eq 'False')
+                        {
+
+                            Write-Verbose "Enabling HTSTS attribute"
+                            Set-IISConfigAttributeValue -ConfigElement $HstsElement -AttributeName "Enabled" -AttributeValue $True
+
+                        }  # End If
+                        Else
+                        {
+
+                            Write-Output "[*] HSTS is already enabled"
+
+                        }  # End Else
+
+
+                        If ($HstsElement.RawAttributes.'max-age' -ne $MaxAge)
+                        {
+
+                            Write-Verbose "Setting the max-age attribute. For more [max-age] information, refer to https://hstspreload.org/"
+                            Set-IISConfigAttributeValue -ConfigElement $HstsElement -AttributeName "max-age" -AttributeValue $MaxAge
+
+                        }  # End If
+                        Else 
+                        {
+
+                            Write-Output "[*] Max-Age is already set to $MaxAge"
+
+                        }  # End Else
+
+
+                        If (($IncludeSubDomains.IsPresent) -and ($HstsElements.RawAttributes.includeSubDomains -eq 'False'))
+                        {
+                            
+                            Write-Verbose "Apply to all subdomains"
+                            Set-IISConfigAttributeValue -ConfigElement $HstsElement -AttributeName "includeSubDomains" -AttributeValue 'True'
+
+                        }  # End If
+                        ElseIf ($HstsElements.RawAttributes.includeSubDomains -eq 'True')
+                        {
+
+                            Write-Output "[*] IncludeSubDomains property is already enabled"
+
+                        }  # End ElseIf
+
+                        If (($ForceHTTPS.IsPresent) -and ($HstsElements.RawAttributes.redirectHttpToHttps -eq 'False'))
+                        {
+
+                            Write-Verbose "Redirecting HTTP traffic to HTTPS"
+                            Set-IISConfigAttributeValue -ConfigElement $HstsElement -AttributeName "redirectHttpToHttps" -AttributeValue 'True'
+
+
+                        }  # End If
+                        ElseIf ($HstsElements.RawAttributes.redirectHttpToHttps -eq 'True')
+                        {
+
+                            Write-Output "[*] Redirect to HTTPS attribute is already enabled"
+
+                        }  # End ElseIf
+
+                        $Obj += New-Object -TypeName PSObject -Property @{Site=(Get-Variable -ErrorAction SilentlyContinue -ValueOnly -Name ($Site + $Count.ToString())); HSTS=$HstsElement.RawAttributes.enabled; MaxAge=$HstsElement.RawAttributes.'max-age'; IncludeSubDomains=$HstsElements.RawAttributes.includeSubDomains; RedirectHTTPtoHTTPS=$HstsElements.RawAttributes.redirectHttpToHttps}
+
+                        $Count++
+
+                    }  # End ForEach
+
+                    If ($Obj.Site) 
+                    {
+                    
+                        $Obj
+
+                    }  # End If
+                    Else
+                    {
+
+                        Write-Output "[*] No changes needed to be carried out"
+
+                    }  # End Else
+
+                }  # End If ShouldProcess
+
+                Stop-IISCommitDelay -ErrorAction SilentlyContinue | Out-NUll
+
+            }  # End ScriptBlock
+
+        }  # End ForEach
+
+    }  # End If
+    Else 
+    {
+
+        $Count = 0
+        $Obj = @()
+        $SiteElements = @()
+        $HstsElements = @()
+
+        Import-Module -Name IISAdministration -ErrorAction Stop
+        Start-IISCommitDelay
+
+        Write-Verbose "Getting Site Collection Information"
+        $SiteCollection = Get-IISConfigSection -SectionPath "system.applicationHost/sites" | Get-IISConfigCollection
+
+        If (!($Site))
+        {
+
+            Write-Verbose "Obtaining all available Site Names"
+            $SiteNames = ($SiteCollection | Select-Object -ExpandProperty RawAttributes).name
+
+        }  # End If
+        Else
+        {
+
+            $SiteNames = $Site
+
+        }  # End If
+
+        Write-Verbose "Obtaining site elements"
+        ForEach ($SiteName in $SiteNames)
+        {
+
+            New-Variable -Name ("$Site" + $Count.ToString()) -Value $SiteName
+            $Count++
+
+            Write-Verbose "Building element from $SiteName"
+            $SiteElements += Get-IISConfigCollectionElement -ConfigCollection $SiteCollection -ConfigAttribute @{"name"="$SiteName"}
+
+        }  # End ForEach
+
+
+        Write-Verbose "Evaluating current HSTS Setting"
+        ForEach ($SiteElement in $SiteElements)
+        {
+
+            $HstsElements += Get-IISConfigElement -ConfigElement $SiteElement -ChildElementName "hsts"
+
+        }  # End
+
+        $Count = 0
+
+        If ($PSCmdlet.ShouldProcess($MaxAge, 'Modify HSTS settings and attributes for IIS sites'))
+        {
+
+            Write-Output "[*] Enabling HSTS on available sites"
+            ForEach ($HstsElement in $HstsElements)
             {
 
-                Write-Verbose "Enabling HTSTS attribute"
-                Set-IISConfigAttributeValue -ConfigElement $HstsElement -AttributeName "Enabled" -AttributeValue $True
+                If ($HstsElement.RawAttributes.enabled -eq 'False')
+                {
+
+                    Write-Verbose "Enabling HTSTS attribute"
+                    Set-IISConfigAttributeValue -ConfigElement $HstsElement -AttributeName "Enabled" -AttributeValue $True
+
+                }  # End If
+                Else
+                {
+
+                    Write-Output "[*] HSTS is already enabled"
+
+                }  # End Else
+
+
+                If ($HstsElement.RawAttributes.'max-age' -ne $MaxAge)
+                {
+
+                    Write-Verbose "Setting the max-age attribute. For more [max-age] information, refer to https://hstspreload.org/"
+                    Set-IISConfigAttributeValue -ConfigElement $HstsElement -AttributeName "max-age" -AttributeValue $MaxAge
+
+                }  # End If
+                Else 
+                {
+
+                    Write-Output "[*] Max-Age is already set to $MaxAge"
+
+                }  # End Else
+
+
+                If (($IncludeSubDomains.IsPresent) -and ($HstsElements.RawAttributes.includeSubDomains -eq 'False'))
+                {
+                    
+                    Write-Verbose "Apply to all subdomains"
+                    Set-IISConfigAttributeValue -ConfigElement $HstsElement -AttributeName "includeSubDomains" -AttributeValue 'True'
+
+                }  # End If
+                ElseIf ($HstsElements.RawAttributes.includeSubDomains -eq 'True')
+                {
+
+                    Write-Output "[*] IncludeSubDomains property is already enabled"
+
+                }  # End ElseIf
+
+                If (($ForceHTTPS.IsPresent) -and ($HstsElements.RawAttributes.redirectHttpToHttps -eq 'False'))
+                {
+
+                    Write-Verbose "Redirecting HTTP traffic to HTTPS"
+                    Set-IISConfigAttributeValue -ConfigElement $HstsElement -AttributeName "redirectHttpToHttps" -AttributeValue 'True'
+
+
+                }  # End If
+                ElseIf ($HstsElements.RawAttributes.redirectHttpToHttps -eq 'True')
+                {
+
+                    Write-Output "[*] Redirect to HTTPS attribute is already enabled"
+
+                }  # End ElseIf
+
+                $Obj += New-Object -TypeName PSObject -Property @{Site=(Get-Variable -ErrorAction SilentlyContinue -ValueOnly -Name ($Site + $Count.ToString())); HSTS=$HstsElement.RawAttributes.enabled; MaxAge=$HstsElement.RawAttributes.'max-age'; IncludeSubDomains=$HstsElements.RawAttributes.includeSubDomains; RedirectHTTPtoHTTPS=$HstsElements.RawAttributes.redirectHttpToHttps}
+
+                $Count++
+
+            }  # End ForEach
+
+            If ($Obj.Site) 
+            {
+            
+                $Obj
 
             }  # End If
             Else
             {
 
-                Write-Output "[*] HSTS is already enabled"
+                Write-Output "[*] No changes needed to be carried out"
 
             }  # End Else
 
+        }  # End If ShouldProcess
 
-            If ($HstsElement.RawAttributes.'max-age' -ne $MaxAge)
-            {
+        Stop-IISCommitDelay -ErrorAction SilentlyContinue | Out-NUll
 
-                Write-Verbose "Setting the max-age attribute. For more [max-age] information, refer to https://hstspreload.org/"
-                Set-IISConfigAttributeValue -ConfigElement $HstsElement -AttributeName "max-age" -AttributeValue $MaxAge
-
-            }  # End If
-            Else 
-            {
-
-                Write-Output "[*] Max-Age is already set to $MaxAge"
-
-            }  # End Else
-
-
-            If (($IncludeSubDomains.IsPresent) -and ($HstsElements.RawAttributes.includeSubDomains -eq 'False'))
-            {
-                
-                Write-Verbose "Apply to all subdomains"
-                Set-IISConfigAttributeValue -ConfigElement $HstsElement -AttributeName "includeSubDomains" -AttributeValue 'True'
-
-            }  # End If
-            ElseIf ($HstsElements.RawAttributes.includeSubDomains -eq 'True')
-            {
-
-                Write-Output "[*] IncludeSubDomains property is already enabled"
-
-            }  # End ElseIf
-
-            If (($ForceHTTPS.IsPresent) -and ($HstsElements.RawAttributes.redirectHttpToHttps -eq 'False'))
-            {
-
-                Write-Verbose "Redirecting HTTP traffic to HTTPS"
-                Set-IISConfigAttributeValue -ConfigElement $HstsElement -AttributeName "redirectHttpToHttps" -AttributeValue 'True'
-
-
-            }  # End If
-            ElseIf ($HstsElements.RawAttributes.redirectHttpToHttps -eq 'True')
-            {
-
-                Write-Output "[*] Redirect to HTTPS attribute is already enabled"
-
-            }  # End ElseIf
-
-            $Obj += New-Object -TypeName PSObject -Property @{Site=(Get-Variable -ValueOnly -Name ($Site + $Count.ToString())); HSTS=$HstsElement.RawAttributes.enabled; MaxAge=$HstsElement.RawAttributes.'max-age'; IncludeSubDomains=$HstsElements.RawAttributes.includeSubDomains; RedirectHTTPtoHTTPS=$HstsElements.RawAttributes.redirectHttpToHttps}
-
-            $Count++
-
-        }  # End ForEach
-
-        $Obj
-
-    }  # End If ShouldProcess
-
-    Stop-IISCommitDelay -ErrorAction SilentlyContinue | Out-NUll
+    }  # End Else
 
 }  # End Function Enable-HSTS
