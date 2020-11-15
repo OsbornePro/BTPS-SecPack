@@ -2,6 +2,9 @@
 
 ![OsbornePro](https://raw.githubusercontent.com/tobor88/OsbornePro-The-Blue-Team-PowerShell-Security-Package/master/WEF%20Application/WEF/WEF/wwwroot/images/Logo.png)
 
+### CONTRIBUTE TO THE PROJECT
+If you wish to help contribute to the contents of this project feel free to reach out to me at rosborne@osbornepro.com with your thoughts and ideas. For more general information on this feel free to refer to the [CONTRIBUTING](https://github.com/tobor88/BTPS-SecPack/blob/master/CONTRIBUTING.md) documentation.
+
 ### DONATIONS
 If you wish to donate to this project to help me keep a nice looking site for the documentation your donations will be graciously accepted.
 [![](https://img.shields.io/badge/LiberaPay-BTPSSecPack-yellow")](https://liberapay.com/tobor/donate)
