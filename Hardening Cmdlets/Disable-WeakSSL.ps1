@@ -36,13 +36,13 @@ Indicates you want to disable TLSv11
 
 
 .EXAMPLE
-Disable-WeakSSL -WeakCiphers -StrongAES -WeakSSLandTLS -Verbose
-# This exmple uses all of the options available. Weak ciphers and encryption protocols are disabled and strong ones are enabled.
+Disable-WeakSSL -WeakTLSCipherSuites -TripleDES -RC4 -SSLv2 -SSLv3 -TLSv1 -TLSv11
+# This enables TLSv1.2, disables Null encryption, TripleDES, RC4, SSLv2, SSLv3, TLSv1, and TLSv1.1. This leaves AES 128 available for use as well as AES 256
 
 
 .EXAMPLE
-Disable-WeakSSL -StrongAES
-# This example enables all of the strong protocols but does not disable any weak ones.
+Disable-WeakSSL -CISBenchmarkRecommendations
+# This example enables all of the strong protocols and disables all the weak ones in accordance with the CIS Benchmarks.
 
 
 .NOTES
