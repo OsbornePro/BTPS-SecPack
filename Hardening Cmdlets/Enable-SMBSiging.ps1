@@ -117,7 +117,7 @@ Function Enable-SMBSigning {
                 ValueFromPipeline=$False)]  # End Parameter
             [Switch][Bool]$EnableSMB2,
 
-            [Parameter(,
+            [Parameter(
                 Mandatory=$False,
                 ValueFromPipeline=$False)]  # End Parameter
             [Switch][Bool]$DisableSMB2
