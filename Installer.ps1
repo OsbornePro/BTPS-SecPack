@@ -318,7 +318,7 @@ Write-Output "[*] Determining whether or not LDAP over SSL is available"
 If (!((Test-LDAPS -ComputerName $PrimaryDC).Protocol -eq 'LDAPS'))
 {
 
-    Write-Warning "LDAP over SSL does not appear to be configured on $PrimaryDC. `nIf you wish to set this up I highly recommend the information at these links `nhttps://social.technet.microsoft.com/wiki/contents/articles/2980.ldap-over-ssl-ldaps-certificate.aspx `nhttps://techcommunity.microsoft.com/t5/sql-server/step-by-step-guide-to-setup-ldaps-on-windows-server/ba-p/385362 `n`n[*] Continuing setup process of the BTPS Security Package."
+    Write-Warning "LDAP over SSL does not appear to be configured on $PrimaryDC. `nIf you wish to set this up I highly recommend the information at these links `nhttps://youtu.be/8rlk2xDkgLw `nhttps://social.technet.microsoft.com/wiki/contents/articles/2980.ldap-over-ssl-ldaps-certificate.aspx `nhttps://techcommunity.microsoft.com/t5/sql-server/step-by-step-guide-to-setup-ldaps-on-windows-server/ba-p/385362 `n`n[*] Continuing setup process of the BTPS Security Package."
 
 
 }  # End If
@@ -333,7 +333,7 @@ Else
 If (!(Test-WSMan -ComputerName $PrimaryDC -UseSSL -ErrorAction SilentlyContinue))
 {
 
-    Write-Warning "WinRM over SSL does not appear to be configured on $PrimaryDC `nI recommend using this. If you wish to set this up I suggest following my instructions at the below link.`nhttps://btps-secpack.com/winrm-over-https `nThis script will pause to give you time to set this up"
+    Write-Warning "WinRM over SSL does not appear to be configured on $PrimaryDC `nI recommend using this. If you wish to set this up I suggest following my instructions at the below link.`nhttps://btps-secpack.com/winrm-over-https `nhttps://youtu.be/UcU2Iu9AXpM `nThis script will pause to give you time to set this up"
 
     Pause
 
