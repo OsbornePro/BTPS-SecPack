@@ -21,6 +21,12 @@ and
     <Select Path="Security">*[System[Provider[@Name='Microsoft-Windows-Security-Auditing'] and (Level=4 or Level=0) and EventID=4740]]</Select>
     <Suppress Path="Security">*[System[(EventID=4799)]]</Suppress>
   </Query>
+  <Query Id="2" Path="MaliciousIPs">
+    <Select Path="MaliciousIPs">*[System[(EventID=1) or (EventID=2)]]</Select>
+  </Query>
+  <Query Id="3" Path="Hash Validations">
+    <Select Path="Hash Validations">*[System[(EventID=4444)]]</Select>
+  </Query>
 </QueryList>]]>
 </Query>
 <ReadExistingEvents>true</ReadExistingEvents>

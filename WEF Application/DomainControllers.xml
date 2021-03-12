@@ -7,42 +7,56 @@
 <ConfigurationMode>MinLatency</ConfigurationMode>
 <Query>
 <![CDATA[<QueryList>
-  <Query Id="0" Path="Security">
-    <Select Path="System">*[System[(EventID='7045')]]</Select>
-    <Select Path="Security">
+<Query Id="0" Path="Security">
+  <Select Path="System">*[System[(EventID="7045")]]</Select>
+  <Select Path="Security">
 (*[EventData[Data[@Name="TargetUserName"] = "Administrators"]]) or
 (*[EventData[Data[@Name="TargetUserName"] = "Domain Admins"]]) or
 (*[EventData[Data[@Name="TargetUserName"] = "Schema Admins"]]) or
 (*[EventData[Data[@Name="TargetUserName"] = "Enterprise Admins"]]) or
-(*[EventData[Data[@Name="TargetUserName"] =  "Print Operators"]]) or
+(*[EventData[Data[@Name="TargetUserName"] = "Print Operators"]]) or
 (*[EventData[Data[@Name="TargetUserName"] = "Server Operators"]]) or
 (*[EventData[Data[@Name="TargetUserName"] = "DnsAdmins"]]) or
 (*[EventData[Data[@Name="TargetUserName"] = "Backup Operators"]])
 and
 *[System[(EventID='4732') or (EventID='4733') or (EventID='4756') or (EventID='4757') or (EventID='4728') or (EventID='4729')]]
 </Select>
-    <Suppress Path="Security">*[System[(EventID=4799)]]</Suppress>
-    <Select Path="Security">*[System[(EventID='1102')]]</Select>
-  </Query>
-  <Query Id="1" Path="Security">
-    <!-- For Domain Accounts event is created on DC-->
-    <!-- For Local Accounts event is created locally-->
-    <!-- 4740: Account Lockouts -->
-    <Select Path="Security">*[System[Provider[@Name='Microsoft-Windows-Security-Auditing'] and (Level=4 or Level=0) and EventID=4740]]</Select>
-    <Suppress Path="Security">*[System[(EventID=4799)]]</Suppress>
-  </Query>
-  <Query Id="2" Path="Security">
-    <!-- 4723 4724: Attempt Password Change -->
-    <Select Path="Security">*[System[(EventID='4723')  or (EventID='4724')]]</Select>
-    <Suppress Path="Security">*[System[(EventID=4799)]]</Suppress>
-  </Query>
-  <Query Id="3" Path="Security">
-    <!-- 4649: A replay attack was detected. -->
-    <Select Path="Security">*[System[(EventID=4649)]]</Select>
-    <!-- Suppress SECURITY_LOCAL_SYSTEM_RID A special account used by the OS, noisy -->
-    <Suppress Path="Security">*[EventData[Data[1]="S-1-5-18"]]</Suppress>
-    <Suppress Path="Security">*[System[(EventID=4799)]]</Suppress>
-  </Query>
+  <Suppress Path="Security">*[System[(EventID=4799)]]</Suppress>
+  <Select Path="Security">*[System[(EventID='1102')]]</Select>
+</Query>
+<Query Id="1" Path="Security">
+  <!-- For Domain Accounts event is created on DC-->
+  <!-- For Local Accounts event is created locally-->
+  <!-- 4740: Account Lockouts -->
+  <Select Path="Security">*[System[Provider[@Name='Microsoft-Windows-Security-Auditing'] and (Level=4 or Level=0) and EventID=4740]]</Select>
+  <Suppress Path="Security">*[System[(EventID=4799)]]</Suppress>
+</Query>
+<Query Id="2" Path="Security">
+  <!-- 4723 4724: Attempt Password Change -->
+  <Select Path="Security">*[System[(EventID='4723')  or (EventID='4724')]]</Select>
+  <Suppress Path="Security">*[System[(EventID=4799)]]</Suppress>
+</Query>
+<Query Id="3" Path="Security">
+  <!-- 4649: A replay attack was detected. -->
+  <Select Path="Security">*[System[(EventID=4649)]]</Select>
+  <!-- Suppress SECURITY_LOCAL_SYSTEM_RID A special account used by the OS, noisy -->
+  <Suppress Path="Security">*[EventData[Data[1]="S-1-5-18"]]</Suppress>
+  <Suppress Path="Security">*[System[(EventID=4799)]]</Suppress>
+</Query>
+<Query Id="4" Path="Security">
+  <!-- 4672: Special privileges assigned to a new logon, administrative logins -sa, -ada, etc. -->
+  <Select Path="Security">*[System[(EventID=4672)]]</Select>
+  <Suppress Path="Security">*[EventData[Data[1]="S-1-5-18"]]</Suppress>
+  <!-- The below should include multiple entries to supress events of Special Permissions Assigned from the Domain Controller Device accounts and other service or admin accounts. This will vary based on environment -->
+  <Suppress Path="Security">*[EventData[Data[1]="S-1-5-21-999999999-9999999999-9999999999-9999"]]</Suppress>
+  <Suppress Path="Security">*[System[(EventID=4799)]]</Suppress>
+</Query>
+<Query Id="5" Path="MaliciousIPs">
+  <Select Path="MaliciousIPs">*[System[(EventID=1) or (EventID=2)]]</Select>
+</Query>
+<Query Id="6" Path="Hash Validations">
+  <Select Path="Hash Validations">*[System[(EventID=4444)]]</Select>
+</Query>
 </QueryList>]]>
 </Query>
 <ReadExistingEvents>True</ReadExistingEvents>

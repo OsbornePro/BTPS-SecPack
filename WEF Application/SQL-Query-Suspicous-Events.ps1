@@ -1,8 +1,3 @@
-# Email Variables
-$To = ""
-$From = ""
-$SmtpServer = ""
-
 # Applications that are filtered from triggering alerts
 # DEFENDER : C:\ProgramData\Microsoft\Windows Defender\Definition Updates\
 # SYSMON   : C:\Windows\SysmonDrv.sys C:\Windows\Sysmon.exe \SystemRoot\SysmonDrv.sys
@@ -11,9 +6,11 @@ $SmtpServer = ""
 # EDGE     : C:\Program Files (x86)\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe C:\Program Files (x86)\Microsoft\Edge\Application\%\elevation_service.exe
 # ADOBE    : C:\Program Files (x86)\Common Files\Adobe\AdobeGCClient\AGSService.exe C:\Program Files (x86)\Common Files\Adobe\AdobeGCClient\AGMService.exe C:\Program Files (x86)\Common Files\Adobe\Adobe Desktop Common\ElevationManager\AdobeUpdateService.exe C:\Program Files (x86)\Common Files\Adobe\ARM\1.0\armsvc.exe
 # CHROME   : C:\Program Files (x86)\Google\Update\GoogleUpdate.exe C:\Program Files (x86)\Google\Chrome\Application\77.0.3865.120\elevation_service.exe
+# DRIVERS   : \SystemRoot\System32\drivers\WirelessKeyboardFilter.sys Intel(R) Graphics Command Center Service Service File C:\Program Files\Microsoft Update Health Tools\uhssvc.exe
+# WindUpda  : C:\Program Files\Microsoft Update Health Tools\uhssvc.exe
 
 $FinalResults= @()
-$Date = Get-Date 
+$Date = Get-Date
 $ConnectionString = "Server=(localdb);Database=EventCollections;Integrated Security=True;Connect Timeout=30"
 
 # SQL Queries to discover suspicious activity
@@ -29,9 +26,10 @@ $UserAccountUnlocked = "Id=4767"
 $SpecialPrivilegeAssigned = "Id=4672 AND Message NOT LIKE '%paessler%' AND Message NOT LIKE '%dnsdynamic%' AND Message NOT LIKE '%nessus.admin%'"
 $ReplayAttack = "Id=4649"
 $MaliciousIPCheck = "Id=1 OR Id=2"
+$HashValidateCheck = "Id=4444"
 
 # This is an array of SQL Commands to execute
-$Sqls = $MaliciousIPCheck,$ClearedEventLog,$PasswordChange,$UserAddedToAdminGroup,$UserRemovedFromAdminGroup,$UserAccountCreated,$UserAccountDeleted,$NewServiceInstalled,$UserAccountLocked,$UserAccountUnlocked,$SpecialPrivilegeAssigned,$ReplayAttack
+$Sqls = $MaliciousIPCheck,$HashValidateCheck,$ClearedEventLog,$PasswordChange,$UserAddedToAdminGroup,$UserRemovedFromAdminGroup,$UserAccountCreated,$UserAccountDeleted,$NewServiceInstalled,$UserAccountLocked,$UserAccountUnlocked,$SpecialPrivilegeAssigned,$ReplayAttack
 
 Function Find-NewlyCreatedLocalAccounts {
     [CmdletBinding()]
@@ -41,8 +39,8 @@ Function Find-NewlyCreatedLocalAccounts {
                 Position=0,
                 ValueFromPipeline=$False,
                 HelpMessage="Enter the connection string to connect to a SQL Server")]  # End Parameter
-            [String]$ConnectionString, 
-            
+            [String]$ConnectionString,
+
             [Parameter(
                 Mandatory=$True,
                 Position=1,
@@ -50,7 +48,7 @@ Function Find-NewlyCreatedLocalAccounts {
                 HelpMessage="Enter a MSSQL Query to execute")]  # End Parameter
             [String]$SqlCommand)  # End param
 
-BEGIN 
+BEGIN
 {
 
     Write-Verbose "Creating connection to SQL database and SQL command"
@@ -86,12 +84,12 @@ ForEach ($Sql in $Sqls)
 {
 
     $SqlCommand = "DECLARE @CurHour DATETIME, @PrevHour DATETIME; SET @CurHour = DATEADD(hour, DATEDIFF(hour,'20110101',CURRENT_TIMESTAMP),'20110101'); SET @PrevHour = DATEADD(hour,-1, @CurHour); SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE TimeCreated >= @PrevHour and TimeCreated < @CurHour AND $Sql ORDER BY TimeCreated DESC"
-    
-    $Results = Find-NewlyCreatedLocalAccounts -ConnectionString $ConnectionString -SqlCommand $SqlCommand -Verbose  
-    
-    If ($Results) 
+
+    $Results = Find-NewlyCreatedLocalAccounts -ConnectionString $ConnectionString -SqlCommand $SqlCommand -Verbose
+
+    If ($Results)
     {
-        
+
         Switch ($Sql)
         {
 
@@ -107,6 +105,7 @@ ForEach ($Sql in $Sqls)
             $SpecialPrivilegeAssigned {$Significance = 'Special Privileges Assigned'}
             $ReplayAttack {$Significance = 'Replay Attack Detected'}
             $MaliciousIPCheck { $Significance = "Connection to an IP that is on a blacklist or a domain less than 2 years old"}
+            $HashValidateCheck { $Significance = "Process run not on whitelist"}
 
         }  # End Switch
 
@@ -148,21 +147,21 @@ td {
         background-color: #ffffff;
 }
 </style>
-"@ # End CSS 
+"@ # End CSS
     $PreContent = "<Title>Suspicous Events</Title>"
     $NoteLine = "This Message was Sent on $(Get-Date -Format 'MM/dd/yyyy HH:mm:ss')"
     $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
     $MailBody = $FinalResults | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "<br>The below table contains suspicous events that were triggered<br><br><hr><br><br>" | Out-String
 
     Send-MailMessage -From FromEmail -To ToEmail -Subject "SUSPICIOUS EVENT TRIGGERED" -BodyAsHtml -Body "$MailBody" -SmtpServer UseSmtpServer -Credential $Credential -UseSSL -Port 587
-    
-}  # End If 
+
+}  # End If
 
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUQvTqfs2P+xegxaLPelO323vm
-# Cmegggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUsBTh6wih+ZY4KrF0x34OKPc0
+# Kpugggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -222,11 +221,11 @@ td {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FNfh8z0ZtGDoLwNycIhnqJz6sCjnMA0GCSqGSIb3DQEBAQUABIIBAHcFsLi3ZcFg
-# qoJnXIdVz+S0FFIGjEJVs45/wsoRzL/WgkSBLQrpK8EYodGuN9Rwdy9M3i4UWBsV
-# XW+XM7KBTsiD3Ccz1SIjJX54ZFpnfV3bcUPfLbBB+5rI+1WPo/c29zkDFVeaMyI+
-# r5QYSU+Z9CC+e9nAxctzB9lWugvEYiwqThxIQgLKlmm6aiJMTiznD25CFT1rNeSs
-# Ul7ZqCVbOnIrdHduD6ZHTeZCaq1igNZJQ2cntXObTwhlxSjYDJoxul3yYEWAEe96
-# ZamD35iK6cDQ2ohAaWZFaG1iAo4+X7Fh/21BegdY2Q5X+Bz73hNCeiJ9Pf5Ii1d4
-# vcJrqb7cocY=
+# FK3BRAAvaSuIFDD+wzIC6YGUQBqZMA0GCSqGSIb3DQEBAQUABIIBAJeZjEJv9Yhq
+# kLzcdmqJK3fG6qoFB3bPtklsfvEiy/BINMpUzZdsn3bgEomXacTOxuPHnTF0c0dF
+# aYWExi+6duLs8fIrP4BebLkLGMIHRuioJcvzfE77jeWTrRpd0tomxnsQW5WOXgcc
+# WPb/lVgYK5WIXTHTuQhYj1xSCQJpWWuxoktLG0wd8YFikSKYgSIahJZ0sbwOgF2m
+# 4gNp9g+qBZoDpSU1uZb3b8P0z4C7dsXuRhzVq23ITN4U+/xaR/RgGu6SNy/2nb7j
+# yDSTeN5pZLayVfNH9Fnj6LlMYtn3M3n/J1wATJ32Xc0W7qA6llJ/TzoK6WfZ+5xD
+# 8yuoWTz/zgI=
 # SIG # End signature block
