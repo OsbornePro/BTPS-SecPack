@@ -29,7 +29,7 @@ ForEach ($User in $AllUsers)
     Write-Host "Checking inbox rules and delegates for user: " $User.UserPrincipalName;
 
     $UserInboxRules += Get-InboxRule -Mailbox $User.UserPrincipalname | Where-Object { ($_.ForwardTo -ne $null) -or ($_.ForwardAsAttachmentTo -ne $null) -or ($_.RedirectsTo -ne $null) } | Select-Object -Property Name, Description, Enabled, Priority, ForwardTo, ForwardAsAttachmentTo, RedirectTo, DeleteMessage
-   
+
     $UserDelegates += Get-MailboxPermission -Identity $User.UserPrincipalName | Where-Object { ($_.IsInherited -ne "True") -and ($_.User -notlike "*SELF*") }
 
 } # End ForEach
@@ -43,20 +43,20 @@ $UserDelegates | Export-Csv "C:\Users\Public\Office365\MailboxDelegatePermission
 $SMTPForwarding | Export-Csv "C:\Users\Public\Office365\Mailboxsmtpforwarding.csv"
 $Attach = "C:\Users\Public\Office365\Mailboxsmtpforwarding.csv", "C:\Users\Public\Office365\MailboxDelegatePermissions.csv", "C:\Users\Public\Office365\MailForwardingRulesToExternalDomains.csv"
 
-Try 
+Try
 {
 
     Send-MailMessage -From $From -To $To -Attachments $Attach -Priority Normal -Subject 'Weekly Check Office365 Mailbox Forwarding Rules' -Body 'Microsoft suggests reviewing this information once a week to ensure Outlooks forwarding rules are not configured in a malicious or unusual manner.' -SmtpServer $SmtpServer
 
 } # End Try
-Catch 
+Catch
 {
 
-    ForEach ($Report in $Attach) 
+    ForEach ($Report in $Attach)
     {
-    
+
         Send-MailMessage -From FromEmail -To ToEmail -Attachments $Report -Priority Normal -Subject 'Weekly Check Office365 Mailbox Forwarding Rules' -Body 'Microsoft suggests reviewing this information once a week to ensure Outlooks forwarding rules are not configured in a malicious or unusual manner.' -SmtpServer UseSmtpServer -Credential $Credential -UseSsl -Port 587  -Credential $Credential
-        
+
     } # End ForEach
 
 } # End Catch
@@ -68,8 +68,8 @@ Remove-PsSession -Session $ExoSession
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUemlHScFc+JK20rBC+zMvo9Ac
-# 83Cgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUkA2eYJzbZF5K1yYjnsrP1WVp
+# qKSgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -129,11 +129,11 @@ Remove-PsSession -Session $ExoSession
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FB45dc9GD9nfO3G4fO3lPGW2oBPnMA0GCSqGSIb3DQEBAQUABIIBAInM3jB+j47d
-# iE+ZyeVByPwIMmjJnyZexvtxP8Sf1klXUPWz2cqP/PZdclnY3mjhhqUd2Omo/Nob
-# 18+YD6Tf/PkcXLBCJ4dEwY/KHDrUtDLiYoj9ERFCsxLyFXGBLI+auYztomHQVmMr
-# vX/Ry1Qi6o80NmWq5ipReSRFFOaoeaCsnyW4zzW7U36zz1hanjfNZ7yhhEX+nIkQ
-# /lvvnBya1WeMjfbo6Rc0S+eRcNR7ul7q9UjaIMA94gE7rQ8JAsEUGNfdmyBVd4pq
-# ZqJhz8jEKKR+A542TVAZMsxbwpuhzmWNsyrv/8ZGqBXMvs+/HjbnCEwv+q816Jh0
-# NuYv9lJzuYw=
+# FAZ1HrFKTqasviiqmN+aXO8eU8NSMA0GCSqGSIb3DQEBAQUABIIBAAbrfIpI1MgB
+# YazqWTdUoQ6PZspZsXHKMffivWELLGipCMNOJapIxqWZbAZwVbkE5v9zEQGppXL9
+# aMf8hTD0ixMI+y2GIHW/BhF5dklYmrqpUScMjMWQ9vBVLHPrXCirtI7uHZhXkY0G
+# bp4Zptq/NcTM5aorwkHWyKR1XRWLO/XcJ6WSephUeLpzvxlDHF4ee2Qckxnhd+zK
+# enjMiUFWzlWkgxi78zclau1xmBLSZ7zDq7cuZkByqdz+xxzM3+rWwY72MGx8Qnme
+# abZGNXpgHmjn+U/YFXQh9YyflZgFiAwgjOWQRpQI0o+w/19KreH9WA0E8BK9VEVO
+# 1tMVvJ9n1Pk=
 # SIG # End signature block

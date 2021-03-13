@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-This cmdlet was created to set retrictive permissions on scripts that were created to run as tasks on servers. 
+This cmdlet was created to set retrictive permissions on scripts that were created to run as tasks on servers.
 
 
 .DESCRIPTION
@@ -20,7 +20,7 @@ Define the local path to a file you want the permissions changed on. Modifying p
 This parameter defines remote devices that have a file on them you want the permissions changed on. Separate multiple values with a comma
 
 
-.EXAMPLE 
+.EXAMPLE
 Set-SecureFilePermissions -Username 'NT AUTHORITY\SYSTEM', 'BUILTIN\Administrators', 'BUILTIN\Network Configuration Operators', 'NT SERVICE\MpsSvc' -Path C:\Temp\secretfile.txt
 # This example gives SYSTEM, Administrators, Network Configuration Operators, MpsSvc exclusive access to secretfile.txt and sets the Administrators group as the owner
 
@@ -87,48 +87,79 @@ Function Set-SecureFilePermissions {
             [String[]]$ComputerName = $env:COMPUTERNAME)  # End param
 
 
-    ForEach ($C in $ComputerName)
+    If ($ComputerName -eq $env:COMPUTERNAME)
     {
 
-        Invoke-Command -ArgumentList $Username,$Path,$Owner -HideComputerName "$C.$env:USERDNSDOMAIN" -UseSSL -Port 5986 -ScriptBlock {
+        Write-Verbose "Modifying access rule proteciton"
 
-            $Username = $Args[0]
-            $Path = $Args[1]
-            $Owner = $Args[2]
+        $Acl = Get-Acl -Path "$Path"
+        $Acl.SetAccessRuleProtection($True, $False)
 
-            Write-Verbose "Modifying access rule proteciton"
+        ForEach ($U in $Username)
+        {
 
-            $Acl = Get-Acl -Path "$Path"
-            $Acl.SetAccessRuleProtection($True, $False)
+            Write-Verbose "Adding $U permissions for $Path"
 
-            ForEach ($U in $Username) 
-            {
+            $Permission = $U, 'FullControl', 'Allow'
+            $AccessRule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $Permission
 
-                Write-Verbose "Adding $U permissions for $Path"
+            $Acl.AddAccessRule($AccessRule)
 
-                $Permission = $U, 'FullControl', 'Allow'
-                $AccessRule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $Permission
+        }  # End ForEach
 
-                $Acl.AddAccessRule($AccessRule)
+        Write-Verbose "Changing the owner of $Path to $Owner"
 
-            }  # End ForEach
+        $Acl.SetOwner((New-Object -TypeName System.Security.Principal.NTAccount("$Owner")))
+        $Acl | Set-Acl -Path "$Path"
 
-            Write-Verbose "Changing the owner of $Path to $Owner"
+    }  # End If
+    Else
+    {
 
-            $Acl.SetOwner((New-Object -TypeName System.Security.Principal.NTAccount("$Owner")))
-            $Acl | Set-Acl -Path "$Path"
+        ForEach ($C in $ComputerName)
+        {
 
-        }  # End Invoke-Command
+            Invoke-Command -ArgumentList $Username,$Path,$Owner -HideComputerName "$C.$env:USERDNSDOMAIN" -UseSSL -Port 5986 -ScriptBlock {
 
-    }  # End ForEach
+                $Username = $Args[0]
+                $Path = $Args[1]
+                $Owner = $Args[2]
+
+                Write-Verbose "Modifying access rule proteciton"
+
+                $Acl = Get-Acl -Path "$Path"
+                $Acl.SetAccessRuleProtection($True, $False)
+
+                ForEach ($U in $Username)
+                {
+
+                    Write-Verbose "Adding $U permissions for $Path"
+
+                    $Permission = $U, 'FullControl', 'Allow'
+                    $AccessRule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $Permission
+
+                    $Acl.AddAccessRule($AccessRule)
+
+                }  # End ForEach
+
+                Write-Verbose "Changing the owner of $Path to $Owner"
+
+                $Acl.SetOwner((New-Object -TypeName System.Security.Principal.NTAccount("$Owner")))
+                $Acl | Set-Acl -Path "$Path"
+
+            }  # End Invoke-Command
+
+        }  # End ForEach
+
+    }  # End Else
 
 }  # End Function Set-SecureFilePermissions
 
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUHVyrXd33IsKNSIqfFQ9ln4Bf
-# hTCgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU5Yi1KB2FixMNWwkT4XedlUR1
+# /9Ogggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -188,11 +219,11 @@ Function Set-SecureFilePermissions {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FIkrU1AcanH1+QRz19mZRyxcYzHSMA0GCSqGSIb3DQEBAQUABIIBAKc3+4MEvvIA
-# eGK0UtadpEV2Y7QMsHFUrqrh0SDuDeuL+4YdUWayFIx+MSIV7FIiB6+DiVbPMQ4K
-# /QeIh2GbgtVYdDq5PDwyO+olQB3sFaRrIcyAfG2MCt3k0N6URDJguBtrla+VPCtN
-# 22KNdyzM1TtlGbDtoX1ZLbuVUm83mGzuFBvM/0TdVJTcHIBTfHCXL0nm/BLb7S4V
-# /S1EROrlsJXCIWvEboaKh/SN1oWBetKuRO8pF0ZxaRPMBqyLZP4gySGSRak+5CWJ
-# 3r9dC+QFw/AUp1udzsW1AV4Pry9N4JphxnyOedj6KakmKrbf9TQDs88k3+lFE2P2
-# ywKHGWS0//Y=
+# FBKXlRycJfSaGYUzENdKqIOHW9tSMA0GCSqGSIb3DQEBAQUABIIBAJqDlMw3OFgK
+# 1buW1ID2T1jMF+dP9tWh1IcIQ7JROE2hwRJbW4hwIdvAVfw1VKfD0me89+FK+joB
+# rTUSkvfe2LszIsT32C/IHWUZ8OMxkZjwmtb54XIH25RjWCNg/oEhor4R7e4B1iCT
+# jrbnA6U++xkgug4ugYbJfHuv1L0MIILbYYUeWcztqLmXrBoWfON6YWVeOwP/FXgL
+# GgslTxNDvd+B+TLLixe2C8jLjiWi+l8HK3rzJjhxxV2yAaX6UFO5y+ljEaTE0pG6
+# K1Fkp3Ad9cw6ELGQQdAvFRGoiLrN0Afvu+1urtv4KqAB21rpOFq4VCmr8uA9b3iU
+# 8CDrMdMnDrw=
 # SIG # End signature block

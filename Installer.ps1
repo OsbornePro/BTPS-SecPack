@@ -1,4 +1,3 @@
-
 Function Test-Admin {
     [CmdletBinding()]
         param()  # End param
@@ -7,13 +6,13 @@ Function Test-Admin {
     $IsAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
     If ($IsAdmin)
     {
-    
+
         Write-Verbose "Permissions verified, continuing execution"
-    
+
     }  # End If
     Else
     {
-    
+
         Throw "[x] Insufficient permissions detected. Run this cmdlet in an adminsitrative prompt."
 
     }  # End Else
@@ -21,7 +20,7 @@ Function Test-Admin {
 }  # End Function Test-Admin
 
 Write-Output "[*] Ensuring install script is executing with administator privileges"
-Test-Admin 
+Test-Admin
 
 Write-Output "==============================================================================================================================="
 Write-Output "|                                                     OsbornePro                                                              |"
@@ -31,10 +30,12 @@ Write-Output "==================================================================
 Write-Output "[i] Suggestions and feedback are always appreciated"
 
 $DomainObj = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
-$Domain = New-Object -TypeName System.DirectoryServices.DirectoryEntry
+$DomainAttr = New-Object -TypeName System.DirectoryServices.DirectoryEntry
+$DistinguishedName = $DomainAttr.distinguishedName
+$Domain = $DomainObj.Forest.Name
 $PrimaryDC = ($DomainObj.PdcRoleOwner).Name
 
-If ($env:COMPUTERNAME -ne $PrimaryDC)
+If ("$env:COMPUTERNAME" -notlike $PrimaryDC.Replace(".$Domain",""))
 {
 
     Write-Output "[!] You are running this install script on a machine that is not your Primary Domain Controller. `n[!] Your primary domain controller has been detected to be $PrimaryDC. I suggest running this on that server to ensure all the commands in this install script can be run"
@@ -46,7 +47,7 @@ If ($env:COMPUTERNAME -ne $PrimaryDC)
         Write-Output "[*] Continuing execution of install script"
 
     }  # End If
-    Else 
+    Else
     {
 
         Throw "[x] Stopping execution of the install script."
@@ -55,39 +56,144 @@ If ($env:COMPUTERNAME -ne $PrimaryDC)
 
 }  # End If
 
-$BTPSHome = Read-Host -Prompt "This script is about to define the location of the home directory for the BTPS Sec Pack repository. `n`n[*]If your save location does not match the default location please enter it here to change it. `n[*]If left blank this script will automatically try to discover it. `nDEFAULT DIRECTORY NAME IS : $env:USERPROFILE\Downloads\BTPS-SecPack-master"
+$BTPSHome = Read-Host -Prompt "Define the directory location you downloaded the BTPS-SecPack Git repository too. If you leave this blank it will be downloaded for you and placed in $env:USERPROFILE\Downloads\master.zip and Extracted to C:\Windows\System32\WindowsPowerShell\v1.0\BTPS-SecPack-master"
 If (($BTPSHome.Length -eq 0) -or (!(Test-Path -Path $BTPSHome)))
 {
 
-    Write-Output "[*] Performing a search for the BTPS-SecPack-master home directory on the C drive."
-    $BTPSHome = (Get-ChildItem -Path C:\ -Filter "BTPS-SecPack-master" -Directory -ErrorAction SilentlyContinue -Force | Select-Object -First 1).FullName
+    Write-Output "[*] Ensuring PowerShell uses TLSv1.2 for downloads"
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+    Write-Output "[*] Downoading the B.T.P.S Security Package."
+    Invoke-WebRequest -Uri "https://github.com/tobor88/BTPS-SecPack/archive/master.zip" -OutFile "$env:USERPROFILE\Downloads\master.zip"
+    Expand-Archive -Path "$env:USERPROFILE\Downloads\master.zip" -Destination "C:\Windows\System32\WindowsPowerShell\v1.0\"
+
+    $BTPSHome = "C:\Windows\System32\WindowsPowerShell\v1.0\BTPS-SecPack-master"
+    If (!(Test-Path -Path $BTPSHome))
+    {
+
+        Throw "[*] Could not find the BTPS Security Package location at $BTPSHome"
+
+    }  # End Else
 
 }  # End If
 
-If (!(Test-Path -Path $BTPSHome))
+Function Set-SecureFilePermissions {
+    [CmdletBinding()]
+        param(
+            [Parameter(
+                Mandatory=$True,
+                ValueFromPipeline=$False,
+                HelpMessage="`n[H] Add a user or list of users who should have permisssions to an NTFS file`n[E] EXAMPLE: 'NT AUTHORITY\SYSTEM', 'BUILTIN\Administrators', 'BUILTIN\Network Configuration Operators', 'NT SERVICE\MpsSvc'")]  # End Parameter
+            [Alias('User')]
+            [String[]]$Username,
+
+            [Parameter(
+                Mandatory=$True,
+                ValueFromPipeline=$True,
+                ValueFromPipelineByPropertyName=$False,
+                HelpMessage="`n[H] Define the path to the NTFS item you want to modify the entire permissions on `n[E] EXAMPLE: C:\Temp\file.txt")]  # End Parameter
+            [String[]]$Path,
+
+            [Parameter(
+                Mandatory=$False,
+                ValueFromPipeline=$False)]
+            [String]$Owner = 'BUILTIN\Administrators',
+
+            [Parameter(
+                Mandatory=$False,
+                ValueFromPipeline=$False)]  # End Parameter
+            [Alias('cn')]
+            [String[]]$ComputerName = $env:COMPUTERNAME)  # End param
+
+
+    If ($ComputerName -eq $env:COMPUTERNAME)
+    {
+
+        Write-Verbose "Modifying access rule proteciton"
+
+        $Acl = Get-Acl -Path "$Path"
+        $Acl.SetAccessRuleProtection($True, $False)
+
+        ForEach ($U in $Username)
+        {
+
+            Write-Verbose "Adding $U permissions for $Path"
+
+            $Permission = $U, 'FullControl', 'Allow'
+            $AccessRule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $Permission
+
+            $Acl.AddAccessRule($AccessRule)
+
+        }  # End ForEach
+
+        Write-Verbose "Changing the owner of $Path to $Owner"
+
+        $Acl.SetOwner((New-Object -TypeName System.Security.Principal.NTAccount("$Owner")))
+        $Acl | Set-Acl -Path "$Path"
+
+    }  # End If
+    Else
+    {
+
+        ForEach ($C in $ComputerName)
+        {
+
+            Invoke-Command -ArgumentList $Username,$Path,$Owner -HideComputerName "$C.$env:USERDNSDOMAIN" -UseSSL -Port 5986 -ScriptBlock {
+
+                $Username = $Args[0]
+                $Path = $Args[1]
+                $Owner = $Args[2]
+
+                Write-Verbose "Modifying access rule proteciton"
+
+                $Acl = Get-Acl -Path "$Path"
+                $Acl.SetAccessRuleProtection($True, $False)
+
+                ForEach ($U in $Username)
+                {
+
+                    Write-Verbose "Adding $U permissions for $Path"
+
+                    $Permission = $U, 'FullControl', 'Allow'
+                    $AccessRule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $Permission
+
+                    $Acl.AddAccessRule($AccessRule)
+
+                }  # End ForEach
+
+                Write-Verbose "Changing the owner of $Path to $Owner"
+
+                $Acl.SetOwner((New-Object -TypeName System.Security.Principal.NTAccount("$Owner")))
+                $Acl | Set-Acl -Path "$Path"
+
+            }  # End Invoke-Command
+
+        }  # End ForEach
+
+    }  # End Else
+
+}  # End Function Set-SecureFilePermissions
+
+
+Write-Output "`n`========================= EMAIL SENDING ========================="
+Write-Output "[!] IMPORTANT: In order to send emails you need to authenticate to an SMTP server. This can be done using different ways.
+`n`t 1 : Use a Credential File (if an attacker were to compromise the computer they can view the credentials). If you choose this option the Credential file will be saved too C:\Users\Administrator\AppData\Local\PackageManagement\btpssecpack.xml and permissions will be set.
+`n`t 2 : IP Authentication (If you are using Office365 you can configure a Connector to allow emails sent from your Public IP address to be good enough for authentication to your Exchange SMTP server)
+`n`t 3 : BEST OPTION : Free SMTP2GO account (This can enable IP address authentication or use credentials that do not authenticate to anywhere else in your environment. This is the best option in my opinion"
+
+$CredAnswer = Read-Host -Prompt "Select one of the above methods [1/2/3]"
+If ($CredAnswer -eq "1") # Credential File
 {
 
-    Throw "[*] Could not find the BTPS Security Package location at $BTPSHome"
-
-}  # End Else
-
-
-Write-Output "========================= EMAIL SENDING ========================="
-Write-Output "[!] IMPORTANT: In order to send emails you need to authenticated to an SMTP server. This can be done using a credential file however, if an attacker were to compromise the computer they can view the credentials. If you choose to take this route the crednetials will be saved to a local administrator directory in an attempt to only allow privileged users to read the file. Credential file will be saved too C:\Users\Administrator\AppData\Local\PackageManagement\btpssecpack.xml"
-Write-Output "`tIf you are using Office365 I have had success in using the Public IP address of an Office365 Exchange SMTP server. This works as long as the emails are coming from on site and you have a Connector configured. The authentiation occuring here is the Public IP Address for your workplace has configured a 'Connector' allowing emails to be sent to internal addresses without passing credentials."
-Write-Output "`nAnother option is to sign up for a free SMTP2GO account and enable IP address authentication. This will allow you to send emails using their SMTP servers without saving credentials to any of the machines. You can also use credentials with SMTP2GO that ONLY authenticate to the SMTP2GO servers meaning the password you configure with them will not allow access to any of your devices."
-
-$CredAnswer = Read-Host -Prompt "Knowing the above information, would you like to create a credential file anyway containing authentication to your company email servers? Answer No if you do not want to use domain credentials to authenticate to the SMTP server [y/N]"
-If ($CredAnswer -like "y*")
-{
-
-    $CredFile = Read-Host -Prompt "Where would you like the credential file saved? `nThe default location is C:\Users\Administrator\AppData\Local\PackageManagement\btpssecpack.xml"
+    $CredFile = Read-Host -Prompt "Where would you like the Credential file saved? `nLeave blank to use the default location C:\Users\Administrator\AppData\Local\PackageManagement\btpssecpack.xml"
     If ($CredFile.Length -eq 0)
     {
 
         $CredFile = "C:\Users\Administrator\AppData\Local\PackageManagement\btpssecpack.xml"
 
     }  # End If
+
+    New-Item -Path "C:\Users\Administrator\AppData\Local\PackageManagement\" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
     $Credential = Get-Credential -Message "Enter the credentials that will be used to authenticate to the SMTP server to send emails. These credentials will be saved to $CredFile. Ideally this password is strong enough that it never changes."
     $Credential | Export-CliXml -Path $CredFile
@@ -99,72 +205,87 @@ If ($CredAnswer -like "y*")
 
     }  # End If
 
-    $To = Read-Host -Prompt "What is the email address that alerts should be sent to? EXAMPLE: $env:USERNAME@$env:USERDNSDOMAIN"
-    $From = Read-Host -Prompt "Define the email address the alerts should be sent from. I usually have an email account email itself though this is not required. EXAMPLE: $env:USERNAME@$env:USERDNSDOMAIN"
+    $To = Read-Host -Prompt "What is the email address that alerts should be sent TO? EXAMPLE: $env:USERNAME@$env:USERDNSDOMAIN"
+    $From = Read-Host -Prompt "What is the email address the alerts should be sent FROM. EXAMPLE: $env:USERNAME@$env:USERDNSDOMAIN"
     $SmtpPort = Read-Host -Prompt "What SMTP port should be used? Use port 587 to use SSL"
 
 }  # End If
-Else 
+ElseIf ($CredAnswer -eq "2") # IP Authentication
 {
 
-    $SmtpQuestion = Read-Host -Prompt "Are you going to use SMTP2GO? [y/N]`nNOTE: If you answer NO then you will be prompted for an IP address of your Office365 Exchange server. If you are unsure of the IP address, contact their support through the Office365 Admin Center at https://admin.microsoft.com/ and ask for the IP address of an SMTP server you use."
+    $SmtpServer = Read-Host -Prompt "What is the IP Address of your SMTP server that accepts IP authentication?"
+    $SmtpPort = Read-Host -Prompt "What SMTP port does your server use? EXAMPLE: 587"
+
+}  # End ElseIf
+ElseIf ($CredAnswer -eq "3") # SMTP2GO
+{
+
+    $SmtpQuestion = Read-Host -Prompt "Do you need to create and SMTP2GO account? [y/N]"
     If ($SmtpQuestion -like "y*")
     {
 
-        Start-Process -FilePath https://www.smtp2go.com/
-
-        Write-Output "[*] Setting SMTP server to mail.smtp2go.com and port to 2525"
-        $SmtpServer = 'mail.smtp2go.com'
-        $To = Read-Host -Prompt "What is the email address that alerts should be sent to? EXAMPLE: $env:USERNAME@$env:USERDNSDOMAIN"
-        $From = Read-Host -Prompt "Define the email address the alerts should be sent from. I usually have an email account email itself though this is not required. EXAMPLE: $env:USERNAME@$env:USERDNSDOMAIN"
-
-        $CredentialAnswer = Read-Host -Prompt "Would you like to create a credential file containing SMTP2GO credentials? [y/N]"
-        If ($CredentialAnswer -like "y*")
-        {
-
-            $CredFile = Read-Host -Prompt "Where would you like the credential file saved? `nThe default location is C:\Users\Administrator\AppData\Local\PackageManagement\btpssecpack.xml"
-            If ($CredFile.Length -eq 0)
-            {
-
-                $CredFile = "C:\Users\Administrator\AppData\Local\PackageManagement\btpssecpack.xml"
-
-            }  # End If
-    
-            $Credential = Get-Credential -Message "Enter the credentials that will be used to authenticate to the SMTP2GO server to send emails. These credentials will be $CredFile. Ideally this password is strong enough that it never changes."
-            $Credential | Export-CliXml -Path $CredFile
-
-        }  # End If
-        Else 
-        {
-
-            $SmtpServer = Read-Host -Prompt "What is the IP address of your SMTP server?"
-            $SmtpPort = Read-Host -Prompt "What SMTP port do you want to use? If you want to use SSL when sending the email, set this value to be port 587."
-            $To = Read-Host -Prompt "What is the email address that alerts should be sent to? EXAMPLE: $env:USERNAME@$env:USERDNSDOMAIN"
-            $From = Read-Host -Prompt "Define the email address the alerts should be sent from. I usually have an email account email itself though this is not required. EXAMPLE: $env:USERNAME@$env:USERDNSDOMAIN"
-
-        }  # End Else
+        Start-Process -FilePath "https://www.smtp2go.com/"
 
     }  # End If
 
-}  # End Else
+    Write-Output "[*] Setting SMTP server to mail.smtp2go.com and using SSL on port 2525"
+    $SmtpServer = 'mail.smtp2go.com'
+    $To = Read-Host -Prompt "What is the email address that alerts should be sent to? EXAMPLE: $env:USERNAME@$env:USERDNSDOMAIN"
+    $From = Read-Host -Prompt "Define the email address the alerts should be sent from. I usually have an email account email itself though this is not required. EXAMPLE: $env:USERNAME@$env:USERDNSDOMAIN"
 
-If (Test-Path -Path $CredFile)
-{
+    $CredentialAnswer = Read-Host -Prompt "Would you like to create a credential file containing SMTP2GO credentials? I recommend this over IP authentication [y/N]"
+    If ($CredentialAnswer -like "y*")
+    {
 
-    Write-Output "[*] Credential file was successfully created at $CredFile"
+        $CredFile = Read-Host -Prompt "Where would you like the credential file saved? `nLeave blank to use the default location C:\Users\Administrator\AppData\Local\PackageManagement\btpssecpack.xml"
+        If ($CredFile.Length -eq 0)
+        {
 
-}  # End If
+            $CredFile = "C:\Users\Administrator\AppData\Local\PackageManagement\btpssecpack.xml"
+            New-Item -Path "C:\Users\Administrator\AppData\Local\PackageManagement\" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-Write-Output "[*] Adding the defined email sending information to all alert scripts in the BTPS Security Package."
+            If (Test-Path -Path $CredFile)
+            {
+
+                Write-Output "[*] Credential file was successfully created at $CredFile"
+
+            }  # End If
+
+        }  # End If
+
+        $Credential = Get-Credential -Message "Enter the SMTP2GO internal user account credentials that will be used to authenticate to the SMTP2GO server to send emails. Ideally this password is strong enough that it never needs to changes."
+        $Credential | Export-CliXml -Path $CredFile
+
+    }  # End If
+    Else
+    {
+
+        $SmtpServer = 'mail.smtp2go.com'
+        $SmtpPort = Read-Host -Prompt "What SMTP port do you want to use? Default is 2525 EXAMPLE: 2525"
+        $To = Read-Host -Prompt "What is the email address that alerts should be sent TO? EXAMPLE: $env:USERNAME@$env:USERDNSDOMAIN"
+        $From = Read-Host -Prompt "Wat is the email address the alerts should be sent FROM? EXAMPLE: $env:USERNAME@$env:USERDNSDOMAIN"
+        If ($SmtpPort.Length -eq 0)
+        {
+
+            $SmtpPort = "2525"
+
+        }  # End If
+
+    }  # End Else
+
+}  # End ElseIf
+
+Write-Output "[*] Adding your email sending information to all alert scripts in the BTPS Security Package."
 
 $AlertFiles = (Get-ChildItem -Path $BTPSHome -Filter "*.ps1" -Exclude "Enable-DoH.ps1","Disable-WeakSSL.ps1","ExchangeRule-DetectExternalSendersMatchingInternalNames.ps1","Fix-UnquotedServicePath.ps1","Remove-PowerShellV2.ps1","Remove-SpamEmail.ps1","Set-NetworkLevelAuthentication.ps1","Set-SecureFilePermissions.ps1","Update-Drivers.ps1","Get-MacVendor.ps1","AutorunsToWinEventLog.ps1","Install.ps1","Uninstall.ps1","Installer.ps1","Import-EventsHourly.ps1","ImportTheScheduledTasks.ps1","Remove-WindowsUpdate.ps1","Update-Windows.ps1","WEFStartupScript.ps1","Import-ScheduledTask.ps1","RemediateCompromisedOfficeAccount.ps1" -Recurse -ErrorAction SilentlyContinue -Force).FullName
 ForEach ($AlertFile in $AlertFiles)
 {
 
-    (Get-Content -Path $AlertFile -Raw) -Replace "ToEmail","$To"
-    (Get-Content -Path $AlertFile -Raw) -Replace "FromEmail","$From"
-    (Get-Content -Path $AlertFile -Raw) -Replace "UseSmtpServer","$SmtpServer"
-    
+    ((Get-Content -Path $AlertFile -Raw) -Replace "ToEmail","$To") | Set-Content -Path $AlertFile -Force
+    ((Get-Content -Path $AlertFile -Raw) -Replace "FromEmail","$From") | Set-Content -Path $AlertFile -Force
+    ((Get-Content -Path $AlertFile -Raw) -Replace "UseSmtpServer","$SmtpServer") | Set-Content -Path $AlertFile -Force
+    ((Get-Content -Path $AlertFile -Raw) -Replace "-Port 587","-Port $SmtpPort") | Set-Content -Path $AlertFile -Force
+
     If (!($CredFile))
     {
 
@@ -174,12 +295,34 @@ ForEach ($AlertFile in $AlertFiles)
     ElseIf (Test-Path -Path $CredFile)
     {
 
+        Set-SecureFilePermissions -Path $CredFile -Username 'NT AUTHORITY\SYSTEM', 'BUILTIN\Administrators', 'BUILTIN\Network Configuration Operators', "$Domain\Domain Admins" -Owner 'BUILTIN\Administrators' -Verbose
         (Get-Content -Path $AlertFile -Raw) -Replace "-Credential `$Credential","-Credential (Import-CliXml -Path $CredFile)"
 
     }  # End ElseIf
 
+    Copy-Item -Path $AlertFiles -Destination "C:\Users\Public\Documents\"
+
 }  # End ForEach
 
+Write-Warning "I am not able to sign alert scripts for you because we just changed the files to include your email information."
+Write-Output "[!] We are about to move the Alert scripts to other devices in your network. These should be Code Signed for Security Reasons."
+Write-Output "[*] If you do not have a Code Signing Certificate for $env:USERNAME please get one now"
+Pause
+Write-Output "[!] Below is a list of the alert scripts that are about to be signed with your Code Signing Certificate. `n"
+$CodeSignUs = "$BTPSHome\WEF Application\SQL-Query-Suspicous-Events.ps1","$BTPSHome\Local Port Scan Monitor\ListenPortMonitor.ps1","$BTPSHome\Local Port Scan Monitor\Watch-PortScan.ps1","$BTPSHome\Hardening Cmdlets\Reset-KerberosKeys.ps1","$BTPSHome\Event Alerts\DNSZoneTransferAlert.ps1","$BTPSHome\Event Alerts\Get-NewlyInstalledService.ps1","$BTPSHome\Event Alerts\NewComputerAlert.ps1","$BTPSHome\Event Alerts\Query-InsecureLDAPBinds.ps1","$BTPSHome\Event Alerts\ReviewForwardingRulesOffice.ps1","$BTPSHome\Event Alerts\UnusualUserSignInAlert.ps1","$BTPSHome\Device Discovery\Find-NewDevices.ps1","$BTPSHome\Account and Password Alerts\AccountsExpiringCheck.ps1","$BTPSHome\Account and Password Alerts\AttemptedPasswordChange.ps1","$BTPSHome\Account and Password Alerts\AttemptedPasswordReset.ps1","$BTPSHome\Account and Password Alerts\Failed.Username.and.Password.ps1","$BTPSHome\Account and Password Alerts\MonitorAdminEscalation.ps1","$BTPSHome\Account and Password Alerts\PasswordExpiryAlert.ps1","$BTPSHome\Account and Password Alerts\User.Account.Created.ps1","$BTPSHome\Account and Password Alerts\User.Account.Locked.ps1","$BTPSHome\Account and Password Alerts\User.Account.Unlocked.ps1"
+
+Write-Output "Begining an infinite loop that will not continue Script Execution until this command returns as True : (Get-ChildItem -Path Cert:\CurrentUser\My -CodeSigningCertificate)[0]"
+$CertExists = (Get-ChildItem -Path Cert:\CurrentUser\My -CodeSigningCert)[0]
+While (!($CertExists))
+{
+
+    $CertExists = (Get-ChildItem -Path Cert:\CurrentUser\My -CodeSigningCert)[0]
+    Start-Sleep -Seconds 2
+
+}  # End While Loop
+
+Write-Output "[*] Using Code Signing Certifciate to sign your alert scripts"
+Set-AuthenticodeSignature -FilePath $CodeSignUs @(Get-ChildItem -Path Cert:\CurrentUser\My -CodeSigningCert)[0]
 
 Function Test-LDAPS {
     [CmdletBinding()]
@@ -234,7 +377,7 @@ PROCESS
         }  # End Else
 
         $Obj += New-Object -TypeName PSObject -Property @{Server="$Computadora";Protocol="$Protocol"}
-	
+
     }  # End ForEach
 
 }  # End PROCESS
@@ -247,72 +390,6 @@ END
 
 } # End Test-LDAPS
 
-Function Set-SecureFilePermissions {
-    [CmdletBinding()]
-        param(
-            [Parameter(
-                Mandatory=$True,
-                ValueFromPipeline=$False,
-                HelpMessage="`n[H] Add a user or list of users who should have permisssions to an NTFS file`n[E] EXAMPLE: 'NT AUTHORITY\SYSTEM', 'BUILTIN\Administrators', 'BUILTIN\Network Configuration Operators', 'NT SERVICE\MpsSvc'")]  # End Parameter
-            [Alias('User')]
-            [String[]]$Username,
-
-            [Parameter(
-                Mandatory=$True,
-                ValueFromPipeline=$True,
-                ValueFromPipelineByPropertyName=$False,
-                HelpMessage="`n[H] Define the path to the NTFS item you want to modify the entire permissions on `n[E] EXAMPLE: C:\Temp\file.txt")]  # End Parameter
-            [String[]]$Path,
-
-            [Parameter(
-                Mandatory=$False,
-                ValueFromPipeline=$False)]
-            [String]$Owner = 'BUILTIN\Administrators',
-
-            [Parameter(
-                Mandatory=$False,
-                ValueFromPipeline=$False)]  # End Parameter
-            [Alias('cn')]
-            [String[]]$ComputerName = $env:COMPUTERNAME)  # End param
-
-
-    ForEach ($C in $ComputerName)
-    {
-
-        Invoke-Command -ArgumentList $Username,$Path,$Owner -HideComputerName "$C.$env:USERDNSDOMAIN" -UseSSL -Port 5986 -ScriptBlock {
-
-            $Username = $Args[0]
-            $Path = $Args[1]
-            $Owner = $Args[2]
-
-            Write-Verbose "Modifying access rule proteciton"
-
-            $Acl = Get-Acl -Path "$Path"
-            $Acl.SetAccessRuleProtection($True, $False)
-
-            ForEach ($U in $Username) 
-            {
-
-                Write-Verbose "Adding $U permissions for $Path"
-
-                $Permission = $U, 'FullControl', 'Allow'
-                $AccessRule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $Permission
-
-                $Acl.AddAccessRule($AccessRule)
-
-            }  # End ForEach
-
-            Write-Verbose "Changing the owner of $Path to $Owner"
-
-            $Acl.SetOwner((New-Object -TypeName System.Security.Principal.NTAccount("$Owner")))
-            $Acl | Set-Acl -Path "$Path"
-
-        }  # End Invoke-Command
-
-    }  # End ForEach
-
-}  # End Function Set-SecureFilePermissions
-
 
 Write-Output "[*] Determining whether or not LDAP over SSL is available"
 If (!((Test-LDAPS -ComputerName $PrimaryDC).Protocol -eq 'LDAPS'))
@@ -322,65 +399,74 @@ If (!((Test-LDAPS -ComputerName $PrimaryDC).Protocol -eq 'LDAPS'))
 
 
 }  # End If
-Else 
+Else
 {
 
     $LDAPSTest = 'True'
+    Write-Output "[*] Excellent work! LDAPS connection test was passed!"
 
 }  # End If
 
+Register-ScheduledTask -Xml (Get-Content -Path "$BTPSHome\Event Alerts\Query-InsecureLDAPBinds.xml"| Out-String) -TaskName "Insecure LDAP Bind Discovery" -TaskPath "\" -User SYSTEM –Force
+Write-Output "[*] LDAP over SSL alert task is set to inform you who performs and whenever an insecure LDAP bind is performed"
 
 If (!(Test-WSMan -ComputerName $PrimaryDC -UseSSL -ErrorAction SilentlyContinue))
 {
 
-    Write-Warning "WinRM over SSL does not appear to be configured on $PrimaryDC `nI recommend using this. If you wish to set this up I suggest following my instructions at the below link.`nhttps://btps-secpack.com/winrm-over-https `nhttps://youtu.be/UcU2Iu9AXpM `nThis script will pause to give you time to set this up"
-
+    Write-Warning "WinRM over SSL does not appear to be configured on $PrimaryDC `nI highly recommend using this. If you wish to set this up I suggest following my instructions at the below links.`nhttps://btps-secpack.com/winrm-over-https `nhttps://youtu.be/UcU2Iu9AXpM `nThis script will pause to give you time to set this up"
     Pause
 
 }  # End If
-Else 
+Else
 {
 
     $WSMANTest = 'True'
-    Write-Output "[*] WinRM over SSL is configured on $PrimaryDC"
+    Write-Output "[*] Excellent work! WinRM over SSL is configured on $PrimaryDC"
 
 }  # End Else
 
 $CutOffDate = (Get-Date).AddDays(-60)
 Write-Output "[*] Obtaining computer and server list based on enabled computers that have been signed into in the last 60 days: $CutOffDate"
 
-$ComputerNames = Get-ADComputer -Properties * -Filter 'LastLogonDate -gt $CutOffDate -and ((OperatingSystem -like "*Windows *Enterprise") -or (OperatingSystem -like "*Windows *Pro*")) -and (Enabled -eq "true")' | Select-Object -Property Name,DnsHostName,OperatingSystem,objectSID,DistinguishedName
-$Servers = Get-ADComputer -Properties * -Filter 'LastLogonDate -gt (Get-Date.AddDays(-60) -and OperatingSystem -like "*Server*" -and Enabled -eq "true"' | Select-Object -Property Name,DnsHostName,OperatingSystem,objectSID,DistinguishedName
-
+$ComputerNames = Get-ADComputer -Properties * -Filter 'LastLogonDate -gt $CutOffDate -and ((OperatingSystem -like "Windows*Enterprise*") -or (OperatingSystem -like "Windows*Pro*")) -and (Enabled -eq "true")' | Select-Object -Property Name,DnsHostName,OperatingSystem,objectSID,DistinguishedName
+$Servers = Get-ADComputer -Properties * -Filter '(LastLogonDate -gt $CutOffDate) -and (Enabled -eq "true") -and (OperatingSystem -like "*Server*")' | Select-Object -Property Name,DnsHostName,OperatingSystem,objectSID,DistinguishedName
 
 
 Write-Output "=================== SYSMON ======================="
-$SysmonNetworkShareRequest = Read-Host -Prompt "With your approval this will create a network share in C:\Sysmon which will be used to install sysmon in your environment and enable the logging of blacklisted IP addresses. Is this ok to do [y/N]" 
+$SysmonNetworkShareRequest = Read-Host -Prompt "With your approval, this will create a network share in C:\Sysmon which will be used to install sysmon in your environment and enable the logging of blacklisted IP addresses. Is this ok to do [y/N]"
 
 If ($SysmonNetworkShareRequest -like "y*")
 {
 
     Write-Output "Creating Sysmon share at C:\Sysmon"
-    New-Item -Path "C:\Sysmon" -ItemType Directory -ErrorAction SilentlyContinue -Force | Out-Null 
+    New-Item -Path "C:\Sysmon" -ItemType Directory -ErrorAction SilentlyContinue -Force | Out-Null
 
     Write-Output "Making C:\Sysmon a Network Share for use with group policy"
-    New-SmbShare -Name "Sysmon" -Path "C:\Sysmon" -ContinuouslyAvailable -FullAccess "$Domain\Domain Admins" -ChangeAccess "$Domain\Domain Admins" -ReadAccess "$Domain\Authenticated Users","$Domain\Domain Users" -Description "Network share used for Sysmon setup"
+    New-SmbShare -Name "Sysmon" -Path "C:\Sysmon" -FullAccess "$Domain\Domain Admins" -Description "Network share used for Sysmon setup"
+
+    Write-Output '[*] Disabling SMB version 1'
+    Set-SmbServerConfiguration -EnableSMB1Protocol $False -Force
+
+    Write-Output '[*] Enabling SMBv2 and SMBv3'
+    Set-SmbServerConfiguration -EnableSMB2Protocol $True -Force
 
     Write-Output "[*] Copying the needed files from the BTPS Sec Pack into C:\Sysmon"
     cmd /c robocopy $BTPSHome\Sysmon C:\Sysmon *
 
-    Write-Output "[*] Creating Malicious IP Checker task on $env:COMPUTERNAME. This task will still need to be pushed out to your environment using group policy"
+    Write-Output "[*] Creating Malicious IP Checker task on $env:COMPUTERNAME. This task will still need to be pushed out to your environment using group policy. Instructions on that can be found HERE https://btps-secpack.com/sysmon-setup"
     Register-ScheduledTask -Xml (Get-Content -Path "C:\Sysmon\MaliciousIPChecker.xml"| Out-String) -TaskName "Malicious IP Checker" -TaskPath "\" -User SYSTEM –Force
 
-    Write-Output "Follow the setup instructions at https://btps-secpack.com/sysmon-setup to create the group policy that gets this on all the devices in your environment `nThis creates a new log in the event viewer that providers more detailed logging and allows you to use a task that monitors connections to your devices providing an alert whenver a blacklisted IP has been connected too"
+    Write-Output "[*] Creating Hash Validation Checker task on $env:COMPUTERNAME. This task will still need to be pushed out to your environment using group policy. Instructions on that can be found HERE https://btps-secpack.com/sysmon-setup"
+    Register-ScheduledTask -Xml (Get-Content -Path "C:\Sysmon\HashValidator.xml"| Out-String) -TaskName "Hash Validator" -TaskPath "\" -User SYSTEM –Force
 
+    Write-Output "Follow the setup instructions at https://btps-secpack.com/sysmon-setup Page 6 to create the group policy that gets this on all the devices in your environment `nThis creates a new log in the event viewer that providers more detailed logging and allows you to use a task that monitors connections to your devices providing an alert whenver a blacklisted IP has been connected too"
     Pause
 
 }  # End If
-Else 
+Else
 {
-    
-    Write-Output "[*] Sysmon will not be set up"
+
+    Write-Output "[*] Sysmon will not be set up. If you change your mind later you can use Install-SysmonBTPSSecPack.ps1 at https://github.com/tobor88/BTPS-SecPack/blob/master/Sysmon/Install-SysmonBTPSSecPack.ps1"
 
 }  # End Else
 
@@ -390,11 +476,17 @@ Write-Output "==================== AUTORUNS ======================"
 If ($env:COMPUTERNAME -like $PrimaryDC)
 {
 
-    Write-Output "[*] Copying AutorunsToWinEvent files into the NETLOGON directory for your domain controller. `n[*] Use Group Policy to add these files to machines in your environment. Once the Install.ps1 file and AutorunsToWinEvent.ps1 files are on client and server machines, you will want a task to run once that executes the Install.ps1 script. Task scheduler allows you to create a Task that runs one time and deletes itself after. Exceute the .AutoRunsToWinEvent\Install.ps1 file on machines in the environment to install this proteciton. If the .\Install.ps1 file is executed on a machine it does not require the task to be created as the install process was run already."
+    Write-Output "[*] Copying AutorunsToWinEvent files into the NETLOGON directory for your domain controller."
     cmd /c  robocopy "$BTPSHome\AutoRunsToWinEvent" "C:\Windows\SYSVOL*\sysvol\$Domain\scripts" *
+    Write-Output "`n[*] Use Group Policy to add all the files in $BTPSHome\AutoRunsToWinEvent directory to machines in your environment.
+    I demonstrate how this can be done in the 'Sysmon Setup.pdf' file at https://btps-secpack.com/sysmon-setup Page 6.
+    Once the Install.ps1 file and AutorunsToWinEvent.ps1 files are on client and server machines, you will want a task to run once that executes the Install.ps1 script.
+    Task scheduler allows you to create a Task that runs one time and deletes itself after.
+    Exceute the .\AutoRunsToWinEvent\Install.ps1 file on machines in the environment to install this proteciton manually.
+    If the .\AutorunsToWinEvent\Install.ps1 file is executed on a machine it does not require the task to be created as the install process was run already."
 
-    Write-Output "[*] Pausing Script Execution to allow you time to create the GPO containing the task as well as the files out to machines in the environment. Information on creating Scheduled Tasks can be found here: https://btps-secpack.com/email-alerts"
-    Pause 
+    Write-Output "[*] Pausing Script Execution to allow you time to create the above GPO's. Information on creating Scheduled Tasks can be found here: https://btps-secpack.com/email-alerts"
+    Pause
 
 }  # End If
 
@@ -403,10 +495,10 @@ If ($AutoRunsAnswer -like "y*")
 {
 
     Set-Location -Path $BTPSHome\AutoRunsToWinEvent
-    .'\Install.ps1'
+    ."$BTPSHome\AutoRunsToWinEvent\Install.ps1"
 
 }  # End If
-Else 
+Else
 {
 
     Write-Output "[*] Autoruns set up is being skipped on $env:COMPUTERNAME."
@@ -416,9 +508,15 @@ Else
 
 
 Write-Output "================= DEVICE DISCOVERY ================"
-$DHCPServer = Read-Host -Prompt "Enter the FQDN of your Windows DHCP server. EXAMPLE: DHCPserver.domain.com"
+$DHCPServer = Get-ADObject -SearchBase "cn=configuration,$DistinguishedName" -Filter "objectclass -eq 'dhcpclass' -AND Name -ne 'dhcproot'" | Select-Object -ExpandProperty "Name"
+If ($DhcpServer.Length -eq 0)
+{
 
-$DeviceDiscoveryAnswer = Read-Host -Prompt "Would you like to set up new device discovery alerts on $DHCPServer? This is for environments with less thatn 1000 computers. It will send you an alert whenever a never before seen device joins your network"
+    $DhcpServer = Read-Host -Prompt "What is the FQDN of your DHCP server? EXAMPLE: dhcp.$Domain"
+
+}  # End If
+
+$DeviceDiscoveryAnswer = Read-Host -Prompt "Would you like to set up new device discovery alerts on $DHCPServer? This is for environments with less thatn 1000 computers. It will send you an alert whenever a never before seen device joins your network [y/N]"
 If ($DeviceDiscoveryAnswer -like "y*")
 {
 
@@ -433,43 +531,50 @@ If ($DeviceDiscoveryAnswer -like "y*")
             $ScheduledTaskUser = $Args[0]
             Write-Output "[*] Creating New Device Check task on $env:COMPUTERNAME. "
 
-            New-Item -Directory -Path "C:\Users\Public\Documents\PSGetHelp" -Force -ErrorAction SilentlyContinue | Out-Null
-            Move-Item -Path 'C:\Users\Public\Documents\MAC.Vendor.List.csv' -Destination 'C:\Users\Public\Documents\PSGetHelp\MAC.Vendor.List.csv' -Force
+            New-Item -ItemType Directory -Path "C:\Users\Public\Documents\PSGetHelp" -Force -ErrorAction SilentlyContinue | Out-Null
+            Copy-Item -Path 'C:\Users\Public\Documents\MAC.Vendor.List.csv' -Destination 'C:\Users\Public\Documents\PSGetHelp\MAC.Vendor.List.csv' -Force
 
+            $SecurePassword = Read-Host -Prompt "Enter the password for the user this task is going to run as. This info will be deleted from events and history later" -AsSecureString
+            $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecurePassword)
+            $Password = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
 
-            Register-ScheduledTask -Xml (Get-Content -Path "C:\Users\Public\Documents\Find-NewDevices.xml"| Out-String) -TaskName "Malicious IP Checker" -TaskPath "\" -User $ScheduledTaskUser -Password (Read-Host -Prompt "Enter the password for the user this task is going to run as. This info will be deleted from events and history later" -AsSecureString | ConvertFrom-SecureString -AsPlainText) –Force
-            Write-Output "[*] The New Device Task is now set up on your DHCP server"
+            Register-ScheduledTask -Xml (Get-Content -Path "C:\Users\Public\Documents\Find-NewDevices.xml"| Out-String) -TaskName "New Device Discovery" -TaskPath "\" -User $ScheduledTaskUser -Password $Password -Force
+            Write-Output "[*] The 'New Device Discovery' Task is now set up on your DHCP server"
 
         }  # End Invoke-Command
 
     }  # End If
-    Else 
+    Else
     {
 
-        Invoke-Command -HideComputerName $DHCPServer -ScriptBlock {
+        Invoke-Command -HideComputerName $DHCPServer -ArgumentList $ScheduledTaskUser -ScriptBlock {
 
+            $ScheduledTaskUser = $Args[0]
             Write-Output "[*] Creating New Device Check task on $env:COMPUTERNAME."
             New-Item -Directory -Path "C:\Users\Public\Documents\PSGetHelp" -Force -ErrorAction SilentlyContinue | Out-Null
             Move-Item -Path 'C:\Users\Public\Documents\MAC.Vendor.List.csv' -Destination 'C:\Users\Public\Documents\PSGetHelp\MAC.Vendor.List.csv' -Force
 
-            Register-ScheduledTask -Xml (Get-Content -Path "C:\Users\Public\Documents\Find-NewDevices.xml"| Out-String) -TaskName "Malicious IP Checker" -TaskPath "\" -User $ScheduledTaskUser -Password (Read-Host -Prompt "Enter the password for the user this task is going to run as. This info will be deleted from events and history later" -AsSecureString | ConvertFrom-SecureString -AsPlainText) –Force
+            $SecurePassword = Read-Host -Prompt "Enter the password for the user this task is going to run as. This info will be deleted from events and history later" -AsSecureString
+            $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecurePassword)
+            $Password = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
 
-            Write-Output "[*] The New Device Task is now set up on your DHCP server"
-            
+            Register-ScheduledTask -Xml (Get-Content -Path "C:\Users\Public\Documents\Find-NewDevices.xml"| Out-String) -TaskName "New Device Discovery" -TaskPath "\" -User $ScheduledTaskUser -Password $Password –Force
+            Write-Output "[*] The 'New Device Discovery' Task is now set up on your DHCP server"
+
         }  # End Invoke-Command
 
     }  # End Else
 
 }  # End If
-Else 
+Else
 {
-    
+
     Write-Output "Skipping setup of Device Discovery alert on $DHCPServer"
 
 }  # End Else
 
 Write-Output "============== PORT MONITORING ====================="
-$PortMonitorAnswer = Read-Host -Prompt "Would you like to set up port scan monitoring? This keeps record of all connections made to a server and provides email alerts if a port scan is detected. NOTE: If you have created an email credetial file, this is the section that copies the credential file onto all available servers. If you did not make a crednetial file it will not be copied onto your servers. This was done to save time for you."
+$PortMonitorAnswer = Read-Host -Prompt "Would you like to set up port scan monitoring? This keeps record of all connections made to a server and provides email alerts if a port scan is detected. `nNOTE: If you have created an email credetial file, this is the section that copies the credential file onto all available servers. If you did not make a credential file it will not be copied onto your servers. This was done to save time for you. `nANSWER [y/N]"
 If ($PortMonitorAnswer -like "y*")
 {
 
@@ -478,15 +583,15 @@ If ($PortMonitorAnswer -like "y*")
     If ($WSMANTest -like 'True')
     {
 
-        ForEach ($Server in $Servers)
+        ForEach ($Server in $Servers.DnsHostName)
         {
 
-            If ($CredFile)
+            If (Test-Path -Path $CredFile)
             {
 
                 $CredFileName = $CredFile.Split('\')[-1]
-                $CopyDir = $CredFile.Replace("$RemoveString","")
-                $PasteDir = $CopyDir.Replace("C:\","\\$Server\C$\")
+                $CopyDir = $CredFile.Replace("$CredFileName","")
+                $PasteDir = $CopyDir.Replace("C:\","\$Server\C$\")
 
                 cmd /c robocopy $CopyDir $PasteDir $CredFileName
 
@@ -494,53 +599,62 @@ If ($PortMonitorAnswer -like "y*")
 
             cmd /c robocopy "$BTPSHome\Local Port Scan Monitor" \\$Server\C$\Users\Public\Documents *
 
-            Invoke-Command -HideComputerName $Server -UseSSL -ScriptBlock {
+            Invoke-Command -HideComputerName $Server -UseSSL -ArgumentList $ScheduledTaskUser -ScriptBlock {
 
+                $SecurePassword = Read-Host -Prompt "Enter the password for the user this task is going to run as. This info will be deleted from events and history later" -AsSecureString
+                $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecurePassword)
+                $Password = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
+
+                $ScheduledTaskUser = $Args[0]
                 Write-Output "[*] Creating Listen Port Monitor Task on $env:COMPUTERNAME."
-                Register-ScheduledTask -Xml (Get-Content -Path "C:\Users\Public\Documents\Port Monitor.xml"| Out-String) -TaskName "Port Monitor" -TaskPath "\" -User $ScheduledTaskUser -Password (Read-Host -Prompt "Enter the password for the user this task is going to run as. This info will be deleted from events and history later" -AsSecureString | ConvertFrom-SecureString -AsPlainText) –Force
+                Register-ScheduledTask -Xml (Get-Content -Path "C:\Users\Public\Documents\Port Monitor.xml"| Out-String) -TaskName "Port Monitor" -TaskPath "\" -User $ScheduledTaskUser -Password $Password –Force
 
                 Write-Output "[*] The Port Monitor Task is now set up on $env:COMPUTERNAME"
 
 
-                Register-ScheduledTask -Xml (Get-Content -Path "C:\Users\Public\Documents\Port Scan Monitor.xml"| Out-String) -TaskName "Port Scan Monitor" -TaskPath "\" -User $ScheduledTaskUser -Password (Read-Host -Prompt "Enter the password for the user this task is going to run as. This info will be deleted from events and history later" -AsSecureString | ConvertFrom-SecureString -AsPlainText) –Force
+                Register-ScheduledTask -Xml (Get-Content -Path "C:\Users\Public\Documents\Port Scan Monitor.xml"| Out-String) -TaskName "Port Scan Monitor" -TaskPath "\" -User $ScheduledTaskUser -Password $Password –Force
                 Write-Output "[*] The Port Scan Monitor Task is now set up on $env:COMPUTERNAME"
-                
+
             }  # End Invoke-Command
 
         }  # End ForEach
 
     }  # End If
-    Else 
+    Else
     {
 
-        ForEach ($Server in $Servers)
+        ForEach ($Server in $Servers.DnsHostName)
         {
 
             If ($CredFile)
             {
 
                 $CredFileName = $CredFile.Split('\')[-1]
-                $CopyDir = $CredFile.Replace("$RemoveString","")
-                $PasteDir = $CopyDir.Replace("C:\","\\$Server\C$\")
+                $CopyDir = $CredFile.Replace("$CredFileName","")
+                $PasteDir = $CopyDir.Replace("C:\","\$Server\C$\")
 
                 cmd /c robocopy $CopyDir $PasteDir $CredFileName
 
             }  # End If
-            
+
             cmd /c robocopy "$BTPSHome\Local Port Scan Monitor" \\$Server\C$\Users\Public\Documents *
 
             Invoke-Command -HideComputerName $Server -ArgumentList $ScheduledTaskUser -ScriptBlock {
 
+                $SecurePassword = Read-Host -Prompt "Enter the password for the user this task is going to run as. This info will be deleted from events and history later" -AsSecureString
+                $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecurePassword)
+                $Password = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
+
                 $ScheduledTaskUser = $Args[0]
                 Write-Output "[*] Creating Listen Port Monitor Task on $env:COMPUTERNAME."
 
-                Register-ScheduledTask -Xml (Get-Content -Path "C:\Users\Public\Documents\Port Scan Monitor.xml"| Out-String) -TaskName "Port Scan Monitor" -TaskPath "\" -User $ScheduledTaskUser -Password (Read-Host -Prompt "Enter the password for the user this task is going to run as. This info will be deleted from events and history later" -AsSecureString | ConvertFrom-SecureString -AsPlainText) –Force
+                Register-ScheduledTask -Xml (Get-Content -Path "C:\Users\Public\Documents\Port Scan Monitor.xml"| Out-String) -TaskName "Port Scan Monitor" -TaskPath "\" -User $ScheduledTaskUser -Password $Password –Force
                 Write-Output "[*] The Port Scan Monitor Task should now set up on $env:COMPUTERNAME"
 
 
-                Register-ScheduledTask -Xml (Get-Content -Path "C:\Users\Public\Documents\Port Monitor.xml"| Out-String) -TaskName "Port Monitor" -TaskPath "\" -User $ScheduledTaskUser -Password (Read-Host -Prompt "Enter the password for the user this task is going to run as. This info will be deleted from events and history later" -AsSecureString | ConvertFrom-SecureString -AsPlainText) –Force
+                Register-ScheduledTask -Xml (Get-Content -Path "C:\Users\Public\Documents\Port Monitor.xml"| Out-String) -TaskName "Port Monitor" -TaskPath "\" -User $ScheduledTaskUser -Password $Password –Force
                 Write-Output "[*] The Port Monitor Task should now set up on $env:COMPUTERNAME"
-                
+
             }  # End Invoke-Command
 
         }  # End ForEach
@@ -548,7 +662,7 @@ If ($PortMonitorAnswer -like "y*")
     }  # End Else
 
 }  # End If
-Else 
+Else
 {
 
     Write-Output "Skipping the setup of port monitoring"
@@ -556,11 +670,11 @@ Else
 }  # End Else
 
 Write-Output "============= ACCOUNTS AND PASSWORDS ==============="
-$AccountAlertAnswer = Read-Host -Prompt "With you permission this will create tasks on $env:COMPUTERNAME that alert on password and account changes. This also creates an alert that informs users who have a password expiring soon [y/N]"
+$AccountAlertAnswer = Read-Host -Prompt "With you permission, this will create tasks on $env:COMPUTERNAME that alert on password and account changes. This also creates an alert that informs users who have a password expiring soon [y/N]"
 If ($AccountAlertAnswer -like "y*")
 {
 
-    $AccountAlertFiles = (Get-ChildItem -Path "$BTPSHome\Accounts and Password Alerts" -Filter "*.xml" -Force).FullName
+    $AccountAlertFiles = (Get-ChildItem -Path "$BTPSHome\Account and Password Alerts" -Filter "*.xml" -Force).FullName
     ForEach ($AccountAlertFile in $AccountAlertFiles)
     {
 
@@ -574,7 +688,7 @@ If ($AccountAlertAnswer -like "y*")
     }  # End ForEach
 
 }  # End If
-Else 
+Else
 {
 
     Write-Output "[*] Skipping alerts on changes to accounts and passwords"
@@ -582,12 +696,13 @@ Else
 }  # End Else
 
 Write-Output "============== MISC ALERTS FOR DC ================"
-$MiscAnswer = Read-Host -Prompt "With your permission, tasks wil be created that alert when a DNS zone transfer occurs, insecure LDAP Binds occur or an Unusual Sign In Occurs [y/N]"
+$MiscAnswer = Read-Host -Prompt "With your permission, tasks wil be created that alert when a DNS zone transfer occurs and when an Unusual Sign In Occurs [y/N]"
 If ($MiscAnswer -like "y*")
 {
- 
-    $MiscAlertFiles = (Get-ChildItem -Path "$BTPSHome\Event Alerts" -Filter "*.xml" -Force).FullName
-    $MiscAlertFiles = $MiscAlertFiles | Where-Object { $_ –notlike "*ReviewForwardingRulesOffice.xml" }
+
+    $MiscAlertFiles = (Get-ChildItem -Path "$BTPSHome\Event Alerts" -Filter *.xml -Force).FullName
+    $MiscAlertFiles = $MiscAlertFiles | Where-Object { $_ -ne "$BTPSHome\Event Alerts\Query-InsecureLDAPBinds.xml" }
+    $MiscAlertFiles = $MiscAlertFiles | Where-Object { $_ -ne "$BTPSHome\Event Alerts\ReviewForwardingRulesOffice.xml" }
     $MiscAlertFiles += (Get-ChildItem -Path "$BTPSHome\Event Alerts" -Filter "*.csv" -Force).FullName
 
     ForEach ($MiscAlertFile in $MiscAlertFiles)
@@ -598,16 +713,15 @@ If ($MiscAnswer -like "y*")
         robocopy $MiscDir C:\Users\Public\Documents $MiscFile
         robocopy $MiscDir C:\Users\Public\Documents UserComputerList.csv
 
-        If ($MiscFile -notlike $MiscAlertFiles[-1])
+        If ($MiscFile -ne $MiscAlertFiles[-1].Split("\")[-1])
         {
-        
+
             Register-ScheduledTask -Xml (Get-Content -Path "$MiscAlertFile"| Out-String) -TaskName $MiscFile.Replace('.xml','') -TaskPath "\" -User SYSTEM –Force
             Write-Output "[*] The $MiscFile task should now set up on $env:COMPUTERNAME"
 
         }  # End If
 
-        Write-Output "[*] The Unusual Sign In Alert will not work until you add entries to the C:\Users\Public\Documents\UserComputerList.csv file. Pausing execution to allow you time to do this"
-
+        Write-Output "[*] The Unusual Sign In Alert will not work until you add entries to the C:\Users\Public\Documents\UserComputerList.csv file. `n[*] Pausing execution to allow you time to do this"
         Pause
 
     }  # End ForEach
@@ -618,24 +732,24 @@ If ($MiscAnswer -like "y*")
 
 Write-Output "============== WEF Application ============="
 Write-Output "[*] To install the WEF Application you will need to follow my tutorial setup guide at https://btps-secpack.com/wef-application. If you have not yet I suggest setting up WinRM over HTTPS first. https://btps-secpack.com/winrm-over-https"
-Pause 
+Pause
 
 Write-Output "=============== Remove PowerShell v2 =============="
-$PS2Answer = Read-Host -Prompt "Would you like to remove the legacy version of PowerShell from the servers in your environment [y/N]"
-$PS2Computer = Read-Host -Prompt "Would you like to remove the legacy version of PowerShell from client computers? [y/N]"
+$PS2Answer = Read-Host -Prompt "WINRM over SSL REQUIRERED FOR THIS : Would you like to remove the legacy version of PowerShell from the servers in your environment [y/N]"
+$PS2Computer = Read-Host -Prompt "WINRM over SSL REQUIRERED FOR THIS : Would you like to remove the legacy version of PowerShell from client computers? [y/N]"
 
 $RemovePowerShellFrom = @()
 If ($PS2Answer -like "y*")
 {
 
-    $RemovePowerShellFrom += $Servers
+    $RemovePowerShellFrom += $Servers.DnsHostName
 
 }  # End If
 
 If ($PS2Computer -like "y*")
 {
 
-    $RemovePowerShellFrom += $ComputerNames
+    $RemovePowerShellFrom += $ComputerNames.DnsHostName
 
 }  # End If
 
@@ -646,41 +760,73 @@ If ($RemovePowerShellFrom.Count -gt 0)
     ForEach ($Computer in $RemovePowerShellFrom)
     {
 
-        Remove-PowerShellV2 -ComputerName $Computer -ErrorAction Continue 
-        
+        If ($Computer -NotLike "$env:COMPUTERNAME.*")
+        {
+
+            Remove-PowerShellV2 -ComputerName $Computer -ErrorAction Continue
+
+        }  # End If
+        Else
+        {
+
+            Remove-PowerShellV2 -ErrorAction Continue
+
+        }  # End Else
+
     }  # End ForEach
 
 }  # End If
 
 
 Write-Output "============= ENABLE DNS OVER HTTPS =============="
-$PS2Server = Read-Host -Prompt "Would you like to enabled DNS over HTTPS on the servers in your environment [y/N]"
-$PS2Client = Read-Host -Prompt "Would you like to enable DNS over HTTPS on the client computers in your environment? [y/N]"
+$PS2Server = Read-Host -Prompt "WINRM over SSL REQUIRERED FOR THIS : Would you like to enabled DNS over HTTPS on the servers in your environment [y/N]"
+$PS2Client = Read-Host -Prompt "WINRM over SSL REQUIRERED FOR THIS : Would you like to enable DNS over HTTPS on the client computers in your environment? [y/N]"
 
 $EnableDoHOn = @()
 If ($PS2Server -like "y*")
 {
 
-    $EnableDoHOn += $Servers
+    $EnableDoHOn += $Servers.DnsHostName
 
 }  # End If
 
 If ($PS2Client -like "y*")
 {
 
-    $EnableDoHOn += $ComputerNames
+    $EnableDoHOn += $ComputerNames.DnsHostName
 
 }  # End If
 
 If ($EnableDoHOn.Count -gt 0)
 {
 
-    ."$BTPSHome\Hardening Cmdlets\Remove-PowerShellV2"
     ForEach ($Device in $EnableDoHOn)
     {
 
-        Remove-PowerShellV2 -ComputerName $Computer -ErrorAction Continue 
-        
+        If ($Device -like "$env:COMPUTERNAME.*")
+        {
+
+            New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters" -Name EnableAutoDOH -PropertyType DWORD -Value 2 -Force
+
+        }  # End If
+        Else
+        {
+
+            If ($Device -notlike "*.$Domain")
+            {
+
+                $Device = "$Device.$Domain"
+
+            }  # End If
+
+            Invoke-Command -HideComputerName $Device -UseSSL -ScriptBlock {
+
+                New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters" -Name EnableAutoDOH -PropertyType DWORD -Value 2 -Force
+
+            }  # End Invoke-Command
+
+        }  # End Else
+
     }  # End ForEach
 
 }  # End If
@@ -688,8 +834,8 @@ If ($EnableDoHOn.Count -gt 0)
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU8mygllF1IrZsLLrl+nDShKFO
-# 9Cigggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUezw+y3TWz+NixPYd1oFa9RPv
+# 9lSgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -749,11 +895,11 @@ If ($EnableDoHOn.Count -gt 0)
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FCGsDfAhImGny6e6UaNNCsM5+fZfMA0GCSqGSIb3DQEBAQUABIIBAAGoLEeCMjV7
-# pvLB/YXM867SpQqszvO7G5x6pnDe9ZcQ7XIojDqv17Rys4gITm09Vss0UksY+CNP
-# SNac0f+Kf8i7ONLrKCwWjnpkzzqfPDkc3bquTUWJsGGXuFtTi2t1zw06cOk3vWXB
-# ThOy+n0elnhA57BFXHTTtS1LP9TnAEOlYCP66yEoZ02CXkLZwiZbYmC9aH1sH7DN
-# iBIGFkoCTs3Bz3GbEEKgrciv/MCpOOXLr1ghTF3eEE+68KbD5Kq4yKDfh29KSNH3
-# 4FpQbAqyKWj481CzmzPri6FWJK/d/dFh6YeWJSWCHKkqgBek7lqrgO321bY9ZO16
-# HvhVgLNTxjQ=
+# FEDY7b4+TsBveYACIn8Qf6swuloWMA0GCSqGSIb3DQEBAQUABIIBAAZ0U4WRaiQ3
+# Al6jH5re22gr3J35/eljG9sddqX7TMwaS662Wt/dM1D477QhowiXcY2u1z0YKF9O
+# ZTbizg+zy3Hb1Mq5yXcMSqPSqx6Upbkr0PUsugc84iR4vwElbzKayqx+JG5LCR3+
+# 0ry3hiADksKORkBI+6aK1+/O87Zi4QLLZ3ZkPHOpiNk7voz6jLQcZ4RwLwQUS1Ls
+# +YH/nByBGUwqmvQVpXbOgnTb5yb5zx3BVdR0D3LX0dzqIM7l2XlK4K6RbuP9xWx9
+# SrUV6QzJpfvbHW/PgJ3me9+mrfoUD1Vbpjf13I/gaMm5qU2vhL0Iarxu1b8hsSuh
+# Mxil/bquTsc=
 # SIG # End signature block

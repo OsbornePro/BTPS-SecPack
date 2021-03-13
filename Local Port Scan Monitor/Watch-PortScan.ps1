@@ -1,4 +1,4 @@
-# This script can be used to monitor for internal port scans on domain and/or private and/or public networks using the firewall logs. 
+# This script can be used to monitor for internal port scans on domain and/or private and/or public networks using the firewall logs.
 # After the permissions are set correctly on the directory your firewall logs are stored in you may need to restart the device to apply them.
 # This can be used to receive an email alert when port scans happen as well as automatically blacklist the ip address performing the port scan
 # on the localhost.
@@ -28,8 +28,8 @@ System.String
 
 .OUTPUTS
 None
-    
-    
+
+
 .LINK
 https://roberthsoborne.com
 https://osbornepro.com
@@ -48,13 +48,13 @@ Function Test-Admin {
     $IsAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
     If ($IsAdmin)
     {
-    
+
         Write-Verbose "Permissions verified, continuing execution"
-    
+
     }  # End If
     Else
     {
-    
+
         Throw "[x] Insufficient permissions detected. Run this cmdlet in an adminsitrative prompt."
 
     }  # End Else
@@ -64,12 +64,12 @@ Function Test-Admin {
 
 <#
 .SYNOPSIS
-This cmdlet is used to create the Firewall Log files inside the directory specified in the $Path parameter. 
+This cmdlet is used to create the Firewall Log files inside the directory specified in the $Path parameter.
 The default path value is determined by the CIS Benchmarks. If the files are not manually created the log files will not hold any information.
 
 
 .DESCRIPTION
-This cmdlet tests to make sure the files do not already exist before creating them. 
+This cmdlet tests to make sure the files do not already exist before creating them.
 The default value creates the appropriately named firewall log files in C:\Windows\System32\logfiles\Firewall directory.
 
 
@@ -98,8 +98,8 @@ System.String
 
 .OUTPUTS
 None
-    
-    
+
+
 .LINK
 https://roberthsoborne.com
 https://osbornepro.com
@@ -124,7 +124,7 @@ Function New-FirewallLogFile
             [String]$Path = "C:\Windows\System32\LogFiles\Firewall"
         )  # End param
 
-BEGIN 
+BEGIN
 {
 
     Test-Admin
@@ -136,7 +136,7 @@ BEGIN
 }  # End BEGIN
 PROCESS
 {
-  
+
   Write-Output "[*] Creating firewall log files in $Path"
   New-Item -Path $FirewallLogFiles -Type File -Force -ErrorAction SilentlyContinue | Out-Null
 
@@ -147,7 +147,7 @@ PROCESS
 
 
   $PermittedUsers = @('NT AUTHORITY\SYSTEM', 'BUILTIN\Administrators', 'BUILTIN\Network Configuration Operators', 'NT SERVICE\MpsSvc', 'USAV\sour.pell')
-  ForEach ($User in $PermittedUsers) 
+  ForEach ($User in $PermittedUsers)
   {
 
     $Permission = $User, 'FullControl', 'Allow'
@@ -242,7 +242,7 @@ Function Enable-FirewallLogging {
         {
 
             Write-Output "[*] Firewall has been enabled"
-            
+
             "[*] FW PROFILE : " + $Re.Name
             "[*] LOG ENABLE : " + $Re.Enabled
 
@@ -251,7 +251,7 @@ Function Enable-FirewallLogging {
         {
 
             Write-Output "[x] Firewall is disabled. This may because of group policy settings. Your current settings are below"
-            
+
             "[*] FW PROFILE : " + $Re.Name
             "[*] LOG ENABLE : " + $Re.Enabled
 
@@ -292,7 +292,7 @@ Function Enable-FirewallLogging {
 
     }  # End ForEach
 
-}  # End Function 
+}  # End Function
 
 
 <#
@@ -350,12 +350,12 @@ Function Block-IPAddress {
                 Mandatory=$True,
                 ValueFromPipeline=$True,
                 ValueFromPipelineByPropertyName=$False,
-                HelpMessage="[H] Define an IP address or multiple IP addresses separating multiple values with a comma. `n[E] EXAMPLE: '10.10.10.10','10.12.12.12'"            
+                HelpMessage="[H] Define an IP address or multiple IP addresses separating multiple values with a comma. `n[E] EXAMPLE: '10.10.10.10','10.12.12.12'"
             )]  # End Parameter
             [String[]]$IPAddress
         )  # End param
 
-    
+
     ForEach ($IP in $IPAddress)
     {
 
@@ -376,13 +376,13 @@ Function Block-IPAddress {
 
             Write-Verbose "Creating firewall rule to block outbound connections to $IP"
             New-NetFirewallRule -DisplayName $RuleNameOut -Name $RuleNameOut -Description "Blocks the IP $IP which may be port scanning" -Direction Outbound -RemoteAddress $IP -Action Block -ErrorAction SilentlyContinue | Out-Null
-            
+
             Write-Output "[*] Possible Scan Attempt detected from IP Address $IP, please check $PreserveLocation"
 
         }  # End If
-        Else 
+        Else
         {
-                     
+
             Write-Output "[*] Firewall Rule for $IP already exists: `nRULE NAME: $RuleName"
 
         }  # End Else
@@ -452,13 +452,13 @@ Function Get-ValidIPAddressFromString {
                 ValueFromPipelineByPropertyName=$False,
                 HelpMessage="`n[H] Enter a string to extract the IPv4 address out of `n[E] EXAMPLE: Log File 8/6/2020 10.10.10.10. DENY TCP")]  # End Parameter
             [String]$String,
-        
+
             [Parameter(
                 ParameterSetName="File",
                 Mandatory=$True,
                 ValueFromPipeline=$False)]  # End Parameter
             [String]$Path)  # End param
-       
+
 
     $Obj = @()
     $Regex=‘(?<Address>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))’
@@ -473,24 +473,24 @@ Function Get-ValidIPAddressFromString {
 
                 If (($Line -Match $Regex) -and ($Obj -notcontains $Matches.Address))
                 {
-    
+
                         $Obj += $Matches.Address
-        
+
                 }  # End If
 
 
 
             }  # End ForEach
-            
+
             Return $Obj
-        
+
         }  # End File Switch
 
         'Line' {
-        
+
             If ($String -Match $Regex)
             {
-                
+
                 $Obj = $Matches.Address
 
             }  # End If
@@ -499,7 +499,7 @@ Function Get-ValidIPAddressFromString {
 
         }  # End Default Switch
 
-    }  # End Switch 
+    }  # End Switch
 
 }  # End Function Get-ValidIPAddressFromString
 
@@ -537,10 +537,10 @@ A tool to provide the user a way to enable local or remote firewalls and then mo
 
 .EXAMPLE
 Watch-PortScan -LogFile 'C:\Windows\System32\logfiles\firewall\domainfw.log', 'C:\Windows\System32\logfiles\firewall\private.log' -Limit 10 -ActiveBlockList -Tail 8000
-# This example checks the domain and private firewall log files will be monitored for port scans. The alert limit is going to be set to 10 and any discovered port scanning IP address will be added to the firewalls blacklist. The newest 8000 packets in the firewall log will be checked for IP addresses. 
+# This example checks the domain and private firewall log files will be monitored for port scans. The alert limit is going to be set to 10 and any discovered port scanning IP address will be added to the firewalls blacklist. The newest 8000 packets in the firewall log will be checked for IP addresses.
 
 .EXAMPLE
-Watch-PortScan -LogFile 'C:\Windows\System32\logfiles\firewall\domainfw.log' -ActiveBlockList -Limit 6 
+Watch-PortScan -LogFile 'C:\Windows\System32\logfiles\firewall\domainfw.log' -ActiveBlockList -Limit 6
 # This example the alert limit is set to 6 which looks for 6 or more successful port connections and adds the violating IP to the firewalls blocklist. The newest 8000 logs of the fireweall will be checked for IP Address connections.
 
 .EXAMPLE
@@ -614,7 +614,7 @@ Function Watch-PortScan {
         )  # End param
 
 
-    Test-Admin 
+    Test-Admin
 
     # Log files that are used to keep information for later analysis
     $FileName =  $LogFile.Split('\') | Select-Object -Index (($LogFile.Split('\').Count) - 1)
@@ -633,18 +633,18 @@ Function Watch-PortScan {
 
     If (!((Test-Path -Path $LogFile) -and ($FileName -like "*.log")))
     {
- 
+
         Throw "[!] The path you defined, $LogFile, needs to end in a .log file extension"
 
-    }  # End If     
+    }  # End If
 
     While ($True)
     {
-           
+
         Write-Verbose "Checking log entries for scanning attempts"
-       
+
         $IPList = Get-ValidIPAddressFromString -Path "$LogFile"
-        
+
         $ArrayList = New-Object -TypeName System.Collections.ArrayList(,$IPList)
 
         Write-Verbose "Removing excluded addresses from radar"
@@ -661,7 +661,7 @@ Function Watch-PortScan {
             $ArrayList.Remove("$sPI")
 
         }  # End ForEach
-        
+
         $ArrayList.Remove("127.0.0.1")
         $ArrayList.Remove("127.0.1.1")
 
@@ -681,33 +681,33 @@ Function Watch-PortScan {
                 {
 
                     $NewObj = New-Object -TypeName PSObject -Property @{
-                        Hostname=$Events[$i].MachineName; 
-                        TimeCreated=$Events[$i].TimeCreated; 
-                        SourceAddress=($Events[$i].Properties[3].Value).ToString(); 
-                        Destination=($Events[$i].Properties[5].Value).ToString(); 
-                        SourcePort=($Events[$i].Properties[4].Value).ToString(); 
-                        DestinationPort=($Events[$i].Properties[6].Value).ToString(); 
-                        Protocol=($Events[$i].Properties[7].Value).ToString() 
+                        Hostname=$Events[$i].MachineName;
+                        TimeCreated=$Events[$i].TimeCreated;
+                        SourceAddress=($Events[$i].Properties[3].Value).ToString();
+                        Destination=($Events[$i].Properties[5].Value).ToString();
+                        SourcePort=($Events[$i].Properties[4].Value).ToString();
+                        DestinationPort=($Events[$i].Properties[6].Value).ToString();
+                        Protocol=($Events[$i].Properties[7].Value).ToString()
                     }  # End New-Object Properties
 
                     $EntryObjList.Add($NewObj)
 
                 }  # End If
-                         
-                If ($EntryObjList.DestinationPort -NotContains ($Events[$i].Properties[6].Value)) 
+
+                If ($EntryObjList.DestinationPort -NotContains ($Events[$i].Properties[6].Value))
                 {
-                    
-                    If ($IgnorePort.Count -eq 0) 
+
+                    If ($IgnorePort.Count -eq 0)
                     {
-                    
+
                         $NewObj = New-Object -TypeName PSObject -Property @{
-                            Hostname=$Events[$i].MachineName; 
-                            TimeCreated=$Events[$i].TimeCreated; 
-                            SourceAddress=($Events[$i].Properties[3].Value).ToString(); 
-                            Destination=($Events[$i].Properties[5].Value).ToString(); 
-                            SourcePort=($Events[$i].Properties[4].Value).ToString(); 
-                            DestinationPort=($Events[$i].Properties[6].Value).ToString(); 
-                            Protocol=($Events[$i].Properties[7].Value).ToString() 
+                            Hostname=$Events[$i].MachineName;
+                            TimeCreated=$Events[$i].TimeCreated;
+                            SourceAddress=($Events[$i].Properties[3].Value).ToString();
+                            Destination=($Events[$i].Properties[5].Value).ToString();
+                            SourcePort=($Events[$i].Properties[4].Value).ToString();
+                            DestinationPort=($Events[$i].Properties[6].Value).ToString();
+                            Protocol=($Events[$i].Properties[7].Value).ToString()
                         }  # End New-Object Properties
 
                         $EntryObjList.Add($NewObj)
@@ -723,21 +723,21 @@ Function Watch-PortScan {
                             {
 
                                 $NewObj = New-Object -TypeName PSObject -Property @{
-                                    Hostname=$Events[$i].MachineName; 
-                                    TimeCreated=$Events[$i].TimeCreated; 
-                                    SourceAddress=($Events[$i].Properties[3].Value).ToString(); 
-                                    Destination=($Events[$i].Properties[5].Value).ToString(); 
-                                    SourcePort=($Events[$i].Properties[4].Value).ToString(); 
-                                    DestinationPort=($Events[$i].Properties[6].Value).ToString(); 
-                                    Protocol=($Events[$i].Properties[7].Value).ToString() 
+                                    Hostname=$Events[$i].MachineName;
+                                    TimeCreated=$Events[$i].TimeCreated;
+                                    SourceAddress=($Events[$i].Properties[3].Value).ToString();
+                                    Destination=($Events[$i].Properties[5].Value).ToString();
+                                    SourcePort=($Events[$i].Properties[4].Value).ToString();
+                                    DestinationPort=($Events[$i].Properties[6].Value).ToString();
+                                    Protocol=($Events[$i].Properties[7].Value).ToString()
                                 }  # End New-Object Properties
 
                                 $EntryObjList.Add($NewObj)
 
                             }  # End If
-                        
+
                         }  # End ForEach
-                        
+
                     }  # End Else
 
                 }  # End If
@@ -748,9 +748,9 @@ Function Watch-PortScan {
             {
 
                 Write-Verbose "Alert Limit Has Been Reached!"
-                
+
                 $ScanFound = $True
-                
+
                 If ($EmailAlert.IsPresent)
                 {
 
@@ -781,17 +781,17 @@ td {
 }
 </style>
 "@
-    
+
                     $TableInfo = $EntryObjList | Select-Object -Property Hostname,TimeCreated,SourceAddress,Destination,SourcePort,DestinationPort,Protocol
                     $PreContent = "<Title>Port Scan Monitor Detections</Title>"
                     $NoteLine = "$(Get-Date -format 'MM/dd/yyyy HH:mm:ss')"
                     $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
                     $MailBody = $TableInfo | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "=======================================================<br> PORT SCAN DETECTED: $env:COMPUTERNAME <br>=======================================================<br><br>SUMMARY: <br>A possible port scan was discovered on $env:COMPUTERNAME.<br>" | Out-String
-            
+
                     Send-MailMessage -To ToEmail -From FromEmail -SmtpServer UseSmtpServer -Credential $Credential -UseSSL -Port 587 -Priority High -Subject "ALERT: Attempted Port Scan $env:COMPUTERNAME" -BodyAsHtml -Body $MailBody
 
                 }  # End If
-                        
+
                 If ($PSBoundParameters.Key -eq "ActiveBlockList")
                 {
 
@@ -805,7 +805,7 @@ td {
 
                             Write-Output "[*] Scan detected: Adding $BadGuyIP to the block list. If -ActiveBlockList was specified the IP will be blocked shortly"
                             $BlockIps.Add($BadGuyIP)
-    
+
                         }  # End If
 
                     }  # End For
@@ -813,13 +813,13 @@ td {
                 }  # End If
 
                 $EntryObjList = [System.Collections.ArrayList]::New()
-  
-            }  # End If    
+
+            }  # End If
             Else
             {
-  
+
                 $EntryObjList = [System.Collections.ArrayList]::New()
-            
+
             }  # End Else
 
         }  # End ForEach
@@ -857,76 +857,3 @@ Enable-FirewallLogging -Path $LogPath
 
 Write-Output "[*] Monitoring for port scans on localhost"
 Watch-PortScan -LogFile "$LogPath\domainfw.log" -ExcludeAddresses 'vulnscanner.osbornepro.com','networkmonitor.osbornepro.com' -Limit 5 -EmailAlert -Tail 8000
-
-# SIG # Begin signature block
-# MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
-# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU9NdnsKDoccc1WYGwL8C/RkZx
-# MAigggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
-# BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
-# BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
-# IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
-# MDUwMzA3MDAwMFowgbQxCzAJBgNVBAYTAlVTMRAwDgYDVQQIEwdBcml6b25hMRMw
-# EQYDVQQHEwpTY290dHNkYWxlMRowGAYDVQQKExFHb0RhZGR5LmNvbSwgSW5jLjEt
-# MCsGA1UECxMkaHR0cDovL2NlcnRzLmdvZGFkZHkuY29tL3JlcG9zaXRvcnkvMTMw
-# MQYDVQQDEypHbyBEYWRkeSBTZWN1cmUgQ2VydGlmaWNhdGUgQXV0aG9yaXR5IC0g
-# RzIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC54MsQ1K92vdSTYusw
-# ZLiBCGzDBNliF44v/z5lz4/OYuY8UhzaFkVLVat4a2ODYpDOD2lsmcgaFItMzEUz
-# 6ojcnqOvK/6AYZ15V8TPLvQ/MDxdR/yaFrzDN5ZBUY4RS1T4KL7QjL7wMDge87Am
-# +GZHY23ecSZHjzhHU9FGHbTj3ADqRay9vHHZqm8A29vNMDp5T19MR/gd71vCxJ1g
-# O7GyQ5HYpDNO6rPWJ0+tJYqlxvTV0KaudAVkV4i1RFXULSo6Pvi4vekyCgKUZMQW
-# OlDxSq7neTOvDCAHf+jfBDnCaQJsY1L6d8EbyHSHyLmTGFBUNUtpTrw700kuH9zB
-# 0lL7AgMBAAGjggEaMIIBFjAPBgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIB
-# BjAdBgNVHQ4EFgQUQMK9J47MNIMwojPX+2yz8LQsgM4wHwYDVR0jBBgwFoAUOpqF
-# BxBnKLbv9r0FQW4gwZTaD94wNAYIKwYBBQUHAQEEKDAmMCQGCCsGAQUFBzABhhho
-# dHRwOi8vb2NzcC5nb2RhZGR5LmNvbS8wNQYDVR0fBC4wLDAqoCigJoYkaHR0cDov
-# L2NybC5nb2RhZGR5LmNvbS9nZHJvb3QtZzIuY3JsMEYGA1UdIAQ/MD0wOwYEVR0g
-# ADAzMDEGCCsGAQUFBwIBFiVodHRwczovL2NlcnRzLmdvZGFkZHkuY29tL3JlcG9z
-# aXRvcnkvMA0GCSqGSIb3DQEBCwUAA4IBAQAIfmyTEMg4uJapkEv/oV9PBO9sPpyI
-# BslQj6Zz91cxG7685C/b+LrTW+C05+Z5Yg4MotdqY3MxtfWoSKQ7CC2iXZDXtHwl
-# TxFWMMS2RJ17LJ3lXubvDGGqv+QqG+6EnriDfcFDzkSnE3ANkR/0yBOtg2DZ2HKo
-# cyQetawiDsoXiWJYRBuriSUBAA/NxBti21G00w9RKpv0vHP8ds42pM3Z2Czqrpv1
-# KrKQ0U11GIo/ikGQI31bS/6kA1ibRrLDYGCD+H1QQc7CoZDDu+8CL9IVVO5EFdkK
-# rqeKM+2xLXY2JtwE65/3YR8V3Idv7kaWKK2hJn0KCacuBKONvPi8BDABMIIFIzCC
-# BAugAwIBAgIIXIhNoAmmSAYwDQYJKoZIhvcNAQELBQAwgbQxCzAJBgNVBAYTAlVT
-# MRAwDgYDVQQIEwdBcml6b25hMRMwEQYDVQQHEwpTY290dHNkYWxlMRowGAYDVQQK
-# ExFHb0RhZGR5LmNvbSwgSW5jLjEtMCsGA1UECxMkaHR0cDovL2NlcnRzLmdvZGFk
-# ZHkuY29tL3JlcG9zaXRvcnkvMTMwMQYDVQQDEypHbyBEYWRkeSBTZWN1cmUgQ2Vy
-# dGlmaWNhdGUgQXV0aG9yaXR5IC0gRzIwHhcNMjAxMTE1MjMyMDI5WhcNMjExMTA0
-# MTkzNjM2WjBlMQswCQYDVQQGEwJVUzERMA8GA1UECBMIQ29sb3JhZG8xGTAXBgNV
-# BAcTEENvbG9yYWRvIFNwcmluZ3MxEzARBgNVBAoTCk9zYm9ybmVQcm8xEzARBgNV
-# BAMTCk9zYm9ybmVQcm8wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDJ
-# V6Cvuf47D4iFITUSNj0ucZk+BfmrRG7XVOOiY9o7qJgaAN88SBSY45rpZtGnEVAY
-# Avj6coNuAqLa8k7+Im72TkMpoLAK0FZtrg6PTfJgi2pFWP+UrTaorLZnG3oIhzNG
-# Bt5oqBEy+BsVoUfA8/aFey3FedKuD1CeTKrghedqvGB+wGefMyT/+jaC99ezqGqs
-# SoXXCBeH6wJahstM5WAddUOylTkTEfyfsqWfMsgWbVn3VokIqpL6rE6YCtNROkZq
-# fCLZ7MJb5hQEl191qYc5VlMKuWlQWGrgVvEIE/8lgJAMwVPDwLNcFnB+zyKb+ULu
-# rWG3gGaKUk1Z5fK6YQ+BAgMBAAGjggGFMIIBgTAMBgNVHRMBAf8EAjAAMBMGA1Ud
-# JQQMMAoGCCsGAQUFBwMDMA4GA1UdDwEB/wQEAwIHgDA1BgNVHR8ELjAsMCqgKKAm
-# hiRodHRwOi8vY3JsLmdvZGFkZHkuY29tL2dkaWcyczUtNi5jcmwwXQYDVR0gBFYw
-# VDBIBgtghkgBhv1tAQcXAjA5MDcGCCsGAQUFBwIBFitodHRwOi8vY2VydGlmaWNh
-# dGVzLmdvZGFkZHkuY29tL3JlcG9zaXRvcnkvMAgGBmeBDAEEATB2BggrBgEFBQcB
-# AQRqMGgwJAYIKwYBBQUHMAGGGGh0dHA6Ly9vY3NwLmdvZGFkZHkuY29tLzBABggr
-# BgEFBQcwAoY0aHR0cDovL2NlcnRpZmljYXRlcy5nb2RhZGR5LmNvbS9yZXBvc2l0
-# b3J5L2dkaWcyLmNydDAfBgNVHSMEGDAWgBRAwr0njsw0gzCiM9f7bLPwtCyAzjAd
-# BgNVHQ4EFgQUkWYB7pDl3xX+PlMK1XO7rUHjbrwwDQYJKoZIhvcNAQELBQADggEB
-# AFSsN3fgaGGCi6m8GuaIrJayKZeEpeIK1VHJyoa33eFUY+0vHaASnH3J/jVHW4BF
-# U3bgFR/H/4B0XbYPlB1f4TYrYh0Ig9goYHK30LiWf+qXaX3WY9mOV3rM6Q/JfPpf
-# x55uU9T4yeY8g3KyA7Y7PmH+ZRgcQqDOZ5IAwKgknYoH25mCZwoZ7z/oJESAstPL
-# vImVrSkCPHKQxZy/tdM9liOYB5R2o/EgOD5OH3B/GzwmyFG3CqrqI2L4btQKKhm+
-# CPrue5oXv2theaUOd+IYJW9LA3gvP/zVQhlOQ/IbDRt7BibQp0uWjYaMAOaEKxZN
-# IksPKEJ8AxAHIvr+3P8R17UxggJjMIICXwIBATCBwTCBtDELMAkGA1UEBhMCVVMx
-# EDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAYBgNVBAoT
-# EUdvRGFkZHkuY29tLCBJbmMuMS0wKwYDVQQLEyRodHRwOi8vY2VydHMuZ29kYWRk
-# eS5jb20vcmVwb3NpdG9yeS8xMzAxBgNVBAMTKkdvIERhZGR5IFNlY3VyZSBDZXJ0
-# aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
-# CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
-# AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FHm1mLaiZ2nWv3Eq07TO/0b7KW00MA0GCSqGSIb3DQEBAQUABIIBAFD2V6oLvVzG
-# nAIGwPrGQA/ol9gaGKuTbjQlguosGIhUBf85XgyuhDfEGSBq2W4hVIZ+sgTlOZBx
-# w8mAxj/v5U/JSMd6VIOJz95OSLXRZJusvCQLMgJhZ7GKtcuD4wL4IEruXUMH4ZsP
-# ADqKRvlt5wzZnMoOMykR/BilbLv934X9Zywkf/8taf8icGLXX35ZE6YBhL10G0SG
-# zx0up2L+7xPsG7SObXOeYFO+waUX0Bi38AV/GR9FyUxr0RthplTs4HjtcHJXtJ3Z
-# YKuG5JvZD0dGX568qsDRppYAA4tGnTdp6y6RYcZQXTIDSipulpa54yhx4vTkfD+F
-# fyN5W0UvjmM=
-# SIG # End signature block

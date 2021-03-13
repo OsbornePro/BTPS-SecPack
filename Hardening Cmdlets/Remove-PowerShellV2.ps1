@@ -67,7 +67,14 @@ Switch ($PSBoundParameters.Keys) {
             $SessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck
             # This option to an attempt to accomdate any environment and should not be needed if WinRM over HTTPS is configured correctly
 
-            Invoke-Command -HideComputerName "$C.$env:USERDNSDOMAIN" -UseSSL -SessionOption $SessionOption -ScriptBlock {
+            If ($C -notlike "*.$env:USERDNSDOMAIN")
+            {
+
+                $C = "$C.$env:USERDNSDOMAIN"
+
+            }  # End If
+            
+            Invoke-Command -HideComputerName $C -UseSSL -SessionOption $SessionOption -ScriptBlock {
 
                 Write-Verbose "[*] Checking whether or not PowerShell version 2 is installed on the $env:COMPUTERNAME"
                 $State = (Get-WindowsOptionalFeature -Online -FeatureName MicrosoftWindowsPowerShellV2).State
