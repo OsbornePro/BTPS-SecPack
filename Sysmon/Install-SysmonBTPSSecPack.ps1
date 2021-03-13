@@ -52,7 +52,7 @@ If ($Answer2 -like "y*")
 {
 
     Write-Output "[*] Downloading Process Hash Validator task and the script that gets executed"
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/HashValidator.ps1" -OutFile "C:\Sysmon\HashValidator.ps1"
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/HashValidator.xml" -OutFile "C:\Sysmon\HashValidator.xml"
     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/HashValidator.ps1" -OutFile "C:\Sysmon\HashValidator.ps1"
     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/Whitelist.csv" -OutFile "C:\Sysmon\Whitelist.csv"
 
@@ -86,8 +86,8 @@ Write-Host "For images and more info on how to configure Group Policy for Malici
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUfLn+/KryWB+RFXuC4A7wwW96
-# DpOgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUH8lEkVgRVZkN6wwx0lQwbzpj
+# 4Figggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -147,11 +147,11 @@ Write-Host "For images and more info on how to configure Group Policy for Malici
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FBL/Imbx5Ua5RBiHRr5AIqJtGKu6MA0GCSqGSIb3DQEBAQUABIIBABqIkfum95AL
-# vIEqEn8MNx4y6ihBKczzP6uUVgyrOFtTt7wuRZM9p8dB+FcWgWXw1Qj6NH+KEJw6
-# GNxxyqcy33cgBLkiTEhqAp3kRTByqa7d1TDbaisEU0IqYNIsuiFxPlpYv59MbN1B
-# R/t00DNMl+zxJXak07RX20Sao6iaEabNYVwZreeW9ZKvTwMWAv10+rbQEJ/9Yjjo
-# tZVxxEuff8GcWZetwv0azqPF2AwRrdWNbef942UxCx1xs3BJ9xpY0/NGYjLdg+2e
-# US5SoM0pDocKpHnDz3e8FcLxgCXidqfKcq0zMtGQSQihdO/1KOiWOzOhxdWWLOZE
-# QlbpA0Nuic8=
+# FNumLEOpZIJSCvEA/V61rWCajcpWMA0GCSqGSIb3DQEBAQUABIIBAAFBnI5EaMwd
+# fYxsDH/D/SsqA2GqytTEI22xWGIn9HGR4AUnXm1/i9rPuk/MdwrpnrJ9Ajjawjkx
+# pCtSqyzjXbqH3eZLla7fHcUrBhwT9LSJhEMD/qntl40JVUMdoLJr2Yw+iGWJ3zjW
+# 8lt9hR0sJMRp7xIntFrlNicBHuyRBIDC7FJPLHAgyR5b1cR0WRq0fG5PtlpdSwTd
+# ey+FRKyo7Q6wanRp0RkGpZJKG97IyblRn0PbsLenHcfjYJhVqPuNcSGGSPln1389
+# IlqU0esJRx7/KKM+j6DTDfRfhcWBTTA1TmaNTk3b4vs4PNJkJork+cDfEMYACjp5
+# pTcb94GiSHg=
 # SIG # End signature block
