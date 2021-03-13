@@ -2,13 +2,14 @@
 #===========================================================================
 # REQUIREMENTS
 #===========================================================================
-# - This will require a CSV file containing a ComputerName header and Name header
+# - This will require a CSV file containing a ComputerName header and Name header and SamAccountName header
 # - The script needs to be run on a domain controller logging Event ID 4624
+# - This script requires a SamAccountName and a Name for parsing the event logs. I have this set on lines 91-94 using the imported Name value from UserComputerList.csv
 # --------------------------------------------------------------------------
 
 # Csv file containing the headers ComputerName and Name
-$CsvInformation = Import-Csv -Path "$env:USERPROFILE\Documents\UserComputerList.csv" -Delimiter ','
-$UserList = $CsvInformation | Select-Object -Property Name -Unique
+$CsvInformation = Import-Csv -Path "C:\Users\Public\Documents\UserComputerList.csv" -Delimiter ','
+$UserList = $CsvInformation | Select-Object -Property Name,SamAccountName -Unique
 
 # Array of Shared Computer Names is for excluding computers that may be shared such as conference room computers that may be signed into
 $SharedComputerIPs = @('10.0.1.1','10.0.2.2','10.0.3.3')
@@ -20,6 +21,9 @@ $SharedComputerIPs = @('10.0.1.1','10.0.2.2','10.0.3.3')
 $PDC = ([ADSI]”LDAP://RootDSE”).dnshostname
 $FinalResult = @()
 
+$DomainObj = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
+$Domain = $DomainObj.Forest.Name
+$DHCPServer = Get-ADObject -SearchBase "cn=configuration,$DistinguishedName" -Filter "objectclass -eq 'dhcpclass' -AND Name -ne 'dhcproot'" | Select-Object -ExpandProperty "Name"
 
 <#
 .SYNOPSIS
@@ -52,15 +56,15 @@ https://www.hackthebox.eu/profile/52286
 Function Get-UserSid {
     [CmdletBinding()]
         param(
-            [Parameter(Mandatory = $True,
-                        Position = 0,
-                        ValueFromPipeline=$True,
-                        ValueFromPipelineByPropertyName=$True,
-                        HelpMessage = "Enter a SamAccountName for the user profile. Example: OsbornePro\rob.osborne"
-                        )] # End Parameter
-            [string[]]$SamAccountName) # End param
+            [Parameter(
+                Mandatory = $True,
+                    Position = 0,
+                    ValueFromPipeline=$True,
+                    ValueFromPipelineByPropertyName=$True,
+                    HelpMessage = "Enter a SamAccountName for the user profile. Example: OsbornePro\rob.osborne")] # End Parameter
+            [String[]]$SamAccountName) # End param
 
-    $ObjUser = New-Object -TypeNaem System.Security.Principal.NTAccount($SamAccountName)
+    $ObjUser = New-Object -TypeName System.Security.Principal.NTAccount($SamAccountName)
 
     $ObjSID = $ObjUser.Translate([System.Security.Principal.SecurityIdentifier])
 
@@ -85,7 +89,7 @@ ForEach ($Assignment in $UserList)
 
     Write-Host "[*] Getting SamAccountName and SID values..." -ForegroundColor 'Cyan'
 
-    $SamAccountName = ($Assignment.Name).Replace(' ','.')
+    $SamAccountName = $Assignment.SamAccountName
     $SID = Get-UserSid -SamAccountName $SamAccountName
     $Name = $Assignment.Name
 
@@ -125,7 +129,7 @@ ForEach ($Assignment in $UserList)
     [System.Collections.ArrayList]$UnusualSignInIps = @()
     [System.Collections.ArrayList]$UnusualSignInHostname = @()
 
-    # Comapres the assigned computers to signed in devices
+    # Compares the assigned computers to signed in devices
      ForEach ($EventIp in $EventLoggedInIps)
     {
 
@@ -135,16 +139,16 @@ ForEach ($Assignment in $UserList)
         Switch -Wildcard ($CompareValue)
         {
             "10.0.0.*" {
-                    $DhcpResolvedHost = Invoke-Command -HideComputerName "DHCPserver01.$env:USERDNSDOMAIN" -ScriptBlock {Get-DhcpServerv4Lease -ComputerName localhost -ScopeID '10.0.0.0'}; $SingleHost = $DhcpResolvedHost.Where({[IPAddress]$_.Ipaddress -like $CompareValue})
+                    $DhcpResolvedHost = Invoke-Command -HideComputerName $DHCPServer -ScriptBlock {Get-DhcpServerv4Lease -ComputerName localhost -ScopeID '10.0.0.0'}; $SingleHost = $DhcpResolvedHost.Where({[IPAddress]$_.Ipaddress -like $CompareValue})
                 }
             "10.1.0.*" {
-                    $DhcpResolvedHost = Invoke-Command -HideComputerName "DHCPserver02.$env:USERDNSDOMAIN" -ScriptBlock {Get-DhcpServerv4Lease -ComputerName localhost -ScopeID '10.1.0.0'};; $SingleHost = $DhcpResolvedHost.Where({[IPAddress]$_.Ipaddress -like $CompareValue})
+                    $DhcpResolvedHost = Invoke-Command -HideComputerName $DHCPServer -ScriptBlock {Get-DhcpServerv4Lease -ComputerName localhost -ScopeID '10.1.0.0'};; $SingleHost = $DhcpResolvedHost.Where({[IPAddress]$_.Ipaddress -like $CompareValue})
                 }
             "10.2.0.*" {
-                    $DhcpResolvedHost = Invoke-Command -HideComputerName "Dhcpserver03.$env:USERDNSDOMAIN" -ScriptBlock {Get-DhcpServerv4Lease -ComputerName localhost -IPAddress -ScopeID '10.2.0.0'}; $SingleHost = $DhcpResolvedHost.Where({[IPAddress]$_.Ipaddress -like $CompareValue})
+                    $DhcpResolvedHost = Invoke-Command -HideComputerName $DHCPServer -ScriptBlock {Get-DhcpServerv4Lease -ComputerName localhost -IPAddress -ScopeID '10.2.0.0'}; $SingleHost = $DhcpResolvedHost.Where({[IPAddress]$_.Ipaddress -like $CompareValue})
                 }
             "10.3.0.*"  {
-                    $DhcpResolvedHost = Invoke-Command -HideComputerName "Dhcpserver04.$env:USERDNSDOMAIN" -ScriptBlock {Get-DhcpServerv4Lease -ComputerName localhost -ScopeID '10.3.0.0'}; $SingleHost = $DhcpResolvedHost.Where({[IPAddress]$_.Ipaddress -like $CompareValue})
+                    $DhcpResolvedHost = Invoke-Command -HideComputerName $DHCPServer -ScriptBlock {Get-DhcpServerv4Lease -ComputerName localhost -ScopeID '10.3.0.0'}; $SingleHost = $DhcpResolvedHost.Where({[IPAddress]$_.Ipaddress -like $CompareValue})
                 }
             Default {
                     Remove-Variable -Name DhcpResolvedHost -ErrorAction SilentlyContinue
@@ -156,7 +160,7 @@ ForEach ($Assignment in $UserList)
             Try
             {
 
-                $DnsCheck = ((Resolve-DnsName -Name $CompareValue -Server "$env:COMPUTERNAME.usav.org" -DnssecOk -ErrorAction SilentlyContinue).NameHost).Replace(".usav.org","")
+                $DnsCheck = ((Resolve-DnsName -Name $CompareValue -Server "$env:COMPUTERNAME.$Domain" -DnssecOk -ErrorAction SilentlyContinue).NameHost).Replace(".$Domain","")
 
                 If ($ResolveTheseComputerNames -contains $DnsCheck)
                 {
@@ -173,11 +177,11 @@ ForEach ($Assignment in $UserList)
 
             }  # End Catch
 
-            If (($ComputerAssignments -notcontains $CompareValue) -and ($CompareValue -notlike "10.10.10.*")) # 10.10.10.* can be used to exclude VPN subnets or whatever
+            If (($ComputerAssignments -notcontains $CompareValue) )# -and ($CompareValue -notlike "10.10.10.*")) # 10.10.10.* can be used to exclude VPN subnets or whatever
             {
 
                 $UnusualSignInIps += ($CompareValue)
-                $UnusualSignInHostname += ((Resolve-DnsName -Name $CompareValue -Server "$env:COMPUTERNAME.usav.org" -DnssecOk -ErrorAction SilentlyContinue).NameHost).Replace(".usav.org","")
+                $UnusualSignInHostname += ((Resolve-DnsName -Name $CompareValue -Server "$env:COMPUTERNAME.$Domain" -DnssecOk -ErrorAction SilentlyContinue).NameHost).Replace(".$Domain","")
 
             } # End If
 
@@ -195,7 +199,7 @@ ForEach ($Assignment in $UserList)
 
         }  # End Else
 
-        Remove-Variable -Name SingleHost,DhcpResolvedHost
+        Remove-Variable -Name SingleHost,DhcpResolvedHost -ErrorAction SilentlyContinue
 
     } # End ForEach
 

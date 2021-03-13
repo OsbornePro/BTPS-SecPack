@@ -230,6 +230,7 @@ ElseIf ($CredAnswer -eq "3") # SMTP2GO
 
     Write-Output "[*] Setting SMTP server to mail.smtp2go.com and using SSL on port 2525"
     $SmtpServer = 'mail.smtp2go.com'
+    $SmtpPort = "2525"
     $To = Read-Host -Prompt "What is the email address that alerts should be sent to? EXAMPLE: $env:USERNAME@$env:USERDNSDOMAIN"
     $From = Read-Host -Prompt "Define the email address the alerts should be sent from. I usually have an email account email itself though this is not required. EXAMPLE: $env:USERNAME@$env:USERDNSDOMAIN"
 
@@ -456,8 +457,25 @@ If ($SysmonNetworkShareRequest -like "y*")
     Write-Output "[*] Creating Malicious IP Checker task on $env:COMPUTERNAME. This task will still need to be pushed out to your environment using group policy. Instructions on that can be found HERE https://btps-secpack.com/sysmon-setup"
     Register-ScheduledTask -Xml (Get-Content -Path "C:\Sysmon\MaliciousIPChecker.xml"| Out-String) -TaskName "Malicious IP Checker" -TaskPath "\" -User SYSTEM –Force
 
+    $VTAnswer = Read-Host -Prompt "Do you have a Virus Total API Key? [y/N]"
+    If ($VTAnswer -notlike "y*")
+    {
+
+        Start-Process -FilePath "https://www.virustotal.com/gui/join-us"
+        Pause
+
+    }  # End Else
+    $VTAPIKey = Read-Host -Prompt "Paste your Virus Total API Key here: "
+    ((Get-Content -Path "C:\Sysmon\HashValidator.ps1") -Replace "$VirusTotalApiKey = ''","$VirusTotalApiKey = '$VTAPIKey'") | Set-Content -Path "C:\sysmon\HashValidator.ps1"
+    ((Get-Content -Path "$BTPSHome\Sysmon\HashValidator.ps1") -Replace "$VirusTotalApiKey = ''","$VirusTotalApiKey = '$VTAPIKey'") | Set-Content -Path "$BTPSHome\Sysmon\HashValidator.ps1"
+
+    $ScheduledTaskUser = Read-Host -Prompt "Enter the username this task should run as. This user will need 'Run as batch job' permissions `nEXAMPLE: CONTOSO\TaskSchedUser"
+    $SecurePassword = Read-Host -Prompt "Enter the password for the user this task is going to run as. This info will be deleted from events and history later" -AsSecureString
+    $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecurePassword)
+    $Password = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
+
     Write-Output "[*] Creating Hash Validation Checker task on $env:COMPUTERNAME. This task will still need to be pushed out to your environment using group policy. Instructions on that can be found HERE https://btps-secpack.com/sysmon-setup"
-    Register-ScheduledTask -Xml (Get-Content -Path "C:\Sysmon\HashValidator.xml"| Out-String) -TaskName "Hash Validator" -TaskPath "\" -User SYSTEM –Force
+    Register-ScheduledTask -Xml (Get-Content -Path "C:\Sysmon\HashValidator.xml"| Out-String) -TaskName "Hash Validator" -TaskPath "\" -User $ScheduledTaskUser -Password $Password –Force
 
     Write-Output "Follow the setup instructions at https://btps-secpack.com/sysmon-setup Page 6 to create the group policy that gets this on all the devices in your environment `nThis creates a new log in the event viewer that providers more detailed logging and allows you to use a task that monitors connections to your devices providing an alert whenver a blacklisted IP has been connected too"
     Pause
@@ -834,8 +852,8 @@ If ($EnableDoHOn.Count -gt 0)
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUezw+y3TWz+NixPYd1oFa9RPv
-# 9lSgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUOKm69fMfUPX6nwz78osXJdiq
+# bR6gggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -895,11 +913,11 @@ If ($EnableDoHOn.Count -gt 0)
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FEDY7b4+TsBveYACIn8Qf6swuloWMA0GCSqGSIb3DQEBAQUABIIBAAZ0U4WRaiQ3
-# Al6jH5re22gr3J35/eljG9sddqX7TMwaS662Wt/dM1D477QhowiXcY2u1z0YKF9O
-# ZTbizg+zy3Hb1Mq5yXcMSqPSqx6Upbkr0PUsugc84iR4vwElbzKayqx+JG5LCR3+
-# 0ry3hiADksKORkBI+6aK1+/O87Zi4QLLZ3ZkPHOpiNk7voz6jLQcZ4RwLwQUS1Ls
-# +YH/nByBGUwqmvQVpXbOgnTb5yb5zx3BVdR0D3LX0dzqIM7l2XlK4K6RbuP9xWx9
-# SrUV6QzJpfvbHW/PgJ3me9+mrfoUD1Vbpjf13I/gaMm5qU2vhL0Iarxu1b8hsSuh
-# Mxil/bquTsc=
+# FN2TmHANtqH0sbxMt88NpaQbPlv8MA0GCSqGSIb3DQEBAQUABIIBAJtx+I1vSyor
+# gIODmIVn/AJTnEl4A/TqVGNn1TF+EpmTBawbUM0ySEfX+YpkZC36ItWhCbXzvxBx
+# WfwD8M4LfFNXQsA3xOSfWqgXU9Wx2aDL4ZJ8+tzBTvRaVzyEVfPIQzus8PUGe+vw
+# BfzMHSCyCddYeAULq+g19ozTH/zt8mVNTmq0NNtFTFmRkSjctYu85L71mwstwYYU
+# LcZReF4gKJSFMZIiC1klbnJ+HRWu6QiJ2D1HHLSv9+arZskumiFX+u506jxo9RTJ
+# ThN+e2O/sw3vu2jU/JczDlEDfwd+VI8mwP/gZgKvs9ZapAVtU20xpEKUK7oMF2VT
+# D7Lki2ISg2c=
 # SIG # End signature block

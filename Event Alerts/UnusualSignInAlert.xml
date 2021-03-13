@@ -54,8 +54,8 @@
   </Settings>
   <Actions Context="Author">
     <Exec>
-      <Command>powershell.exe</Command>
-      <Arguments>-NoLogo -NonInteractive -WindowStyle Hidden .\UnusualSignInAlert.ps1</Arguments>
+      <Command>powershell</Command>
+      <Arguments>-NoLogo -NonInteractive -WindowStyle Hidden .\UnusualUserSignInAlert.ps1</Arguments>
       <WorkingDirectory>C:\Users\Public\Documents</WorkingDirectory>
     </Exec>
   </Actions>

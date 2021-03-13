@@ -56,6 +56,17 @@ If ($Answer2 -like "y*")
     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/HashValidator.ps1" -OutFile "C:\Sysmon\HashValidator.ps1"
     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/Whitelist.csv" -OutFile "C:\Sysmon\Whitelist.csv"
 
+    $VTAnswer = Read-Host -Prompt "Do you have a Virus Total API Key? [y/N]"
+    If ($VTAnswer -notlike "y*")
+    {
+
+        Start-Process -FilePath "https://www.virustotal.com/gui/join-us"
+        Pause
+
+    }  # End Else
+    $VTAPIKey = Read-Host -Prompt "Paste your Virus Total API Key here: "
+    ((Get-Content -Path "C:\Sysmon\HashValidator.ps1") -Replace "$VirusTotalApiKey = ''","$VirusTotalApiKey = '$VTAPIKey'") | Set-Content -Path "C:\sysmon\HashValidator.ps1"
+
 }  # End If
 
 Write-Output "[*] Turning C:\Sysmon into a Network Share for use with pushing out Sysmon logging to domain joined devices"
@@ -86,8 +97,8 @@ Write-Host "For images and more info on how to configure Group Policy for Malici
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUH8lEkVgRVZkN6wwx0lQwbzpj
-# 4Figggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUgZ3pi4OSZK1rogxERbYo5hbo
+# 9VKgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -147,11 +158,11 @@ Write-Host "For images and more info on how to configure Group Policy for Malici
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FNumLEOpZIJSCvEA/V61rWCajcpWMA0GCSqGSIb3DQEBAQUABIIBAAFBnI5EaMwd
-# fYxsDH/D/SsqA2GqytTEI22xWGIn9HGR4AUnXm1/i9rPuk/MdwrpnrJ9Ajjawjkx
-# pCtSqyzjXbqH3eZLla7fHcUrBhwT9LSJhEMD/qntl40JVUMdoLJr2Yw+iGWJ3zjW
-# 8lt9hR0sJMRp7xIntFrlNicBHuyRBIDC7FJPLHAgyR5b1cR0WRq0fG5PtlpdSwTd
-# ey+FRKyo7Q6wanRp0RkGpZJKG97IyblRn0PbsLenHcfjYJhVqPuNcSGGSPln1389
-# IlqU0esJRx7/KKM+j6DTDfRfhcWBTTA1TmaNTk3b4vs4PNJkJork+cDfEMYACjp5
-# pTcb94GiSHg=
+# FKa1KEDbMHFdcizUktfLYhwmEaxXMA0GCSqGSIb3DQEBAQUABIIBAASBl/m93QNL
+# wJoHhPKJ+det9LB4Tx82+0AjwrpaETLKio3jb5hdabcDZxj3kCi9RJQq4UNgyIy8
+# RwUMPTiX8nAmfzHA+Y+SRnlKWZAlLdDIAHXcTlbhw5fWUBZP+YPm97LD3DYZPPoM
+# uzbFKritGAAwz052F/pgrsTBI4VS8Kj6WhDbn100pcZolKxh8573OxzNb2Vh7PRK
+# N4ecDg5MfglkLoseOTvNgg4mwh2Sp8+rsFjhRrXH85UGsOawxu1Y4ztMYlKuR5Dd
+# 3otAanECcHDF3LL7pu4xQLpWiZltQDLRH4Rh3+3xAMRGMg1B9uE5IZYfHJdtFg7G
+# T9lqAEHxk8M=
 # SIG # End signature block
