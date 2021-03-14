@@ -715,7 +715,7 @@ If ($MiscAnswer -like "y*")
     ForEach ($MiscAlertFile in $MiscAlertFiles)
     {
 
-        $MiscFile = $MiscAlertFile.Split('\')[-1]
+	$MiscFIle = $MiscAlertFile.Split("\")[-1]
         $MiscDir = $MiscAlertFile.Replace("$MiscFile","")
         robocopy $MiscDir C:\Users\Public\Documents $MiscFile
         robocopy $MiscDir C:\Users\Public\Documents UserComputerList.csv
@@ -841,8 +841,8 @@ If ($EnableDoHOn.Count -gt 0)
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUZoNIk99QLEZh+sGzjq+vOWsV
-# Fwagggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU/9vpFWEGqMN6Gdmrv32/5bde
+# 8Iygggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -902,11 +902,11 @@ If ($EnableDoHOn.Count -gt 0)
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FDlfsYtGSb2tJ4BZHCp0ulbyLMFwMA0GCSqGSIb3DQEBAQUABIIBAGyJJQfA2Tdz
-# UF/uQKcSoQEmsBGcmLdb3v2k0pH8La2cVZvoO5xyXJNrSmQwRms0ZCSePvUa4qfl
-# tJnd/jtdpIjPLlph2If4dMlX9x2vmSKjEnX+XuM9HYmvOZ0bjraUxLVRoTfMiwEm
-# VFMjJRjW3cgnZ9dviepLMVkW9/ybXOjw22XpP9wUHIRIcQkKLq5Ad5l41RWSxCBp
-# V/SIBAwA/a86uxGNGDfh2M7TyxtvbZ3OLQvNLSN6aevjpBUNBtF7X7CG27NEWB7q
-# pWRRaGrXLZ3bEhtv+g5RDIJcUn6uEppR7cJ4K0ZxvExtWpTlCnjHDR0F/qExD1A5
-# GgOzHNp8T3g=
+# FKNpVYaBgLhUsYaMfAmxR2PPhRQLMA0GCSqGSIb3DQEBAQUABIIBADm5Ys2vQ3UX
+# 80YqhRv1+KOWxSpoNDfqo7rW7Aqw04Raq1cMx9+iH93DZ/7CIVYizPyw0/pBCAs4
+# 6PjiRWo1EZU7uGIHjXRZOMxO92R3/1Rk5FOrqmsyBeDDdRA84x8OxowexgyeRqI8
+# pFGTiW4uItMFZS1PzCi6j5p17XPnugimDmsi4gOzjRuJeywoulYLHBAHnFc+9HBF
+# fOcnhvHWATnbrS3BNIYJNKy/46efjfhM55gyknid4VqJEfaesuHtdQyg3Ag8t32r
+# LbTju/si3oqHCSG6DnSWfv8guHDv27Eb82+ad0jwmBQJRU553ZAMi/USU6CI/w1i
+# SRnBzeAbr1M=
 # SIG # End signature block
