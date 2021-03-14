@@ -496,7 +496,7 @@ If ($env:COMPUTERNAME -like $PrimaryDC)
 
     Write-Output "[*] Copying AutorunsToWinEvent files into the NETLOGON directory for your domain controller."
     cmd /c  robocopy "$BTPSHome\AutoRunsToWinEvent" "C:\Windows\SYSVOL*\sysvol\$Domain\scripts" *
-    $Message = "`n[*] Use Group Policy to add all the files in $BTPSHome\AutoRunsToWinEvent directory to machines in your environment.`nI demonstrate how this can be done in the 'Sysmon Setup.pdf' file at https://btps-secpack.com/sysmon-setup Page 6.`nOnce the Install.ps1 file and AutorunsToWinEvent.ps1 files are on client and server machines, you will want a task to run once that executes the Install.ps1 script.`nTask scheduler allows you to create a Task that runs one time and deletes itself after.`nExceute the .\AutoRunsToWinEvent\Install.ps1 file on machines in the environment to install this proteciton manually.`nIf the .\AutorunsToWinEvent\Install.ps1 file is executed on a machine it does not require the task to be created as the install process was run already."
+    $Message = "`n[*] Use Group Policy to add all the files in $BTPSHome\AutoRunsToWinEvent directory to machines in your environment.`nI demonstrate how this can be done in the 'Sysmon Setup.pdf' file at https://btps-secpack.com/sysmon-setup Page 6.`nOnce the Install.ps1 file and AutorunsToWinEvent.ps1 files are on client and server machines, you will want a task to run once that executes the Install.ps1 script.`nTask scheduler allows you to create a Task that runs one time and deletes itself after.`nExceute the .\AutoRunsToWinEvent\Install.ps1 file on machines in the environment to install this proteciton manually.`nWhen the .\AutorunsToWinEvent\Install.ps1 file is executed on a machine it does not require the task to be created as the install process was run already."
     $Message
 
     Write-Output "[*] Pausing Script Execution to allow you time to create the above GPO's. Information on creating Scheduled Tasks can be found here: https://btps-secpack.com/email-alerts"
@@ -730,7 +730,7 @@ If ($MiscAnswer -like "y*")
         If ($MiscFile -ne $MiscAlertFiles[-1].Split("\")[-1])
         {
 
-            Register-ScheduledTask -Xml (Get-Content -Path "$MiscAlertFile" | Out-String) -TaskName $MiscFile.Replace('.xml','') -TaskPath "\" -User SYSTEM –Force
+            Register-ScheduledTask -Xml (Get-Content -Path "$MiscAlertFile" | Out-String) -TaskName $MiscFile.Replace('.xml','') -TaskPath "\" -User "SYSTEM" -Force
             Write-Output "[*] The $MiscFile task should now set up on $env:COMPUTERNAME"
 
         }  # End If
@@ -848,8 +848,8 @@ If ($EnableDoHOn.Count -gt 0)
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUJ999eDi6c5PBbffwQKe3eUU8
-# MrOgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU/Kndz5elPnx7d0+1syp2uFer
+# 762gggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -909,11 +909,11 @@ If ($EnableDoHOn.Count -gt 0)
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FEOwJZwPopJg+HXytBnJHqw9mkGlMA0GCSqGSIb3DQEBAQUABIIBAIEeHM3jJ8mE
-# bc74GtbhoFX4e7sWI/hBVCGkY0BP2JgOnEDS+PyTm/3Ire84PKqttdezxsM8WbA3
-# Wa9FPjkvn6zMMQKc77cS819IttJGUSzBXA9dzgeUxYGkVB+n1LQG8svlL32EMEXS
-# 3H0FU52yMZ2wQI0BMA+fr92vZOrLM0Thxe9pMnbCiqyKA6xLH0LZLYecA8/mwHd2
-# g/mule2CoenmId8lul2jYpTsDdMpN5PTCIM8qma4ALL7I9+qYrecbkQqsjru6rJB
-# U5hGgdUZfWAyMdFmdTY3FP2xGBo9xc76jdXx2LqOnU0D6/9ejDUjYC49rZkPU1He
-# fvABWxSw2QM=
+# FIkU4LpfJeKfp+PxIl2wAUEugrgRMA0GCSqGSIb3DQEBAQUABIIBADZlyAwcyXQL
+# yqs/LFaBA+D3rzr4wf/Rv0JyC8ujYaT1e2Yi/YNLX8VBX2guW57Jm71dWhBT89E6
+# Hxdmp9KidN+DnZnQRULkZ7NugpXnfFceehcWDByZUAuYXJiXpmysclwqi5B7zfUx
+# QLehNIL4ir0JZgPd9wPgnHaZnfOk9G7erUD52EiZy+h2h/j5mK3b7gQAM2FCYL7E
+# xmPc6YxC8brymd3a8hqfXZhH5w1H29vJCb9WJQPcdv1clSsqpj2d66IM3S6CFEj9
+# ufZvEutzgEaRTNtpZPf2JnroFd+zYzEc5rNij1vtrUSfXKwt1dE1AOpBQ3nhJrnA
+# wlhNSXdHiSE=
 # SIG # End signature block
