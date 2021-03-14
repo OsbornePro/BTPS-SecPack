@@ -146,7 +146,7 @@ PROCESS
   $Acl.SetAccessRuleProtection($True, $False)
 
 
-  $PermittedUsers = @('NT AUTHORITY\SYSTEM', 'BUILTIN\Administrators', 'BUILTIN\Network Configuration Operators', 'NT SERVICE\MpsSvc', 'USAV\sour.pell')
+  $PermittedUsers = @('NT AUTHORITY\SYSTEM', 'BUILTIN\Administrators', 'BUILTIN\Network Configuration Operators', 'NT SERVICE\MpsSvc')
   ForEach ($User in $PermittedUsers)
   {
 
