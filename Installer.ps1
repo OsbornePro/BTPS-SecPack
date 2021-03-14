@@ -557,15 +557,16 @@ If ($DeviceDiscoveryAnswer -like "y*")
         Invoke-Command -HideComputerName $DHCPServer -ArgumentList $ScheduledTaskUser -ScriptBlock {
 
             $ScheduledTaskUser = $Args[0]
-            Write-Output "[*] Creating New Device Check task on $env:COMPUTERNAME."
-            New-Item -Directory -Path "C:\Users\Public\Documents\PSGetHelp" -Force -ErrorAction SilentlyContinue | Out-Null
-            Move-Item -Path 'C:\Users\Public\Documents\MAC.Vendor.List.csv' -Destination 'C:\Users\Public\Documents\PSGetHelp\MAC.Vendor.List.csv' -Force
+            Write-Output "[*] Creating New Device Check task on $env:COMPUTERNAME. "
+
+            New-Item -ItemType Directory -Path "C:\Users\Public\Documents\PSGetHelp" -Force -ErrorAction SilentlyContinue | Out-Null
+            Copy-Item -Path 'C:\Users\Public\Documents\MAC.Vendor.List.csv' -Destination 'C:\Users\Public\Documents\PSGetHelp\MAC.Vendor.List.csv' -Force
 
             $SecurePassword = Read-Host -Prompt "Enter the password for the user this task is going to run as. This info will be deleted from events and history later" -AsSecureString
             $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecurePassword)
             $Password = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
 
-            Register-ScheduledTask -Xml (Get-Content -Path "C:\Users\Public\Documents\Find-NewDevices.xml"| Out-String) -TaskName "New Device Discovery" -TaskPath "\" -User $ScheduledTaskUser -Password $Password –Force
+            Register-ScheduledTask -Xml (Get-Content -Path "C:\Users\Public\Documents\Find-NewDevices.xml"| Out-String) -TaskName "New Device Discovery" -TaskPath "\" -User $ScheduledTaskUser -Password $Password -Force
             Write-Output "[*] The 'New Device Discovery' Task is now set up on your DHCP server"
 
         }  # End Invoke-Command
@@ -841,8 +842,8 @@ If ($EnableDoHOn.Count -gt 0)
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU/9vpFWEGqMN6Gdmrv32/5bde
-# 8Iygggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU5fCJtRvRTUrx5/vLMiuEbzj0
+# ReKgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -902,11 +903,11 @@ If ($EnableDoHOn.Count -gt 0)
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FKNpVYaBgLhUsYaMfAmxR2PPhRQLMA0GCSqGSIb3DQEBAQUABIIBADm5Ys2vQ3UX
-# 80YqhRv1+KOWxSpoNDfqo7rW7Aqw04Raq1cMx9+iH93DZ/7CIVYizPyw0/pBCAs4
-# 6PjiRWo1EZU7uGIHjXRZOMxO92R3/1Rk5FOrqmsyBeDDdRA84x8OxowexgyeRqI8
-# pFGTiW4uItMFZS1PzCi6j5p17XPnugimDmsi4gOzjRuJeywoulYLHBAHnFc+9HBF
-# fOcnhvHWATnbrS3BNIYJNKy/46efjfhM55gyknid4VqJEfaesuHtdQyg3Ag8t32r
-# LbTju/si3oqHCSG6DnSWfv8guHDv27Eb82+ad0jwmBQJRU553ZAMi/USU6CI/w1i
-# SRnBzeAbr1M=
+# FHuK5DvsyKTynBsB+FRKJkseCBioMA0GCSqGSIb3DQEBAQUABIIBABrSurJPMMev
+# FaV6V4pHm63pRM25qiwLOUJlovheptNE00B/xZen5kYoZJD7KcSBs8MCKWjXH6au
+# L6P8WGsFWWMCHaIkCXPCfzasv1TYllQT3/4cnp8RWDYYuLNOdwBJKpeLZeAstu/L
+# 62H2M8Ma4nxd58abMRVy19LpqK8Xdq3HZitYV7V5JM1Li+JBIfcvPotRGErQmh+C
+# 8jK4/ZTx2U6k31LIZQ2nTCS8u76AeOXzDkds2LywolDhVA3CGow7KVRq4GbUDLuZ
+# YMPYVcbKRq4yBMtutGxTIKfKUrQDFLyjP1D/M+1Sg3z7ucNE7P87kwaXHqbuHRCa
+# yEEsqnXvqZg=
 # SIG # End signature block
