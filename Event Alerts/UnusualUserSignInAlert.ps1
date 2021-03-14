@@ -252,4 +252,4 @@ $NoteLine = "This Message was Sent on $(Get-Date -Format 'MM/dd/yyyy HH:mm:ss')"
 $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
 $MailBody = $FinalResult | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "<br>The below table contains information on users who have signed into devices they are not assigned in the last 24 hours<br><br><hr><br><br>" | Out-String
 
-Send-MailMessage -From FromEmail -To ToEmail -Subject "Unusual Login Occurred" -BodyAsHtml -Body "$MailBody" -SmtpServer SmtpServer -Credential $Credential -UseSsl -Port 587
+Send-MailMessage -From FromEmail -To ToEmail -Subject "Unusual Login Occurred" -BodyAsHtml -Body "$MailBody" -SmtpServer UseSmtpServer -Credential $Credential -UseSsl -Port 587
