@@ -1,26 +1,19 @@
-Function Test-Admin {
-    [CmdletBinding()]
-        param()  # End param
+Write-Output "[*] Ensuring install script is executing with administator privileges"
 
-    Write-Verbose "Verifying permissions"
-    $IsAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
-    If ($IsAdmin)
+If (!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator'))
+{
+
+    If ([int](Get-CimInstance -Class Win32_OperatingSystem | Select-Object -ExpandProperty BuildNumber) -ge 6000)
     {
 
-        Write-Verbose "Permissions verified, continuing execution"
+        $CommandLine = "-File `"" + $MyInvocation.MyCommand.Path + "`" " + $MyInvocation.UnboundArguments
+        Start-Process -FilePath PowerShell.exe -Verb Runas -ArgumentList $CommandLine
+        Exit
 
     }  # End If
-    Else
-    {
 
-        Throw "[x] Insufficient permissions detected. Run this cmdlet in an adminsitrative prompt."
+}  # End If
 
-    }  # End Else
-
-}  # End Function Test-Admin
-
-Write-Output "[*] Ensuring install script is executing with administator privileges"
-Test-Admin
 
 Write-Output "==============================================================================================================================="
 Write-Output "|                                                     OsbornePro                                                              |"
@@ -496,12 +489,7 @@ If ($env:COMPUTERNAME -like $PrimaryDC)
 
     Write-Output "[*] Copying AutorunsToWinEvent files into the NETLOGON directory for your domain controller."
     cmd /c  robocopy "$BTPSHome\AutoRunsToWinEvent" "C:\Windows\SYSVOL*\sysvol\$Domain\scripts" *
-    $Message = "`n[*] Use Group Policy to add all the files in $BTPSHome\AutoRunsToWinEvent directory to machines in your environment.
-    I demonstrate how this can be done in the 'Sysmon Setup.pdf' file at https://btps-secpack.com/sysmon-setup Page 6.
-    Once the Install.ps1 file and AutorunsToWinEvent.ps1 files are on client and server machines, you will want a task to run once that executes the Install.ps1 script.
-    Task scheduler allows you to create a Task that runs one time and deletes itself after.
-    Exceute the .\AutoRunsToWinEvent\Install.ps1 file on machines in the environment to install this proteciton manually.
-    If the .\AutorunsToWinEvent\Install.ps1 file is executed on a machine it does not require the task to be created as the install process was run already."
+    $Message = "`n[*] Use Group Policy to add all the files in $BTPSHome\AutoRunsToWinEvent directory to machines in your environment.`nI demonstrate how this can be done in the 'Sysmon Setup.pdf' file at https://btps-secpack.com/sysmon-setup Page 6.`nOnce the Install.ps1 file and AutorunsToWinEvent.ps1 files are on client and server machines, you will want a task to run once that executes the Install.ps1 script.`nTask scheduler allows you to create a Task that runs one time and deletes itself after.`nExceute the .\AutoRunsToWinEvent\Install.ps1 file on machines in the environment to install this proteciton manually.`nWhen the .\AutorunsToWinEvent\Install.ps1 file is executed on a machine it does not require the task to be created as the install process was run already."
     $Message
 
     Write-Output "[*] Pausing Script Execution to allow you time to create the above GPO's. Information on creating Scheduled Tasks can be found here: https://btps-secpack.com/email-alerts"
@@ -735,7 +723,7 @@ If ($MiscAnswer -like "y*")
         If ($MiscFile -ne $MiscAlertFiles[-1].Split("\")[-1])
         {
 
-            Register-ScheduledTask -Xml (Get-Content -Path "$MiscAlertFile" | Out-String) -TaskName $MiscFile.Replace('.xml','') -TaskPath "\" -User SYSTEM –Force
+            Register-ScheduledTask -Xml (Get-Content -Path "$MiscAlertFile" | Out-String) -TaskName $MiscFile.Replace('.xml','') -TaskPath "\" -User "SYSTEM" -Force
             Write-Output "[*] The $MiscFile task should now set up on $env:COMPUTERNAME"
 
         }  # End If
@@ -853,8 +841,8 @@ If ($EnableDoHOn.Count -gt 0)
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUJYJ/jrEElKFi0pforRTNALrM
-# otKgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU27cWFJX0HUI1dA1l6k52xxOi
+# lgygggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -914,11 +902,11 @@ If ($EnableDoHOn.Count -gt 0)
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FCotinVSyXIh7rQuSI6L4C/h9QhMMA0GCSqGSIb3DQEBAQUABIIBAItZKZeFn102
-# Wi4/Q+DhUzf6hnBmg7I58D5E3uvSxLm3VtJtGpFgWOJhgu8MQ7dNbeUsadFSeK6Y
-# ArM+7y8GWWhDzhjZ/AXh3VR/bWQPaR5R4LScY4zYGeubcX8zs0EGXXwzqEiJ0Olp
-# 7ova7/MxwHnGHdkFkpudu4kBohTPgHA6mMeofkgCCc7hB0M3lEqHGBV9GJPcyDGQ
-# KYdUzUGBj1/LNCyDGRFcd51Yn7U1PHkXZleToevndlnEHJ8Nyx/Z8VRlrS7vm0Zf
-# Mlp5TCsbvQi5DIFlKsXiXEUzPjGvsPQC3cQ5CYIFruA8mrGAuFzy1UpzFT5KWRm/
-# k92IKLzp8dA=
+# FF0NokJZV7wXG6bBRPOgWF/Hud+AMA0GCSqGSIb3DQEBAQUABIIBAMFcQw9hUNdG
+# QW2lcIf2GfbQlf1q22MRNe/s3DBOGUbDTxfsT9orLjY08Dg4rSEq2UqaIkrp1qFW
+# e1FX6yVR9Ot5AOknBaqgxwPBYFYfAFBtntjsKDYXwpl5riim9Od3EwVB8dMzlo88
+# rPFPIj5A8xc0828NIwNicWw5dpk2S5kHbrtgGwbVVNCo3L6v3TZ2OHYDN4xRt7KE
+# VJXOcUwkiIlM44T3NiUZIHjpUvJoaNnbt7m8nWM7e+LcgKgJahULFyxFHydU7jhZ
+# 3k5OnRUwXJK0rwHxe35YiBaHTi+Iq0sLJ0TXyQhZfWJp6j1JP4zSVbCfTjMKXuET
+# XzjmcnfYgTQ=
 # SIG # End signature block
