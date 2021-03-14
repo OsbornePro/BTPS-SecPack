@@ -6,7 +6,7 @@ If (!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]
     If ([int](Get-CimInstance -Class Win32_OperatingSystem | Select-Object -ExpandProperty BuildNumber) -ge 6000)
     {
 
-        $CommandLine = "-File -NoExit`"" + $MyInvocation.MyCommand.Path + "`" " + $MyInvocation.UnboundArguments
+        $CommandLine = "-File `"" + $MyInvocation.MyCommand.Path + "`" " + $MyInvocation.UnboundArguments
         Start-Process -FilePath PowerShell.exe -Verb Runas -ArgumentList $CommandLine
         Exit
 
@@ -841,8 +841,8 @@ If ($EnableDoHOn.Count -gt 0)
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQURRuwp8+ERGZPYwWBeIk/5zxq
-# 9dmgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU27cWFJX0HUI1dA1l6k52xxOi
+# lgygggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -902,11 +902,11 @@ If ($EnableDoHOn.Count -gt 0)
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FFyZAS4DyoxYiG6gsCgNDH4BFBfIMA0GCSqGSIb3DQEBAQUABIIBAI188ASdE/eM
-# njuusgQ1HFi5Pdl4qbae82wVYxzx0OvTga9tOE9074T9+kI4AxHoK50fw7wDXmPv
-# vJWHL6Png4OIf0BGuQ1A0KO+U+tdQVeTnjxOhAoXLCIzqXemt9cVnZ+mBR5GSrIl
-# AQvf3Nuy5v1NGhFOQLdsqGIy7sqHFuAxpApWYSwFt7Rtl5hsd1q5xK/TUJQHsuCq
-# Yc569jh0Cg12juxRoSslo+MQUuafaaKumukPvu/Pl5oQU0wDtc9m5fvlmLJuhlKa
-# SJe6qWJxz7uxfKIDd33d8+nR2SlSX2sINhH+hQeYBeJZpGiOCm/1dnLhIPsSSYky
-# JFb8AVHS6gk=
+# FF0NokJZV7wXG6bBRPOgWF/Hud+AMA0GCSqGSIb3DQEBAQUABIIBAMFcQw9hUNdG
+# QW2lcIf2GfbQlf1q22MRNe/s3DBOGUbDTxfsT9orLjY08Dg4rSEq2UqaIkrp1qFW
+# e1FX6yVR9Ot5AOknBaqgxwPBYFYfAFBtntjsKDYXwpl5riim9Od3EwVB8dMzlo88
+# rPFPIj5A8xc0828NIwNicWw5dpk2S5kHbrtgGwbVVNCo3L6v3TZ2OHYDN4xRt7KE
+# VJXOcUwkiIlM44T3NiUZIHjpUvJoaNnbt7m8nWM7e+LcgKgJahULFyxFHydU7jhZ
+# 3k5OnRUwXJK0rwHxe35YiBaHTi+Iq0sLJ0TXyQhZfWJp6j1JP4zSVbCfTjMKXuET
+# XzjmcnfYgTQ=
 # SIG # End signature block
