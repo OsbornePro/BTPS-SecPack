@@ -496,12 +496,13 @@ If ($env:COMPUTERNAME -like $PrimaryDC)
 
     Write-Output "[*] Copying AutorunsToWinEvent files into the NETLOGON directory for your domain controller."
     cmd /c  robocopy "$BTPSHome\AutoRunsToWinEvent" "C:\Windows\SYSVOL*\sysvol\$Domain\scripts" *
-    Write-Output "`n[*] Use Group Policy to add all the files in $BTPSHome\AutoRunsToWinEvent directory to machines in your environment.
+    $Message = "`n[*] Use Group Policy to add all the files in $BTPSHome\AutoRunsToWinEvent directory to machines in your environment.
     I demonstrate how this can be done in the 'Sysmon Setup.pdf' file at https://btps-secpack.com/sysmon-setup Page 6.
     Once the Install.ps1 file and AutorunsToWinEvent.ps1 files are on client and server machines, you will want a task to run once that executes the Install.ps1 script.
     Task scheduler allows you to create a Task that runs one time and deletes itself after.
     Exceute the .\AutoRunsToWinEvent\Install.ps1 file on machines in the environment to install this proteciton manually.
     If the .\AutorunsToWinEvent\Install.ps1 file is executed on a machine it does not require the task to be created as the install process was run already."
+    $Message
 
     Write-Output "[*] Pausing Script Execution to allow you time to create the above GPO's. Information on creating Scheduled Tasks can be found here: https://btps-secpack.com/email-alerts"
     Pause
@@ -734,7 +735,7 @@ If ($MiscAnswer -like "y*")
         If ($MiscFile -ne $MiscAlertFiles[-1].Split("\")[-1])
         {
 
-            Register-ScheduledTask -Xml (Get-Content -Path "$MiscAlertFile"| Out-String) -TaskName $MiscFile.Replace('.xml','') -TaskPath "\" -User SYSTEM –Force
+            Register-ScheduledTask -Xml (Get-Content -Path "$MiscAlertFile" | Out-String) -TaskName $MiscFile.Replace('.xml','') -TaskPath "\" -User SYSTEM –Force
             Write-Output "[*] The $MiscFile task should now set up on $env:COMPUTERNAME"
 
         }  # End If
@@ -852,8 +853,8 @@ If ($EnableDoHOn.Count -gt 0)
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUOKm69fMfUPX6nwz78osXJdiq
-# bR6gggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUJYJ/jrEElKFi0pforRTNALrM
+# otKgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -913,11 +914,11 @@ If ($EnableDoHOn.Count -gt 0)
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FN2TmHANtqH0sbxMt88NpaQbPlv8MA0GCSqGSIb3DQEBAQUABIIBAJtx+I1vSyor
-# gIODmIVn/AJTnEl4A/TqVGNn1TF+EpmTBawbUM0ySEfX+YpkZC36ItWhCbXzvxBx
-# WfwD8M4LfFNXQsA3xOSfWqgXU9Wx2aDL4ZJ8+tzBTvRaVzyEVfPIQzus8PUGe+vw
-# BfzMHSCyCddYeAULq+g19ozTH/zt8mVNTmq0NNtFTFmRkSjctYu85L71mwstwYYU
-# LcZReF4gKJSFMZIiC1klbnJ+HRWu6QiJ2D1HHLSv9+arZskumiFX+u506jxo9RTJ
-# ThN+e2O/sw3vu2jU/JczDlEDfwd+VI8mwP/gZgKvs9ZapAVtU20xpEKUK7oMF2VT
-# D7Lki2ISg2c=
+# FCotinVSyXIh7rQuSI6L4C/h9QhMMA0GCSqGSIb3DQEBAQUABIIBAItZKZeFn102
+# Wi4/Q+DhUzf6hnBmg7I58D5E3uvSxLm3VtJtGpFgWOJhgu8MQ7dNbeUsadFSeK6Y
+# ArM+7y8GWWhDzhjZ/AXh3VR/bWQPaR5R4LScY4zYGeubcX8zs0EGXXwzqEiJ0Olp
+# 7ova7/MxwHnGHdkFkpudu4kBohTPgHA6mMeofkgCCc7hB0M3lEqHGBV9GJPcyDGQ
+# KYdUzUGBj1/LNCyDGRFcd51Yn7U1PHkXZleToevndlnEHJ8Nyx/Z8VRlrS7vm0Zf
+# Mlp5TCsbvQi5DIFlKsXiXEUzPjGvsPQC3cQ5CYIFruA8mrGAuFzy1UpzFT5KWRm/
+# k92IKLzp8dA=
 # SIG # End signature block
