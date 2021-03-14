@@ -734,7 +734,7 @@ If ($MiscAnswer -like "y*")
         If ($MiscFile -ne $MiscAlertFiles[-1].Split("\")[-1])
         {
 
-            Register-ScheduledTask -Xml (Get-Content -Path "$MiscAlertFile"| Out-String) -TaskName $MiscFile.Replace('.xml','') -TaskPath "\" -User SYSTEM –Force
+            Register-ScheduledTask -Xml (Get-Content -Path "$MiscAlertFile" | Out-String) -TaskName $MiscFile.Replace('.xml','') -TaskPath "\" -User SYSTEM –Force
             Write-Output "[*] The $MiscFile task should now set up on $env:COMPUTERNAME"
 
         }  # End If
