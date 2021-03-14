@@ -1,26 +1,19 @@
-Function Test-Admin {
-    [CmdletBinding()]
-        param()  # End param
+Write-Output "[*] Ensuring install script is executing with administator privileges"
 
-    Write-Verbose "Verifying permissions"
-    $IsAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
-    If ($IsAdmin)
+If (!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator'))
+{
+
+    If ([int](Get-CimInstance -Class Win32_OperatingSystem | Select-Object -ExpandProperty BuildNumber) -ge 6000)
     {
 
-        Write-Verbose "Permissions verified, continuing execution"
+        $CommandLine = "-File `"" + $MyInvocation.MyCommand.Path + "`" " + $MyInvocation.UnboundArguments
+        Start-Process -FilePath PowerShell.exe -Verb Runas -ArgumentList $CommandLine
+        Exit
 
     }  # End If
-    Else
-    {
 
-        Throw "[x] Insufficient permissions detected. Run this cmdlet in an adminsitrative prompt."
+}  # End If
 
-    }  # End Else
-
-}  # End Function Test-Admin
-
-Write-Output "[*] Ensuring install script is executing with administator privileges"
-Test-Admin
 
 Write-Output "==============================================================================================================================="
 Write-Output "|                                                     OsbornePro                                                              |"
@@ -848,8 +841,8 @@ If ($EnableDoHOn.Count -gt 0)
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU/Kndz5elPnx7d0+1syp2uFer
-# 762gggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU27cWFJX0HUI1dA1l6k52xxOi
+# lgygggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -909,11 +902,11 @@ If ($EnableDoHOn.Count -gt 0)
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FIkU4LpfJeKfp+PxIl2wAUEugrgRMA0GCSqGSIb3DQEBAQUABIIBADZlyAwcyXQL
-# yqs/LFaBA+D3rzr4wf/Rv0JyC8ujYaT1e2Yi/YNLX8VBX2guW57Jm71dWhBT89E6
-# Hxdmp9KidN+DnZnQRULkZ7NugpXnfFceehcWDByZUAuYXJiXpmysclwqi5B7zfUx
-# QLehNIL4ir0JZgPd9wPgnHaZnfOk9G7erUD52EiZy+h2h/j5mK3b7gQAM2FCYL7E
-# xmPc6YxC8brymd3a8hqfXZhH5w1H29vJCb9WJQPcdv1clSsqpj2d66IM3S6CFEj9
-# ufZvEutzgEaRTNtpZPf2JnroFd+zYzEc5rNij1vtrUSfXKwt1dE1AOpBQ3nhJrnA
-# wlhNSXdHiSE=
+# FF0NokJZV7wXG6bBRPOgWF/Hud+AMA0GCSqGSIb3DQEBAQUABIIBAMFcQw9hUNdG
+# QW2lcIf2GfbQlf1q22MRNe/s3DBOGUbDTxfsT9orLjY08Dg4rSEq2UqaIkrp1qFW
+# e1FX6yVR9Ot5AOknBaqgxwPBYFYfAFBtntjsKDYXwpl5riim9Od3EwVB8dMzlo88
+# rPFPIj5A8xc0828NIwNicWw5dpk2S5kHbrtgGwbVVNCo3L6v3TZ2OHYDN4xRt7KE
+# VJXOcUwkiIlM44T3NiUZIHjpUvJoaNnbt7m8nWM7e+LcgKgJahULFyxFHydU7jhZ
+# 3k5OnRUwXJK0rwHxe35YiBaHTi+Iq0sLJ0TXyQhZfWJp6j1JP4zSVbCfTjMKXuET
+# XzjmcnfYgTQ=
 # SIG # End signature block
