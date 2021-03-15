@@ -17,7 +17,7 @@
   </Triggers>
   <Principals>
     <Principal id="Author">
-      <UserId>S-1-5-21-277898991-1934889977-1734353810-17242</UserId>
+      <UserId>S-1-5-21</UserId>
       <LogonType>Password</LogonType>
       <RunLevel>HighestAvailable</RunLevel>
     </Principal>
@@ -47,7 +47,7 @@
   </Settings>
   <Actions Context="Author">
     <Exec>
-      <Command>powershell.exe</Command>
+      <Command>powershell</Command>
       <Arguments>-NoLogo -WindowStyle Hidden -NonInteractive .\Query-InsecureLDAPBinds.ps1</Arguments>
       <WorkingDirectory>C:\Users\Public\Documents</WorkingDirectory>
     </Exec>
