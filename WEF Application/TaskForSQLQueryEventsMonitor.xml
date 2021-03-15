@@ -210,7 +210,7 @@
   </Settings>
   <Actions Context="Author">
     <Exec>
-      <Command>powershell.exe</Command>
+      <Command>powershell</Command>
       <Arguments>-NoLogo -WindowStyle Hidden -NonInteractive .\SQL-Query-Suspicous-Events.ps1</Arguments>
       <WorkingDirectory>C:\Users\Public\Documents</WorkingDirectory>
     </Exec>
