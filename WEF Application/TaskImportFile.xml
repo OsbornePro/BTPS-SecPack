@@ -50,7 +50,7 @@
   </Settings>
   <Actions Context="Author">
     <Exec>
-      <Command>powershell.exe</Command>
+      <Command>powershell</Command>
       <Arguments>-NoLogo -NonInteractive -WindowStyle Hidden .\Import-EventsHourly.ps1</Arguments>
       <WorkingDirectory>C:\Users\Public\Documents</WorkingDirectory>
     </Exec>
