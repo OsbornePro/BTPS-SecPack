@@ -49,8 +49,8 @@
   </Settings>
   <Actions Context="Author">
     <Exec>
-      <Command>PowerShell.exe</Command>
-      <Arguments>".\Find-NewDevices.ps1"</Arguments>
+      <Command>powershell</Command>
+      <Arguments>"-NoLogo -NonInteractive -WindowStyle Hidden .\Find-NewDevices.ps1"</Arguments>
       <WorkingDirectory>C:\Users\Public\Documents</WorkingDirectory>
     </Exec>
   </Actions>
