@@ -405,6 +405,31 @@ REFERENCE LINK https://github.com/SwiftOnSecurity/sysmon-config/blob/master/sysm
 			<DestinationPort name="Tor" condition="is">1723</DestinationPort> <!--Tor protocol [ https://attack.mitre.org/wiki/Technique/T1090 ] | Credit @ion-storm-->
 			<DestinationPort name="Tor" condition="is">9001</DestinationPort> <!--Tor protocol [ http://www.computerworlduk.com/tutorial/security/tor-enterprise-2016-blocking-malware-darknet-use-rogue-nodes-3633907/ ] -->
 			<DestinationPort name="Tor" condition="is">9030</DestinationPort> <!--Tor protocol [ http://www.computerworlduk.com/tutorial/security/tor-enterprise-2016-blocking-malware-darknet-use-rogue-nodes-3633907/ ] -->
+			<!-- BTPS Security Package Related -->
+			<DestinationHostname condition="is">whois.arin.net</DestinationHostname> <!-- Used by Watch-PortScan.ps1 in the BTPS Security Package -->
+			<!-- AV RELATED DNS LOOKUPS -->
+			<DestinationHostname condition="is">nimbus.bitdefender.net</DestinationHostname>
+			<DestinationHostname condition="is">www.virustotal.com</DestinationHostname>
+			<!-- MALICIOUS IP CHECKER LOOKUPS -->
+			<DestinationHostname condition="begin with">190.3.113.66.</DestinationHostname>
+			<DestinationHostname condition="begin with">6.152.171.205.</DestinationHostname>
+			<DestinationHostname condition="begin with">190.3.113.66.</DestinationHostname>
+			<DestinationHostname condition="begin with">166.66.117.208.</DestinationHostname>
+			<DestinationHostname condition="begin with">6.253.171.205.</DestinationHostname>
+			<DestinationHostname condition="begin with">209.0.109.66.</DestinationHostname>
+			<DestinationHostname condition="begin with">15.92.118.137.</DestinationHostname>
+			<DestinationHostname condition="begin with">44.200.13.72.</DestinationHostname>
+			<DestinationHostname condition="begin with">10.92.191.64.</DestinationHostname>
+			<DestinationHostname condition="begin with">154.22.241.69.</DestinationHostname>
+			<DestinationHostname condition="begin with">131.129.30.192.</DestinationHostname>
+			<DestinationHostname condition="begin with">232.109.55.157.</DestinationHostname>
+			<DestinationHostname condition="begin with">4.235.239.52.</DestinationHostname>
+			<DestinationHostname condition="begin with">39.194.108.40.</DestinationHostname>
+			<DestinationHostname condition="begin with">14.160.122.40.</DestinationHostname>
+			<DestinationHostname condition="begin with">32.159.114.52.</DestinationHostname>
+			<DestinationHostname condition="begin with">39.194.108.40.</DestinationHostname>
+			<DestinationHostname condition="begin with">228.109.55.157.</DestinationHostname>
+			<DestinationHostname condition="begin with">36.136.225.52.</DestinationHostname>
 		</NetworkConnect>
 	</RuleGroup>
 
