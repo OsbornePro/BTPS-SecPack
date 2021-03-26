@@ -84,6 +84,44 @@ REFERENCE LINK https://github.com/SwiftOnSecurity/sysmon-config/blob/master/sysm
 		<!--DATA: UtcTime, ProcessGuid, ProcessID, Image, FileVersion, Description, Product, Company, CommandLine, CurrentDirectory, User, LogonGuid, LogonId, TerminalSessionId, IntegrityLevel, Hashes, ParentProcessGuid, ParentProcessId, ParentImage, ParentCommandLine, RuleName-->
 	<RuleGroup name="" groupRelation="or">
 		<ProcessCreate onmatch="exclude">
+			<ParentCommandLine condition="is">powershell.exe -NoLogo -WindowStyle Hidden -NonInteractive .\Watch-PortScan.ps1</ParentCommandLine>
+			<CommandLine condition="is">powershell.exe -NoLogo -WindowStyle Hidden -NonInteractive .\SQL-Query-Suspicous-Events.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -WindowStyle Hidden .\ListenPortMonitor.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -WindowStyle Hidden ./UnusualSignInAlert.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -WindowStyle Hidden .\UnusualSignInAlert.ps1</CommandLine>
+			<CommandLine condition="is">C:\WINDOWS\System32\WindowsPowerShell\v1.0\PowerShell.EXE .\AlertExpiryPassword.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -NoLogo -NonInteractive -WindowStyle Hidden .\UnusualSignInAlert.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -NoLogo -WindowStyle Hidden -NonInteractive .\Query-InsecureLDAPBinds.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -NoLogo -NonInteractive -WindowStyle Hidden .\MaliciousIPChecker.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -NoLogo -NonInteractive -WindowStyle Hidden .\Import-EventsHourly.ps1</CommandLine>
+			<CommandLine condition="is">Auditpol  /set /subcategory:"Filtering Platform Connection" /success:enable /failure:disable</CommandLine>
+			<CommandLine condition="is">powershell.exe -NoLogo -WindowStyle Hidden -NonInteractive .\Watch-PortScan.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -NoLogo -NonInteractive -WindowStyle Hidden .\AttemptedPasswordReset.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -NoLogo -NonInteractive -WindowStyle Hidden .\NewComputerAlert.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -WindowStyle Hidden -NoLogo -NonInteractive .\User.Account.Locked.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -WindowStyle Hidden -NoLogo -NonInteractive .\User.Account.Unlocked.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -NoLogo -NonInteractive -WindowStyle Hidden .\User.Account.Created.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -NoLogo -NonInteractive -WindowStyle Hidden ./User.Account.Created.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -NoLogo -NonInteractive -WindowStyle Hidden C:\PROGRA~1\AutorunsToWinEventLog\AutorunsToWinEventLog.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -WindowStyle Hidden -NoLogo -NonInteractive .\CodeTwoTokenRotaionAlert.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -NoLogo -NonInteractive -WindowStyle Hidden .\Failed.Username.and.Password.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe .\Failed.Username.and.Password.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -WindowStyle Hidden .\ReviewForwardingRulesOffice.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -WindowStyle Hidden -NoLogo -NonInteractive .\BackupCA.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -NoLogo -NonInteractive -WindowStyle Hidden ".\Find-NewDevices.ps1"</CommandLine>
+			<CommandLine condition="is">powershell.exe -NoLogo -NonInteractive -WindowStyle Hidden ./Restart-PrintSpooler.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -NoLogo -NonInteractive -WindowStyle Hidden .\DNSZoneTransferAlert.ps1</CommandLine>
+			<CommandLine condition="is">powershell.exe -WindowStyle Hidden -NoLogo -NonInteractive .\Backup-WACDB.ps1</CommandLine>
+			<ParentCommandLine condition="is">"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --profile-directory=Default</ParentCommandLine>
+			<Image condition="is">C:\Program Files (x86)\Microsoft Office\root\Office16\SDXHelper.exe</Image>
+			<Image condition="is">C:\Program Files\Common Files\microsoft shared\ink\TabTip.exe</Image>
+			<Image condition="is">C:\Program Files (x86)\Apple Software Update\SoftwareUpdate.exe</Image>
+			<Image condition="is">C:\Windows\System32\MoUsoCoreWorker.exe</Image>
+			<Image condition="is">C:\Windows\System32\UsoClient.exe</Image>
+			<Image condition="is">C:\Windows\System32\gpupdate.exe</Image>
+			<Image condition="end with">AppData\Local\GoToMeeting\19228\g2mupdate.exe</Image>
+			<Image condition="is">C:\Program Files (x86)\Google\Update\GoogleUpdate.exe</Image>
+			<ParentCommandLine condition="is">"C:\WINDOWS\sysnative\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NonInteractive -NoProfile -ExecutionPolicy Bypass -File "C:\WINDOWS\Action1\scripts\Installed Software_1000.ps1"</ParentCommandLine>
 			<!--SECTION: Microsoft Windows-->
 			<CommandLine condition="begin with"> "C:\Windows\system32\wermgr.exe" "-queuereporting_svc" </CommandLine> <!--Windows:Windows error reporting/telemetry-->
 			<CommandLine condition="begin with">C:\Windows\system32\DllHost.exe /Processid</CommandLine> <!--Windows-->
@@ -806,6 +844,25 @@ REFERENCE LINK https://github.com/SwiftOnSecurity/sysmon-config/blob/master/sysm
 			<!--Inventory noise-->
 			<TargetObject condition="begin with">HKLM\Software\Microsoft\Windows\CurrentVersion\AppModel\StateRepository\Cache</TargetObject>
 			<!--Misc-->
+			<TargetObject condition="is">HKLM\System\CurrentControlSet\Services\WMPNetworkSvc\Start</TargetObject>
+			<Image condition="is">C:\Program Files (x86)\Webroot\WRSA.exe</Image>
+			<Image condition="is">\\usav-dcp\Sysmon\Sysmon.exe</Image>
+			<Image condition="is">\\usav-dcp.usav.org\Sysmon\Sysmon.exe</Image>
+			<TargetObject condition="is">HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\DisableAntiSpyware</TargetObject>
+			<TargetObject condition="is">HKLM\SOFTWARE\Policies\Microsoft\WindowsFirewall\DomainProfile\EnableFirewall</TargetObject>
+			<TargetObject condition="is">HKLM\SOFTWARE\Policies\Microsoft\WindowsFirewall\PublicProfile\EnableFirewall</TargetObject>
+			<TargetObject condition="is">HKLM\SOFTWARE\Policies\Microsoft\WindowsFirewall\PrivateProfile\EnableFirewall></TargetObject>
+			<TargetObject condition="is">HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\fDenyTSConnections</TargetObject>
+			<TargetObject condition="is">HKLM\System\CurrentControlSet\Services\HomeGroupListener\Start</TargetObject>
+			<TargetObject condition="is">HKLM\System\CurrentControlSet\Services\HomeGroupProvider\Start</TargetObject>
+			<TargetObject condition="is">HKLM\System\CurrentControlSet\Services\irmon\Start</TargetObject>
+			<TargetObject condition="is">HKLM\System\CurrentControlSet\Services\WMPNetworkSvc\Start</TargetObject>
+			<TargetObject condition="is">HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\Microsoft-Windows-DriverFrameworks-UserMode/Operational\Enabled</TargetObject>
+			<TargetObject condition="is">HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\Microsoft-Windows-DNS-Client/Operational\Enabled</TargetObject>
+			<TargetObject condition="is">HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WINEVT\Channels\Microsoft-Windows-PowerShell/Operational\MaxSize</TargetObject>
+			<TargetObject condition="is">HKLM\System\CurrentControlSet\Services\XboxNetApiSvc\Start</TargetObject>
+			<TargetObject condition="is">HKLM\System\CurrentControlSet\Services\xbgm\Start</TargetObject>
+			<TargetObject condition="is">HKLM\System\CurrentControlSet\Services\XboxGipSvc\Start</TargetObject>
 			<TargetObject condition="end with">Toolbar\WebBrowser</TargetObject> <!--Microsoft:IE: Extraneous activity-->
 			<TargetObject condition="end with">Browser\ITBar7Height</TargetObject> <!--Microsoft:IE: Extraneous activity, covers ShellBrowser and WebBrowser-->
 			<TargetObject condition="end with">Browser\ITBar7Layout</TargetObject> <!--Microsoft:IE: Extraneous activity-->
@@ -971,6 +1028,77 @@ REFERENCE LINK https://github.com/SwiftOnSecurity/sysmon-config/blob/master/sysm
 
 	<RuleGroup name="" groupRelation="or">
 		<DnsQuery onmatch="exclude">
+			<!-- MALICIOUS IP CHECKER LOOKUPS -->
+			<QueryName condition="end with">b.barracudacentral.org</QueryName>
+			<QueryName condition="end with">spam.rbl.msrbl.net</QueryName>
+			<QueryName condition="end with">bl.deadbeef.com</QueryName>
+			<QueryName condition="end with">bl.spamcop.net</QueryName>
+			<QueryName condition="end with">blackholes.five-ten-sg.com</QueryName>
+			<QueryName condition="end with">blacklist.woody.ch</QueryName>
+			<QueryName condition="end with">bogons.cymru.com</QueryName>
+			<QueryName condition="end with">cbl.abuseat.org</QueryName>
+			<QueryName condition="end with">cdl.anti-spam.org.cn</QueryName>
+			<QueryName condition="end with">combined.abuse.ch</QueryName>
+			<QueryName condition="end with">combined.rbl.msrbl.net</QueryName>
+			<QueryName condition="end with">db.wpbl.info</QueryName>
+			<QueryName condition="end with">dnsbl-1.uceprotect.net</QueryName>
+			<QueryName condition="end with">dnsbl-2.uceprotect.net</QueryName>
+			<QueryName condition="end with">dnsbl-3.uceprotect.net</QueryName>
+			<QueryName condition="end with">dnsbl.cyberlogic.net</QueryName>
+			<QueryName condition="end with">dnsbl.inps.de</QueryName>
+			<QueryName condition="end with">dnsbl.njabl.org</QueryName>
+			<QueryName condition="end with">dnsbl.sorbs.net</QueryName>
+			<QueryName condition="end with">drone.abuse.ch</QueryName>
+			<QueryName condition="end with">drone.abuse.ch</QueryName>
+			<QueryName condition="end with">duinv.aupads.org</QueryName>
+			<QueryName condition="end with">dul.dnsbl.sorbs.net</QueryName>
+			<QueryName condition="end with">dul.ru</QueryName>
+			<QueryName condition="end with">dyna.spamrats.com</QueryName>
+			<QueryName condition="end with">http.dnsbl.sorbs.net</QueryName>
+			<QueryName condition="end with">images.rbl.msrbl.net</QueryName>
+			<QueryName condition="end with">ips.backscatterer.org</QueryName>
+			<QueryName condition="end with">ix.dnsbl.manitu.net</QueryName>
+			<QueryName condition="end with">korea.services.net</QueryName>
+			<QueryName condition="end with">misc.dnsbl.sorbs.net</QueryName>
+			<QueryName condition="end with">ohps.dnsbl.net.au</QueryName>
+			<QueryName condition="end with">omrs.dnsbl.net.au</QueryName>
+			<QueryName condition="end with">orvedb.aupads.org</QueryName>
+			<QueryName condition="end with">osps.dnsbl.net.au</QueryName>
+			<QueryName condition="end with">osrs.dnsbl.net.au</QueryName>
+			<QueryName condition="end with">owfs.dnsbl.net.au</QueryName>
+			<QueryName condition="end with">owps.dnsbl.net.au</QueryName>
+			<QueryName condition="end with">phishing.rbl.msrbl.net</QueryName>
+			<QueryName condition="end with">probes.dnsbl.net.au</QueryName>
+			<QueryName condition="end with">proxy.bl.gweep.ca</QueryName>
+			<QueryName condition="end with">proxy.block.transip.nl</QueryName>
+			<QueryName condition="end with">psbl.surriel.com</QueryName>
+			<QueryName condition="end with">rbl.interserver.net</QueryName>
+			<QueryName condition="end with">rdts.dnsbl.net.au</QueryName>
+			<QueryName condition="end with">relays.bl.gweep.ca</QueryName>
+			<QueryName condition="end with">relays.bl.kundenserver.de</QueryName>
+			<QueryName condition="end with">relays.nether.net</QueryName>
+			<QueryName condition="end with">residential.block.transip.nl</QueryName>
+			<QueryName condition="end with">ricn.dnsbl.net.au</QueryName>
+			<QueryName condition="end with">rmst.dnsbl.net.au</QueryName>
+			<QueryName condition="end with">short.rbl.jp</QueryName>
+			<QueryName condition="end with">smtp.dnsbl.sorbs.net</QueryName>
+			<QueryName condition="end with">socks.dnsbl.sorbs.net</QueryName>
+			<QueryName condition="end with">spam.abuse.ch</QueryName>
+			<QueryName condition="end with">spam.dnsbl.sorbs.net</QueryName>
+			<QueryName condition="end with">spamlist.or.kr</QueryName>
+			<QueryName condition="end with">spamrbl.imp.ch</QueryName>
+			<QueryName condition="end with">t3direct.dnsbl.net.au</QueryName>
+			<QueryName condition="end with">tor.dnsbl.sectoor.de</QueryName>
+			<QueryName condition="end with">torserver.tor.dnsbl.sectoor.de</QueryName>
+			<QueryName condition="end with">ubl.lashback.com</QueryName>
+			<QueryName condition="end with">ubl.unsubscore.com</QueryName>
+			<QueryName condition="end with">virbl.bit.nl</QueryName>
+			<QueryName condition="end with">virus.rbl.jp</QueryName>
+			<QueryName condition="end with">virus.rbl.msrbl.net</QueryName>
+			<QueryName condition="end with">web.dnsbl.sorbs.net</QueryName>
+			<QueryName condition="end with">wormrbl.imp.ch</QueryName>
+			<QueryName condition="end with">xbl.spamhaus.org</QueryName>
+			<QueryName condition="end with">zombie.dnsbl.sorbs.net</QueryName>
 			<!--Network noise-->
 			<QueryName condition="end with">.arpa.</QueryName> <!--Design decision to not log reverse DNS lookups. You will need to decide.-->
 			<QueryName condition="end with">.arpa</QueryName> <!--Design decision to not log reverse DNS lookups. You will need to decide.-->
@@ -1001,6 +1129,7 @@ REFERENCE LINK https://github.com/SwiftOnSecurity/sysmon-config/blob/master/sysm
 			<QueryName condition="is">login.windows.net</QueryName> <!--Microsoft-->
 			<Image condition="begin with">C:\ProgramData\Microsoft\Windows Defender\Platform\</Image> <!--Microsoft: https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-atp/network-protection -->
 			<!--Microsoft:Office365/AzureAD-->
+			<QueryName condition="end with">.blob.core.windows.net</QueryName>
 			<QueryName condition="end with">.activedirectory.windowsazure.com</QueryName> <!--Microsoft: AzureAD-->
 			<QueryName condition="end with">.aria.microsoft.com</QueryName> <!--Microsoft: OneDrive/SharePoint-->
 			<QueryName condition="end with">.msauth.net</QueryName>
