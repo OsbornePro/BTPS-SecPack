@@ -10,7 +10,8 @@ $LogfileExists = Get-Eventlog -List | Where-Object {$_.logdisplayname -eq "Autor
 If (!($LogfileExists))
 {
 
-  New-EventLog -LogName Autoruns -Source AutorunsToWinEventLog
+  New-EventLog -LogName "Autoruns" -Source "AutorunsToWinEventLog"
+  Limit-EventLog -LogName "Autoruns" -OverflowAction OverWriteAsNeeded -MaximumSize 512KB
 
 }  # End If
 
@@ -34,11 +35,11 @@ $Proc = Start-Process -FilePath "c:\Program Files\AutorunsToWinEventLog\Autoruns
 $Proc.WaitForExit()
 $AutoRunsArray = Import-Csv -Path $AutoRunsCsv
 
-Foreach ($Item in $AutoRunsArray) 
+Foreach ($Item in $AutoRunsArray)
 {
 
   $Item = Write-Output $Item  | Out-String -Width 1000
-  Write-EventLog -LogName Autoruns -Source AutorunsToWinEventLog -EntryType Information -EventId 1 -Message $Item
+  Write-EventLog -LogName "Autoruns" -Source "AutorunsToWinEventLog" -EntryType Information -EventId 1 -Message $Item
 
 }  # End ForEach
 
@@ -55,9 +56,7 @@ $LocalGroups | ForEach-Object {
 
     $GroupName = $_
 
-    Get-LocalGroupMember -Name $GroupName | Where-Object {
-        $_.PrincipalSource -Match "ActiveDirectory"
-    } | ForEach-Object {
+    Get-LocalGroupMember -Name $GroupName | Where-Object { $_.PrincipalSource -Match "ActiveDirectory" } | ForEach-Object {
 
         $PrincipalName = $_.Name.Split("\")[1] + "@" + $DomainFQDN
 
@@ -67,13 +66,12 @@ $LocalGroups | ForEach-Object {
         $Member | Add-Member Noteproperty 'PrincipalName' $principalname
 
         $Data = @"
-
 GroupName: $($Member.GroupName)
 PrincipalType: $($Member.PrincipalType)
 PrincipalName: $($Member.PrincipalName)
 "@
 
-        Write-EventLog -LogName Autoruns -Source AutorunsToWinEventLog -EntryType Information -EventId 2 -Message $Data
+        Write-EventLog -LogName "Autoruns" -Source "AutorunsToWinEventLog" -EntryType Information -EventId 2 -Message $Data
 
     }  # End ForEach-Object
 
@@ -85,8 +83,8 @@ $AutoRunsArray | Export-Csv -Path $AutorunsCsv -Delimiter ',' -NoTypeInformation
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU0NVvvj28mfQ4kvQHLHFcjytu
-# ky+gggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUJFlfLoHu0lnM09B6PLql6VRO
+# Jpqgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -146,11 +144,11 @@ $AutoRunsArray | Export-Csv -Path $AutorunsCsv -Delimiter ',' -NoTypeInformation
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FJFSYBM0RgwF+XZ4pzabDkl9cr2xMA0GCSqGSIb3DQEBAQUABIIBABKca8a51ZnZ
-# Gx+ZFUYeLXf5SNlf4HPlEGEz3c3PsbphE9BmPYF401TpvvlsiAYqq+y6clgMiSEV
-# qxxkhzycaulafm+Q6xXCr/6TxxBo8XERjlfqXHVKoXiCQ6u6O4o8jcSy85riZ+Qd
-# B17vTGO4NoW7w+9xzD42QINXnsWkEcF14x9I0G21oO3uz0H8fZ+GGnXwKP0CuVgs
-# skNerrprgeBLE+QzOedXm4q3jnbBDN7PPLNndeMy4ChN5JBRwY+wJhfZ4IvYAp+T
-# O46NVMAGDWYvRhjx1422CVaC5iURLzBQNOchKXiumb3QJit5R8Bbncxw+yGdt6KQ
-# 4ZT6sFMVLe8=
+# FIO/Hbv07HmQmTX1mOo8jC2celVYMA0GCSqGSIb3DQEBAQUABIIBAAfHgS2TlLaS
+# MPMWOXWragGQv7NNmEPMM4PcnLu3AIzckMDzT2DSlWdoNTbkj0uvQAEKHiT8n+lh
+# Amm8HFbVZ8iEsz8+wt1B2BRfP5xXSOF4zuEryZQQAT8Hl+krERxZ6c0TTT52e0yY
+# hxLyMd19b5AAzRnAEK/TqK586k4l5WlZrkEyBdjWmbyrsQnLaZdsPSVGR6n3kyAS
+# 9tIdKqJO8NzKUncNRHl3ZAztbS2wQzNqiP9WJKkLRL/diWltZP/KuFrWNHmN2L8M
+# VYHAlSWPIVVz19RLlPrB5WLW2vXEMDUYb7FxqmpkaaMeApaYu9aYC+xDl95odN2+
+# 4YkyJKMeE5A=
 # SIG # End signature block
