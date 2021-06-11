@@ -75,6 +75,7 @@ New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders
 <br>
 Verify that both the server and client are able to successfully check revocation status on all certificates. Use of the certutil command can assist in troubleshooting any errors.<br>
 <br>
+
 ### Setup the listener on the Event collector
 Set the certificate authentication with the following command:
 ```powershell
