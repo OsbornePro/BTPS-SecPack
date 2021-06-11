@@ -59,7 +59,53 @@ If ($EventInfo.LevelDisplayName -ne "Information")
   ```
   - Group Policy Setting "__Computer Configuration__ > __Policies__ > __Adminsitrative Templates__ > __Windows Components__ > __Event Log Service__ > __Security__ > __Change Log Access__" needs to be set to the value of the property "__ChannelAccess__" after issuing the command ```wevtutil gl security```
   - Group Policy Setting "__Computer Configuration__ > __Policies__ > __Adminsitrative Templates__ > __Windows Components__ > __Event Log Service__ > __Security__ > __Change Log Access (Legacy)__" needs to be set to the value of the property "__ChannelAccess__" after issuing the command ```wevtutil gl security```
- 
+<br>
+
+### Certificates requirements
+A server authentication certificate has to be installed on the Event Collector computer in the Personal store of the Local machine. The subject of this certificate has to match the FQDN of the collector. <br>
+<br>
+A client authentication certificate has to be installed on the Event Source computers in the Personal store of the Local machine. The subject of this certificate has to match the FQDN of the computer. <br>
+<br>
+If the client certificate has been issued by a different Certification Authority than the one of the Event Collector then those Root and Intermediate certificates needs to be installed on the Event Collector as well. <br>
+<br>
+If the client certificate was issued by an Intermediate certification authority and the collector is running Windows 2012 or later you will have to configure the following registry key: __HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\Schannel\ClientAuthTrustMode (DWORD) = 2__ <br>
+```powershell
+New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\Schannel" -Name "ClientAuthTrustMode" -Value 2 -Force
+```
+<br>
+Verify that both the server and client are able to successfully check revocation status on all certificates. Use of the certutil command can assist in troubleshooting any errors.<br>
+<br>
+### Setup the listener on the Event collector
+Set the certificate authentication with the following command:
+```powershell
+cmd /c 'winrm set winrm/config/service/auth @{Certificate="true"}'
+```
+A WinRM HTTPS listener with the server authentication certificate thumb print should exist on the event collector computer. This can be verified with the following command:
+```powershell
+winrm e winrm/config/listener
+```
+If you do not see the HTTPS listener, or if the HTTPS listener's thumb print is not same as the thumb print of the server authentication certificate on collector computer, then you can delete that listener and create a new one with the correct thumb print. To delete the https listener, use the following command:
+```powershell
+winrm delete winrm/config/Listener?Address=*+Transport=HTTPS
+```
+To create a new listener, use the following command:
+```powershell
+winrm create winrm/config/Listener?Address=*+Transport=HTTPS @{Hostname="<FQDN of the collector>";CertificateThumbprint="<Thumb print of the server authentication certificate>"}
+```
+<br>
+Create the certificate mapping using a certificate that is present in the machine’s “Trusted Root Certification Authorities” or “Intermediate Certification Authorities”.
+```powershell
+winrm create winrm/config/service/certmapping?Issuer=<Thumbprint of the issuing CA certificate>+Subject=*+URI=* @{UserName="<LocalAdministrator>";Password="<password>"} -remote:localhost
+```
+<br>
+From a client test the listener and the certificate mapping with the following command:
+```powershell
+winrm g winrm/config -r:https://<Event Collector FQDN>:5986 -a:certificate -certificate:"<Thumbprint of the client authentication certificate>"
+```
+<br>
+
+This should return the WinRM configuration of the Event collector. Do not move past this step if the configuration is not displayed.
+<br>
 ## SET UP USING THESE FILES
 #### STEP 1.)
 In order to use the __DomainComputers.xml__ and __DomainControllers.xml__ config files in Windows Event Forwarding the below commands must be issued in an Administrator Command Prompt.
