@@ -2,8 +2,9 @@
 
 $MonitorAdmin = ''
 
-Get-Credential | Export-CliXml -Path "${env:\userprofile}\MonitorAdmin.Cred"
-$Cred = Import-CliXml -Path "${env:\userprofile}\MonitorAdmin.Cred"
+# If you did not use the install script you can execute the below commands to create a credential file. $Credential is used to send authenticated emails
+#Get-Credential | Export-CliXml -Path "${env:\userprofile}\MonitorAdmin.Cred"
+#$Credential = Import-CliXml -Path "${env:\userprofile}\MonitorAdmin.Cred"
 
 Write-Verbose "Building queries"
 $XMLConsent = "<QueryList>
