@@ -43,6 +43,7 @@ I wrote an initial install script to automatically set up as much of these prote
     - Receive an alert when an insecure LDAP bind occurs (When Bind is not LDAP over SSL)
     - Receive an alert when a user signs into a device they were not assigned
 - __Hardening Cmdlets__ [VIEW](https://github.com/tobor88/BTPS-SecPack/tree/master/Hardening%20Cmdlets)
+    - Receive daily information on Azure sign ins for your users
     - Disable weak TLS and SSL protocols on a Client or IIS Server
     - Enable DNS over HTTPS when available
     - Enable HSTS on a local IIS Server
