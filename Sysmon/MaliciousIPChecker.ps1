@@ -31,13 +31,13 @@ Contact: rosborne@osbornepro.com
 
 
 .LINK
-https://roberthsoborne.com
 https://osbornepro.com
+https://writeups.osbornepro.com
 https://github.com/tobor88
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
-https://www.youracclaim.com/users/roberthosborne/badges
+https://www.credly.com/users/roberthosborne/badges
 https://www.hackthebox.eu/profile/52286
 
 
@@ -60,13 +60,13 @@ Function Get-ValidIPAddressFromString {
                 ValueFromPipelineByPropertyName=$False,
                 HelpMessage="`n[H] Enter a string to extract the IPv4 address out of `n[E] EXAMPLE: Log File 8/6/2020 10.10.10.10. DENY TCP")]  # End Parameter
             [String]$String,
-        
+
             [Parameter(
                 ParameterSetName="File",
                 Mandatory=$True,
                 ValueFromPipeline=$False)]  # End Parameter
             [String]$Path)  # End param
-       
+
 
     $Obj = @()
     $Regex=‘(?<Address>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))’
@@ -81,24 +81,24 @@ Function Get-ValidIPAddressFromString {
 
                 If (($Line -Match $Regex) -and ($Obj -notcontains $Matches.Address))
                 {
-    
+
                         $Obj += $Matches.Address
-        
+
                 }  # End If
 
 
 
             }  # End ForEach
-            
+
             Return $Obj
-        
+
         }  # End File Switch
 
         'Line' {
-        
+
             If ($String -Match $Regex)
             {
-                
+
                 $Obj = $Matches.Address
 
             }  # End If
@@ -107,13 +107,13 @@ Function Get-ValidIPAddressFromString {
 
         }  # End Default Switch
 
-    }  # End Switch 
+    }  # End Switch
 
 }  # End Function Get-ValidIPAddressFromString
 
 
 # REFERNCE: https://www.kittell.net/code/powershell-domain-whois/
-<# 
+<#
 .SYNOPSIS
 Does a raw WHOIS query and returns the results
 
@@ -152,10 +152,10 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
             # The query to send to WHOIS servers
             [Parameter(Position=0, ValueFromRemainingArguments=$True)]
             [String]$Query,
- 
+
             # A specific whois server to search
             [string]$Server,
- 
+
             # Disable forwarding to new whois servers
             [Switch]$NoForward)  # End param
 
@@ -177,71 +177,71 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
             ".gov"="whois.nic.gov"
           }
         }
- 
+
         $EAP, $ErrorActionPreference = $ErrorActionPreference, "Stop"
- 
+
         $Query = $Query.Trim()
- 
-        If ($Query -Match "(?:\d{1,3}\.){3}\d{1,3}") 
+
+        If ($Query -Match "(?:\d{1,3}\.){3}\d{1,3}")
         {
 
             Write-Verbose "IP Lookup!"
-            If ($Query -NotMatch " ") 
+            If ($Query -NotMatch " ")
             {
 
                 $Query = "n $Query"
 
             }  # End If
-            If (!$Server) 
-            { 
-            
-                $Server = "whois.arin.net" 
-                
+            If (!$Server)
+            {
+
+                $Server = "whois.arin.net"
+
             }  # End If
         }  # End If
-        ElseIf (!$Server) 
+        ElseIf (!$Server)
         {
 
             $Server = $TLDs.GetEnumerator() | Where-Object { $Query -like  ("*"+$_.Name) } | Select-Object -ExpandProperty Value -First 1
 
         }  # End ElseIf
- 
-        If (!$Server) 
-        { 
-        
-            $Server = "whois.arin.net" 
-            
+
+        If (!$Server)
+        {
+
+            $Server = "whois.arin.net"
+
         }  # End If
 
         $MaxRequery = 3
- 
+
         Do {
 
             Write-Verbose "Connecting to $Server"
             $Client = New-Object -TypeName System.Net.Sockets.TcpClient $Server, 43
- 
+
             Try {
                 $Stream = $Client.GetStream()
- 
+
                 Write-Verbose "Sending Query: $Query"
                 $Data = [System.Text.Encoding]::Ascii.GetBytes( $Query + "`r`n" )
                 $Stream.Write($Data, 0, $Data.Length)
- 
+
                 Write-Verbose "Reading Response:"
                 $Reader = New-Object -TypeName System.IO.StreamReader $Stream, [System.Text.Encoding]::ASCII
- 
+
                 $Result = $Reader.ReadToEnd()
- 
-                If ($Result -Match "(?s)Whois Server:\s*(\S+)\s*") 
+
+                If ($Result -Match "(?s)Whois Server:\s*(\S+)\s*")
                 {
 
                     Write-Warning "Recommended WHOIS server: ${Server}"
 
-                    If (!$NoForward) 
+                    If (!$NoForward)
                     {
                         Write-verbose "Non-Authoritative Results:`n${Result}"
                         # cache, in case we can't get an answer at the forwarder
-                        If (!$CachedResult) 
+                        If (!$CachedResult)
                         {
 
                             $CachedResult = $Result
@@ -254,25 +254,25 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
                         $MaxRequery--
 
                     }  # End If
-                    Else 
-                    { 
+                    Else
+                    {
 
-                        $MaxRequery = 0 
+                        $MaxRequery = 0
 
                     }  # End Else
                 }   # End If
-                Else 
-                { 
+                Else
+                {
 
-                    $MaxRequery = 0 
+                    $MaxRequery = 0
 
                 }  # End Else
 
             }  # End Try
-            Finally 
+            Finally
             {
 
-                If ($Stream) 
+                If ($Stream)
                 {
 
                     $Stream.Close()
@@ -282,20 +282,20 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
 
             }  # End Finally
         } While ($MaxRequery -gt 0)
- 
+
         $Result
- 
-        If ($CachedResult -and ($Result -Split "`n").Count -lt 5) 
+
+        If ($CachedResult -and ($Result -Split "`n").Count -lt 5)
         {
 
             Write-Warning "Original Result from ${CachedServer}:"
             $CachedResult
 
         }  # End If
- 
+
         $ErrorActionPreference = $EAP
 
-    }  # End If 
+    }  # End If
 
   } # End END
 
@@ -334,7 +334,7 @@ Function Invoke-IPBlacklistCheck {
             $BlacklistServers = @(
                 'b.barracudacentral.org'
                 'spam.rbl.msrbl.net'
-                'bl.deadbeef.com'  
+                'bl.deadbeef.com'
                 'bl.spamcop.net'
                 'blackholes.five-ten-sg.com'
                 'blacklist.woody.ch'
@@ -414,8 +414,8 @@ Function Invoke-IPBlacklistCheck {
                     $BlacklistedOn += $Server
 
                 }  # End Try
-                Catch 
-                { 
+                Catch
+                {
 
                     Continue
 
@@ -427,12 +427,12 @@ Function Invoke-IPBlacklistCheck {
             {
 
                 Write-Verbose "Create an event in MaliciousIPs in Event Viewer Tree"
-                Foreach ($Item in $BlacklistedOn) 
+                Foreach ($Item in $BlacklistedOn)
                 {
 
                     $EventMessage = Get-WinEvent -FilterHashtable @{LogName="Microsoft-Windows-Sysmon/Operational"; Id=3} | Where-Object -Property Message -like "*$IP*" | Select-Object -First 1 -ExpandProperty Message | Out-String
                     $Message = "IP Address was found to be on the following Blacklists: `n`nIP Address: $IP`nBlacklist: " + (Write-Output $Item  | Out-String -Width 1000) + "`n`n" + (Write-Output $EventMessage | Out-String -Width 1000)
-                    
+
                     Write-EventLog -LogName MaliciousIPs -Source MaliciousIPs -EntryType Information -EventId 1 -Message $Message
 
                 }  # End ForEach
@@ -465,21 +465,21 @@ ForEach ($IP in $IPList)
 
     If (($Creation) -and (($Now.AddYears(-2) -le $CreationDate)))
     {
-      
+
         Write-Verbose "Creating an event in MaliciousIPs Event Viewer Tree for a young domain"
 
         $Message = Write-Output "Domain was found to be less than a year old. WHOIS Information is below: `n" + ($Results  | Out-String -Width 1000)
         Write-EventLog -LogName MaliciousIPs -Source MaliciousIPs -EntryType Information -EventId 2 -Message $Message
-        
+
     }  # End If
 
-}  # End ForEach  
+}  # End ForEach
 
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQULG7isc22PiPJ8tuqCMo2tVVR
-# 5PSgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUVFc6DFP8UEa05t8Z00YAhp/Z
+# 3xmgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -539,11 +539,11 @@ ForEach ($IP in $IPList)
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FL7MA8ZfTu6GlWLEuPbVZd0724mOMA0GCSqGSIb3DQEBAQUABIIBALMApHRw+Qnd
-# b7+sK1iIabhd3yhbkd9Gcp2jlrlFiC1kYjeOOf0ro9lyH9lBq5q3DIq6ZP4ww4M7
-# GMCMGUe054/A18LbT67VT/BsEpNqGUrS6YNiwVAJA9gfQVNmsrJJ46lszed9rSzn
-# 55OVRDefD8A1bFRrrN0JbxV/W0m6m3oS1nhmxJ+TWmuoAJmdAhzM/D/5AE7HTxIy
-# ftd/YH526PNMKYkNCBquX0MRxOcA7cq4158CmsHTKCKRxod0Jn4I7RIh1vRlXVEh
-# 7Amvdqph16bUwkLEu93uhsxsRvhzKSQPm8Z3Kv8m9UUPb683DjeLBWDkzxNsR4El
-# 6hHeq6FGao4=
+# FPHxxNRZCVYGxuZt0hv6PyJE4ZASMA0GCSqGSIb3DQEBAQUABIIBADKssyW5Xx9s
+# z1qcUy/F6th5AwITeN9cBzpsC0IrbFeunuYAjLw6PsOpnZpTfFNGLw6m7Ma/cZ3a
+# nvM1pg8iaXI5Rd970fbRTrxMfFwfxvur+krW15FRRRmynCOhSiFV5VwxcwoEfmi/
+# ST0YJ54dzvu3VFpu03qHUlRn1VHu+CxePdgyE6+5TOJ75mhlUkue4E3QgfSkYN49
+# murV2Aefw98Dh6ghO8dcieE9fRm1b45NCAV1cWJd4Wy0bWPeuvlH5CeVugJLk0Fa
+# 7FbGOEawJYQZMcwqVprI/bTMBkBxsYmKyQl6PkMkHSZ0rN9xgUy5XT28ASavQ725
+# ZPp4T1rge1k=
 # SIG # End signature block

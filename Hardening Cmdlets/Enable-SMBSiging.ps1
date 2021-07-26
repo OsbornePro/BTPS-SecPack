@@ -61,14 +61,14 @@ Alias: tobor
 
 
 .LINK
-https://roberthsoborne.com
 https://osbornepro.com
+https://writeups.osbornepro.com
 https://btps-secpack.com
 https://github.com/tobor88
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
-https://www.youracclaim.com/users/roberthosborne/badges
+https://www.credly.com/users/roberthosborne/badges
 https://www.hackthebox.eu/profile/52286
 
 
@@ -123,7 +123,7 @@ Function Enable-SMBSigning {
             [Switch][Bool]$DisableSMB2
         )  # End param
 
-    
+
     Switch ($PSCmdlet.ParameterSetName)
     {
 
@@ -134,7 +134,7 @@ Function Enable-SMBSigning {
             {
 
                 $Bool = $True
-                     
+
             }  # End If
 
 
@@ -271,8 +271,8 @@ Function Enable-SMBSigning {
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUE/WJtmZDLbUpNYtUFXafFuzX
-# duWgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUs3V3+rhvfXZT4GjEtRy2qkFE
+# qRGgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -332,11 +332,11 @@ Function Enable-SMBSigning {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FBOxGsX/PkrY/ptDU3E1B3SUfnzrMA0GCSqGSIb3DQEBAQUABIIBAHc2jruzu+5z
-# HkosJtr2grr4hbQOTc7NsYoaipZcbz8fLmFZuq9d17OtlOEVKbPK5Gxo2XVsIoSJ
-# 4n4u3MTLL9SUPgSmhNFAX6EnSSaZbksBY4MAn+QgpeykoWod5ecJbLbPZxvHr2vZ
-# uKInWZnGW53BKlojdn77lsCwJa1II4gRWVCVok9MMqNxqiRfvUpkPsXcN/q1f8EU
-# 5SybvzM5szaQobJ6xXDxGbVL03Y8ZfB1yfwq8gJP+5LPPugtVU9mnhUZ+2CTdACI
-# ulJkboMAuXTFBvlP30xdepjCuIO5vJLIr4zNE5eETXouwq6kX7EvgYsRlSBoE3MO
-# LyidXJo+io8=
+# FAv/G1zPxw6NA3mBTLgfkEPMlD2kMA0GCSqGSIb3DQEBAQUABIIBAAHES+tPgIoa
+# n/5KB2XrLUNvoCgFXplGIE9rN4XPJkGkWYFKktGTbpo0UfSu0MYgDDHBd1hPkfGt
+# bzSeOuNFAZrh9ciuBKyHOCXp5fJ9ZAzbSWPcqjcqXGr6TP/aW5L98j8ktzZ8YPrn
+# 4BttlSpfKOz2iJx7pZsTh2YEJ/i8DlRI8cpCLc37nT3Dym91vDln8GkgWpghkoGR
+# kpVeGPG9zSSMR9L1JT3wOQgLqaANtb/94DhE1hc4skZa2qd6URIblUPvKWe+EHLc
+# /ONGP9DUs9G6SXLohfMWVUgpgfL3KWZOcFwLSTOuC10KvIdqPbFYVL7tU2tmHgmW
+# H6bppkfbg4U=
 # SIG # End signature block

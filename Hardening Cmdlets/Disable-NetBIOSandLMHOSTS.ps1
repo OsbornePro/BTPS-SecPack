@@ -67,15 +67,15 @@ None
 
 
 .LINK
-https://roberthosborne.com
 https://osbornepro.com
+https://writeups.osbornepro.com
 https://btps-secpack.com
 https://github.com/tobor88
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.hackthebox.eu/profile/52286
 https://www.linkedin.com/in/roberthosborne/
-https://www.youracclaim.com/users/roberthosborne/badges
+https://www.credly.com/users/roberthosborne/badges
 #>
 Function Disable-NetBIOSandLMHOSTS {
     [CmdletBinding(DefaultParameterSetName='Local')]
@@ -112,9 +112,9 @@ Function Disable-NetBIOSandLMHOSTS {
 
     If ((Get-CimInstance -ClassName Win32_ComputerSystem).PartofDomain)
     {
-    
+
         $Domain = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain().Name
-        
+
     }  # End If
 
     Switch ($PSCmdlet.ParameterSetName)
@@ -129,18 +129,18 @@ Function Disable-NetBIOSandLMHOSTS {
                 $Bool = $True
 
             }  # End If
-            
+
             $Lmhost = $False
             If ($EnableLMHOSTS.IsPresent)
             {
-            
+
                 $Lmhost = $True
-                
+
             }  # End If
 
-            ForEach ($C in $ComputerName) 
+            ForEach ($C in $ComputerName)
             {
-                
+
                 Write-Verbose "Changing NetBIOS settings on $C"
 
                 If ($C -notlike "*.$Domain")
@@ -151,7 +151,7 @@ Function Disable-NetBIOSandLMHOSTS {
                 }  # End If
 
                 Invoke-Command -ArgumentList $Undo,$UseDHCPNetBIOSSetting,$Lmhost -HideComputerName $C -UseSSL:$Bool -ScriptBlock {
-                    
+
                     $Undo = $Args[0]
                     $UseDHCPNetBIOSSetting = $Args[1]
                     $Lmhost = $Args[2]
@@ -159,18 +159,18 @@ Function Disable-NetBIOSandLMHOSTS {
 
                     If ($Lmhost -eq $True)
                     {
-                    
+
                         Invoke-CimMethod -Namespace root/CIMV2 -ClassName Win32_NetworkAdapterConfiguration -MethodName EnableWINS -Arguments @{ DNSEnabledForWINSResolution = $False; WINSEnableLMHostsLookup = $False }
-                    
+
                     }  # End If
                     ElseIf ($Lmhost -eq $False)
                     {
-                    
+
                         Invoke-CimMethod -Namespace root/CIMV2 -ClassName Win32_NetworkAdapterConfiguration -MethodName EnableWINS -Arguments @{ DNSEnabledForWINSResolution = $True; WINSEnableLMHostsLookup = $True }
-                    
+
                     }  # End ElseIf
-                    
-                    
+
+
                     If ($Undo.IsPresent)
                     {
 
@@ -188,7 +188,7 @@ Function Disable-NetBIOSandLMHOSTS {
 
                     Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\services\NetBT\Parameters\Interfaces\tcpip*" -Name NetbiosOptions -Value $Value
                     $CurrentSetting = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\services\NetBT\Parameters\Interfaces\tcpip*" -Name NetbiosOptions | Select-Object -Property NetbiosOptions -Unique
-                
+
                     If ($CurrentSetting.NetbiosOptions -eq 2)
                     {
 
@@ -202,7 +202,7 @@ Function Disable-NetBIOSandLMHOSTS {
                         $CurrentSetting
 
                     }  # End Else
-                    
+
                     $LMSetting = (Get-CimInstance -Namespace root/CIMV2 -ClassName Win32_NetworkAdapterConfiguration).WINSEnableLMHostsLookup | Select-Object -Unique
                     If ($LMSetting -eq $False)
                     {
@@ -216,9 +216,9 @@ Function Disable-NetBIOSandLMHOSTS {
                         Write-Output "[!] The use of the LMHOSTS file has been enabled on $env:COMPUTERNAME"
 
                     }  # End Else
-            
+
                 }  # End Invoke-Command
-            
+
             }  # End ForEach
 
         }  # End Switch Remote
@@ -227,17 +227,17 @@ Function Disable-NetBIOSandLMHOSTS {
 
             If ($EnableLMHOSTS.IsPresent)
             {
-                    
+
                 Invoke-CimMethod -Namespace root/CIMV2 -ClassName Win32_NetworkAdapterConfiguration -MethodName EnableWINS -Arguments @{ DNSEnabledForWINSResolution = $True; WINSEnableLMHostsLookup = $True }
-                    
+
             }  # End If
             Else
             {
-                    
+
                 Invoke-CimMethod -Namespace root/CIMV2 -ClassName Win32_NetworkAdapterConfiguration -MethodName EnableWINS -Arguments @{ DNSEnabledForWINSResolution = $False; WINSEnableLMHostsLookup = $False }
-                    
+
             }  # End ElseIf
-                    
+
             $Value = 2
             If ($Undo.IsPresent)
             {
@@ -256,8 +256,8 @@ Function Disable-NetBIOSandLMHOSTS {
 
 
             Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\services\NetBT\Parameters\Interfaces\tcpip*" -Name NetbiosOptions -Value $Value
-           
-            
+
+
             $CurrentSetting = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\services\NetBT\Parameters\Interfaces\tcpip*" -Name NetbiosOptions | Select-Object -Property NetbiosOptions -Unique
             If ($CurrentSetting.NetbiosOptions -eq 2)
             {
@@ -272,13 +272,13 @@ Function Disable-NetBIOSandLMHOSTS {
                 $CurrentSetting
 
             }  # End Else
-            
+
             $LMSetting = (Get-CimInstance -Namespace root/CIMV2 -ClassName Win32_NetworkAdapterConfiguration).WINSEnableLMHostsLookup | Select-Object -Unique
             If ($LMSetting -eq $False)
             {
-            
+
                 Write-Output "[*] The use of the LMHOSTS file has been disabled on $env:COMPUTERNAME"
-            
+
             }  # End If
             Else
             {
@@ -296,8 +296,8 @@ Function Disable-NetBIOSandLMHOSTS {
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUGZ4+DLZ5Cuy8kcLjX/DG6kTO
-# 7uCgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQULy+3eIFTPjeuV6+/4Vbt+lDc
+# iW2gggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -357,11 +357,11 @@ Function Disable-NetBIOSandLMHOSTS {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FHunU+UEA9v/ZM+6ltbrRtVyUltYMA0GCSqGSIb3DQEBAQUABIIBAJDqd8IGV1HK
-# PXY3HZXXX3sMtnaAGmxfzPol0GBOg8VEaYAUKGtuK+TgQ2ClomdLUvcO5DVaCIXc
-# g8Z7izSWRcW/Z6MEVS8XhimM8r5OtvwXI/7MUQCuVPhbwGeTmy4SEtaa9gzdhVGs
-# dggvCFC/teU0tsApxJpT4xlcHlMb37QEu5FU/7hGWSThU5qNSCNZlQgkkjw8N268
-# 5cFiPtfwrXwljhNTw0eFA5aZdSMP8e0gUsBUZSw7cjGb4RW6j+hZsuSaphUYQBv4
-# 2ry42vMC3YYLa/Yxi2YdapG235ke5d5Dz/ib5RavATIMYtazn2yqjV2qrA46PfyS
-# n1cvcuXVoq0=
+# FDFJtPZRdr7WBhoHih7HdSvaZ6V+MA0GCSqGSIb3DQEBAQUABIIBAAzzZLO4SqAw
+# Pan0EjmZQn/gpmxkfDkCAkP36kUIrZq+6iuGuEsA4GVQl7l/Jc0p75w+YmP8W2/Q
+# lfgsDVi7SzLDB4Go++N3zvb4d807u4LvHraZ2u14l6KG2qewBfNpO58Zw+MTSJWl
+# pbscKyTauRKZkbx1COV/Jl3c/UTet1X8yDeFL9yNd6aRp/1LLRufKmOU5fqnrcyK
+# Ab7GJsy456bSswKcJNIY1X2KHj+eYZe8ZsLMUngJXwa8qbHkHlU1XP6UCOPvM6at
+# JdCAbUshJOrOG1VNSnelxNkv22XWe+/xJOnnVHh5TjWUkrOS+S9BF83+oaoTxVhq
+# pnu/2VH584s=
 # SIG # End signature block

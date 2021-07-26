@@ -62,14 +62,14 @@ System.Array
 
 
 .LINK
-https://roberthsoborne.com
 https://osbornepro.com
+https://writeups.osbornepro.com
 https://btps-secpack.com
 https://github.com/tobor88
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
-https://www.youracclaim.com/users/roberthosborne/badges
+https://www.credly.com/users/roberthosborne/badges
 https://www.hackthebox.eu/profile/52286
 #>
 Function Enable-HSTS {
@@ -130,7 +130,7 @@ Function Enable-HSTS {
 
             Write-Warning "This does not work yet. I am still trying to trouble shoot the issue here"
             If ($UseSSL.IsPresent -and $C -notlike "*.$env:USERDNSDOMAIN")
-            { 
+            {
 
                 $C = $C + ".$env:USERDNSDOMAIN"
 
@@ -222,7 +222,7 @@ Function Enable-HSTS {
                             Set-IISConfigAttributeValue -ConfigElement $HstsElement -AttributeName "max-age" -AttributeValue $MaxAge
 
                         }  # End If
-                        Else 
+                        Else
                         {
 
                             Write-Output "[*] Max-Age is already set to $MaxAge"
@@ -232,7 +232,7 @@ Function Enable-HSTS {
 
                         If (($IncludeSubDomains.IsPresent) -and ($HstsElements.RawAttributes.includeSubDomains -eq 'False'))
                         {
-                            
+
                             Write-Verbose "Apply to all subdomains"
                             Set-IISConfigAttributeValue -ConfigElement $HstsElement -AttributeName "includeSubDomains" -AttributeValue 'True'
 
@@ -265,9 +265,9 @@ Function Enable-HSTS {
 
                     }  # End ForEach
 
-                    If ($Obj.Site) 
+                    If ($Obj.Site)
                     {
-                    
+
                         $Obj
 
                     }  # End If
@@ -287,7 +287,7 @@ Function Enable-HSTS {
         }  # End ForEach
 
     }  # End If
-    Else 
+    Else
     {
 
         $Count = 0
@@ -367,7 +367,7 @@ Function Enable-HSTS {
                     Set-IISConfigAttributeValue -ConfigElement $HstsElement -AttributeName "max-age" -AttributeValue $MaxAge
 
                 }  # End If
-                Else 
+                Else
                 {
 
                     Write-Output "[*] Max-Age is already set to $MaxAge"
@@ -377,7 +377,7 @@ Function Enable-HSTS {
 
                 If (($IncludeSubDomains.IsPresent) -and ($HstsElements.RawAttributes.includeSubDomains -eq 'False'))
                 {
-                    
+
                     Write-Verbose "Apply to all subdomains"
                     Set-IISConfigAttributeValue -ConfigElement $HstsElement -AttributeName "includeSubDomains" -AttributeValue 'True'
 
@@ -410,9 +410,9 @@ Function Enable-HSTS {
 
             }  # End ForEach
 
-            If ($Obj.Site) 
+            If ($Obj.Site)
             {
-            
+
                 $Obj
 
             }  # End If
@@ -433,8 +433,8 @@ Function Enable-HSTS {
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUPBbZmrkIynXvGrzVTjdYcF+8
-# 94Sgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUca3+O9eitX/9HFxKIh7tKUBJ
+# STygggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -494,11 +494,11 @@ Function Enable-HSTS {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FPwMnaMQWT2CFOgzRz3eymd7L7mIMA0GCSqGSIb3DQEBAQUABIIBAMRQNtK1Gy2K
-# qJeXX8SheGu6uiVHN5j0g9g2qJ4P3g/B80mxg0lPVewrPVCxbzPQU2HmfKELfbC8
-# LdcQlDi2MXXjQ4HRlbGEaHcIwkQgq8slc4vWlkP/RTCYXOcU1C2Fvs2k+betnb+k
-# L1mxLq+ivD4M9Eakp4M5rNWNvffxemok7Hok5YXz+wZimOZ+sbI2+ihT19jfSr44
-# Omd5RNZuN6lIlqZMl5X35WAbL5Pjw0S34Porsp26kGTWxAvZJdyWgccHAq8DHoOx
-# rF4UpuGRkRuXzDa1IM1i5FDBIgNfzI52g/BaRZa9tNs71sLnDAecOIXKZ94XTllq
-# Roye3RWDc6Q=
+# FOzJyMRIvwvsAkdhkmWeT04Ut3w4MA0GCSqGSIb3DQEBAQUABIIBAKt67pagahJS
+# 5vCrKCI7qzluVv3P2DX2Girua1imORkfyDH47W/czIHrLBrmQawc+QDZ0p25+Xj1
+# x1fEqytw1euFJtBPbM4qREVBZ9rkCMaTNZr35gzw0dAIPvhsTJKqRePirjbZYPOi
+# agrMuWWJ+aMICr+2zgraYWACZCM9RFQhhRfRyImHCvnhms0BWuA6PItBXWzRdH7W
+# hGwLaMWnSEORB91qQ07zd6Vwvz99dGloYth4bxHex8w1fu01ZlGZXNlp01decNQk
+# qR6hfRg4G6d9HaV93/K7FBvbZcx7WWP4lyE+qJmYgpNkvlqsbw19LJQYbZeVFB7Y
+# KCFnBMcbQxU=
 # SIG # End signature block

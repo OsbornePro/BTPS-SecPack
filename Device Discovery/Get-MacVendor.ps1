@@ -1,5 +1,4 @@
-﻿function Get-MACVendor
-{
+﻿Function Get-MACVendor {
     [CmdletBinding()]
     param(
         [Parameter(
@@ -8,94 +7,82 @@
             HelpMessage='MAC-Address or the first 6 digits of it')]
 
         [ValidateScript({
-                if($_ -match "^(([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})|([0-9A-Fa-f]{2}){6})|([0-9A-Fa-f]{2}[:-]){2}([0-9A-Fa-f]{2})|([0-9A-Fa-f]{2}){3}$")
+                If ($_ -match "^(([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})|([0-9A-Fa-f]{2}){6})|([0-9A-Fa-f]{2}[:-]){2}([0-9A-Fa-f]{2})|([0-9A-Fa-f]{2}){3}$")
                 {
-                    return $true
-                }
-                else 
+
+                    Return $true
+
+                }  # End If
+                Else
                 {
-                    throw "Enter a valid MAC-Address (like 00:00:00:00:00:00 or 00-00-00-00-00-00)!"    
-                }
 
-        })]
+                    Throw "Enter a valid MAC-Address (like 00:00:00:00:00:00 or 00-00-00-00-00-00)!"
 
+                }  # End Else
+        })]  # End ValidateScript
         [String[]]$MACAddress
 
-    )
+    )  # End param
 
-    Begin{
+    BEGIN {
 
         # MAC-Vendor list path
 ##########################################################################################################################
-        $CSV_MACVendorList_Path = "C:\Users\Public\Documents\PSGetHelp\MAC.Vendor.List.csv"        
-
-        if([System.IO.File]::Exists($CSV_MACVendorList_Path))
-
+        $CSV_MACVendorList_Path = "C:\Users\Public\Documents\PSGetHelp\MAC.Vendor.List.csv"
+        If([System.IO.File]::Exists($CSV_MACVendorList_Path))
         {
 
             $MAC_VendorList = Import-Csv -Path $CSV_MACVendorList_Path | Select-Object -Property "Assignment", "Organization Name"
-            
-            #### The above values may change depending on your csv file. Just replaec Assignment and Organization Name with whatever the headers are in your 
-        }
+            #### The above values may change depending on your csv file. Just replaec Assignment and Organization Name with whatever the headers are in your
+        }  # End If
+        Else
+        {
 
-        else {
+            Throw [System.IO.FileNotFoundException] "No CSV-File to assign vendor with MAC-Address found!"
 
-            throw [System.IO.FileNotFoundException] "No CSV-File to assign vendor with MAC-Address found!"
+        }  # End Else
 
-        }
+    }  # End BEGIN
+    PROCESS {
 
-    }
-
-    Process{
-
-        foreach($MACAddress2 in $MACAddress)
-
+        ForEach ($MACAddress2 in $MACAddress)
         {
 
             $Vendor = [String]::Empty
-
-            # Split it, so we can search the vendor (XX-XX-XX-XX-XX-XX to XX-XX-XX)            
-
+            # Split it, so we can search the vendor (XX-XX-XX-XX-XX-XX to XX-XX-XX)
             $MAC_VendorSearch = $MACAddress2.Replace("-","").Replace(":","").Substring(0,6)
-
-            foreach($ListEntry in $MAC_VendorList)
+            ForEach ($ListEntry in $MAC_VendorList)
 
             {
 
-                if($ListEntry.Assignment -eq $MAC_VendorSearch)
-
+                If ($ListEntry.Assignment -eq $MAC_VendorSearch)
                 {
 
                     $Vendor = $ListEntry."Organization Name"
-             
                     [pscustomobject] @{
-
                         ClientId = $MACAddress2
-
                         Vendor = $Vendor
+                    }  # End CustomObject
 
-                    }
+                }  # End If
 
-                }
+            }  # End ForEach
 
-            }                            
+        }  # End ForEach
 
-        }
+    }  # End PROCESS
+    END {
 
-    }
+    }  # End END
 
-    End{
-
-    }
-
-}
+}  # End Function Get-MacVendor
 
 
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUugq87KG5U5Pb8DJ1ajwMzdcw
-# amugggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUOn5DNKbW2FqRu46VSNHDFToP
+# 4Gugggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -155,11 +142,11 @@
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FBQ6kEiW4PxTuU51BmiDeMxCmx7lMA0GCSqGSIb3DQEBAQUABIIBAEyq9ZEiSx7X
-# tjh8eoqcIdeIqwHLrZ9B2Z2Yk5QZHg1dC6tH+CWEZ5Jf3laoqC0V94w0TKV0Wbdl
-# SVrcShq7LQXOue9Y1qqU7yDQzTq9SJcvwuPUgTGFZarWq21D5AUW9Gn7G+0JfFqy
-# QG+EV3/Ei2HUTZwJTXE+gyo4O3MB23HrubPkBrEnOzkXqK3NhZiMh4uo45h9wRLX
-# U81QAFhmvsVCh+ghJyARnCA+01zq9GeHuawZgazs7wdqyCBNqxOdg2kxoJgdL94u
-# UqQWvCe0UWzvkKouPYCqcKoR3CmWeQYZ8I3bHtaDy9aj782H5+6wbLsQYa1znQYt
-# FVGOTKJCEG8=
+# FGT7wdYbtFi3cq5NNrS0cvbud+cKMA0GCSqGSIb3DQEBAQUABIIBACylBn3GOI6+
+# EdS4w8ZhtIQAxJygdVrgLVZSBLYOfDia8ITxP18ewS8eCacYzCt8XxlF6XUxLhjy
+# 42ICLoQpeYphi6qwH24aV5ZMtYs4cLsuqpMv+/qMNLeoF3FNhfJOfyM8cusaJWyL
+# vnHaukHc4/UdqUXVHt9JOmKj0F5hgOva7JjkxpQ8Ey/9AMSNkc+XEI7ecJzDZNhO
+# qe2aZGNZwo0cMNjTafLYLi6S4UuTNlLstKMiuaJoEb/kOe0om2ebfFTzw0skz7Af
+# QRYi/3xDsW+Rn2usP1h+tnBj2AZYygXiPslPoG2UY+o0pPWDBVI5zK9svghWdQyC
+# Y8tBtkBA0lo=
 # SIG # End signature block

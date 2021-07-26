@@ -48,13 +48,13 @@ None
 
 
 .LINK
-https://roberthsoborne.com
 https://osbornepro.com
+https://writeups.osbornepro.com
 https://github.com/tobor88
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
-https://www.youracclaim.com/users/roberthosborne/badges
+https://www.credly.com/users/roberthosborne/badges
 https://www.hackthebox.eu/profile/52286
 
 #>
@@ -158,8 +158,8 @@ Function Set-SecureFilePermissions {
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU5Yi1KB2FixMNWwkT4XedlUR1
-# /9Ogggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUC/3Rp+k1z8avMmVAQ7cYnZz5
+# XRKgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -219,11 +219,11 @@ Function Set-SecureFilePermissions {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FBKXlRycJfSaGYUzENdKqIOHW9tSMA0GCSqGSIb3DQEBAQUABIIBAJqDlMw3OFgK
-# 1buW1ID2T1jMF+dP9tWh1IcIQ7JROE2hwRJbW4hwIdvAVfw1VKfD0me89+FK+joB
-# rTUSkvfe2LszIsT32C/IHWUZ8OMxkZjwmtb54XIH25RjWCNg/oEhor4R7e4B1iCT
-# jrbnA6U++xkgug4ugYbJfHuv1L0MIILbYYUeWcztqLmXrBoWfON6YWVeOwP/FXgL
-# GgslTxNDvd+B+TLLixe2C8jLjiWi+l8HK3rzJjhxxV2yAaX6UFO5y+ljEaTE0pG6
-# K1Fkp3Ad9cw6ELGQQdAvFRGoiLrN0Afvu+1urtv4KqAB21rpOFq4VCmr8uA9b3iU
-# 8CDrMdMnDrw=
+# FOshoOpt8YKIa69Jt1zYANEQfLOnMA0GCSqGSIb3DQEBAQUABIIBAHk+N73n1CEN
+# DugycyGlxtyeUVaSP2EulPl2xsS/WhmCehWGgfQg+2BbRIgCChR0/IS2jvRWt9yA
+# Ho8HMINFsGgEnqHpoSqJ1PbzrVYWS0CXRPi/6O1ZYmUq/oKCcM9mJTJrL8ZGkAFm
+# cdr6P7AxEA19jAZbPemARC7r32Na+QQ2UTIjkkeogEE8EdRraYyk/681lCgknArB
+# FdjsINBx3nRyQUD4qj3eOu+FDMEYD16xVnhcl6KcPFtYul4Sat7AF3uX6rcKMC2f
+# TV8DKt7U9vglatN/hEgIZEQ4Vz+MWBaykDVasrJ0H3SIiomr2yMi+vzPO3Bwt5pH
+# UkFV7ergk1o=
 # SIG # End signature block

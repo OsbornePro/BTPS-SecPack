@@ -27,14 +27,14 @@ Contact: rosborne@osbornepro.com
 
 
 .LINK
-https://roberthosborne.com/f/dns-protections-and-applications
-https://roberthsoborne.com
+https://osbornepro.com/f/dns-protections-and-applications
 https://osbornepro.com
+https://writeups.osbornepro.com
 https://github.com/tobor88
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
-https://www.youracclaim.com/users/roberthosborne/badges
+https://www.credly.com/users/roberthosborne/badges
 https://www.hackthebox.eu/profile/52286
 
 
@@ -95,8 +95,8 @@ Function Enable-DoH {
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUELXOdJFe4QWO4Lp7C9gBB9js
-# UDagggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUqeBhmwAZ9aQqT0/3Tj42k7Vt
+# lFugggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -156,11 +156,11 @@ Function Enable-DoH {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FIYUeALkS6PaaNn+tja/0pF9MO2XMA0GCSqGSIb3DQEBAQUABIIBAHtfza9HbJ02
-# gvq7veYwIjWveL77zRmK6iOrW7tUU6vNvsX+pSK9TKmN0fE9GO+fPYLC06Tlc9J+
-# 8/axCB8XgHZ7TUGlIJr202PtkJ6R3WDISi816GC+ynpGn03i1iVe01q0+WPeEaZ0
-# EPKoOPKGRgGATM2XKwKqxrwdk2mGB7Svx5ONxM1Uge6e5sHfwgvoP5tLqFBzU5f1
-# oaDbqtMlV/3MtK3RNCe2RmYTurBKgYHphyTarHdnnxU8MG194E7wGGFOSM4LhLDg
-# tvj1fFv/ZKB3xfAkXO3bTGCCJAcBagKzEAzicT5mQJ+8VxUvMD34rR7ve/bw+cqA
-# TMytPplL7Z8=
+# FDbAjZRa0JOu0FnBWX/PoMh1lgfCMA0GCSqGSIb3DQEBAQUABIIBAH6CUXoqdUoN
+# hXKGnu9sLqdjp6KXys3mZpThuKhm4ciX+MEprQd2LexiVBNl1gkqrige2dFWw/AL
+# b74mdOmHB0XxmTqaNfo9Nbkp9rCquhmXPh50ljUsPrl1Nejb1LbTNQyYav6YEvy9
+# mK57yW4y+Ur9p2S9SFtf3jh9rBMfjj1tTDQKmLmNPjbmhczH7mOzlRgxS47RehJ8
+# hkjBnuFmiuU6HI7Dhvg/2qQ+KpTd1Ou4eN6Tw/9fvgFUNPmS9j0yE3g7H8Y86x33
+# vO0hX+sSILjNzRigMeC5NaOnLEVDH74h4gaIvmZJV8lw1qDMrtr4sfKuZLqzQ75e
+# v06kBN1UtxI=
 # SIG # End signature block

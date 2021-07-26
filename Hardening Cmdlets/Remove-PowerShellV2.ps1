@@ -35,13 +35,13 @@ None
 
 
 .LINK
-https://roberthsoborne.com
 https://osbornepro.com
+https://writeups.osbornepro.com
 https://github.com/tobor88
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
-https://www.youracclaim.com/users/roberthosborne/badges
+https://www.credly.com/users/roberthosborne/badges
 https://www.hackthebox.eu/profile/52286
 
 #>
@@ -73,7 +73,7 @@ Switch ($PSBoundParameters.Keys) {
                 $C = "$C.$env:USERDNSDOMAIN"
 
             }  # End If
-            
+
             Invoke-Command -HideComputerName $C -UseSSL -SessionOption $SessionOption -ScriptBlock {
 
                 Write-Verbose "[*] Checking whether or not PowerShell version 2 is installed on the $env:COMPUTERNAME"
@@ -161,8 +161,8 @@ Switch ($PSBoundParameters.Keys) {
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU4JG5PEezHAFJSre2XWEwGxFm
-# xiCgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUZ0/VFndr1k2HtbC5bKtt7SjZ
+# psCgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -222,11 +222,11 @@ Switch ($PSBoundParameters.Keys) {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FOP0rJpBxvuazxOYeDRZXKM10fXQMA0GCSqGSIb3DQEBAQUABIIBALUFeDqlqv2O
-# wfll0KfuM/wKNqBr5OvwiQ7gJcSOhMToXcCt75m4fiqEOWSpkrQcX2n5uUno4gYZ
-# 4WNat+tvWPB2VPh7HYpg8Z+l7L7aq7S66Kv+1RLqzxLwi0ahnnCICRvpjuaehm4i
-# u5gvY7FpQZGOomJdKsn0Js1P85uyje/B1mJL+trWZjjXs/EjUP2YcltEkx8ULzCt
-# ksS+HI6rJfa+JG8avWPDE9Im14lGgm1RPdXE6T67kOKPd3noIphmzH/4UmoXBanJ
-# LW8pnQBirBGvuFVapsFofQeHE9D7ihTwnTSpCA/gitgpggevWw9rd1c2m2JBEGim
-# MVounsI60ZA=
+# FGKD8/5+wB84aeTKG/BdDuUuNAn8MA0GCSqGSIb3DQEBAQUABIIBAA9LRwGLAnUB
+# RjEBaiegJv7zoRbkfN9FQtijfvktSAomP90cBJGogyUpQ/eXDAr/7EOTRPyQVa/t
+# lRgc3h3d5n41ZNJUe5tnJx6nuiOrP1UgpplogMF9BDp89W/CtBenkSbaLajz7LHV
+# IGjJRdSww8fkzGxD1cDumkuHrPs5VA6uNVnZxnxTLDYz3WeSMXYrVFDLE/hEwLjx
+# dHYqVnK3Ns6k6O6tHuhX8gzACiQonHFGANgS7UXcuGvLRjCsb68yj8LpDoH0TIlj
+# yUpA6KUN+AWhIQjN49RmmTf0DP0Hf3UIwyli3D4KUyAoGJgB5nqmkQHPhf4WydVY
+# fpS9TQFEC80=
 # SIG # End signature block

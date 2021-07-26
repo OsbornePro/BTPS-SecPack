@@ -20,12 +20,10 @@
 
 $Upn = Read-Host "What is the user's Email Address/UserPrincipalName Example: first.last@$env:USERDNSDOMAIN"
 
-
 If ($Null -eq $Upn)
 {
 
-    Write-Host "User UPN/email address was not defined was not defined. Ending script" -ForegroundColor Red 
-
+    Write-Host "User UPN/email address was not defined was not defined. Ending script" -ForegroundColor Red
     Break
 
 } # End If
@@ -33,43 +31,38 @@ Else
 {
 
     $SamAccountName = $Upn -Split "@"
-    
     $TranscriptPath = "C:\Users\Public\Desktop\" + $SamAccountName[0] + "_RemediationTranscript_" + (Get-Date).ToString('MM-dd-yyyy') + ".txt"
 
     Start-Transcript -Path $TranscriptPath
-
     Write-Host "$Upn's account will have remediation actions applied to it.`nAn audit report will be saved to $TranscriptPath" -ForegroundColor Cyan
 
     Import-Module MSOnline
-
     Write-Verbose "Connecting to Exchange Online Remote Powershell Service"
-
     $ExoSession = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential (Get-Credential -Message "Enter Global Admin Creds") -Authentication Basic -AllowRedirection
 
-    If ($Null -ne $ExoSession) 
-    { 
+    If ($Null -ne $ExoSession)
+    {
 
         Import-PSSession -Session $ExoSession
 
-    } # End If 
-    Else 
+    } # End If
+    Else
     {
 
         Write-Host "  No EXO service set up for this account" -ForegroundColor Red
 
-    } # End Else 
+    } # End Else
 
     Write-Host "Connecting to EOP Powershell Service" -ForegroundColor Cyan
-
     $EopSession = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://ps.compliance.protection.outlook.com/powershell-liveid/ -Credential $AdminCredential -Authentication Basic -AllowRedirection
 
-    If ($Null -ne $EopSession) 
-    { 
+    If ($Null -ne $EopSession)
+    {
 
         Import-PSSession -Session $EopSession -AllowClobber
 
     } # End If
-    Else 
+    Else
     {
 
         Write-Host "  No EOP service set up for this account" -ForegroundColor Red
@@ -77,23 +70,22 @@ Else
     } # End Else
 
     Connect-MsolService -Credential $AdminCredential
-
-    [Reflection.Assembly]::LoadWithPartialName("System.Web") 
+    [Reflection.Assembly]::LoadWithPartialName("System.Web")
 
 # BELOW THIS LINE CREATES THE FUNCTIONS------------------------------------------------------------------------
 Function Get-RandomHexNumber{
-    param( 
-        [int] $length = 20,
-        [string] $chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-    )
-        $bytes = New-Object "System.Byte[]" $length
-        $rnd = New-Object System.Security.Cryptography.RNGCryptoServiceProvider
-        $rnd.GetBytes($bytes)
-        $result = ""
-        1..$length | foreach{
-            $result += $chars[ $bytes[$_] % $chars.Length ]	
-        }
-        $result
+    param(
+        [Int]$Length = 20,
+        [String]$Chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    )  # End param
+        $Bytes = New-Object -TypeName "System.Byte[]" -ArgumentList $Length
+        $Rnd = New-Object -TypeName System.Security.Cryptography.RNGCryptoServiceProvider
+        $Rnd.GetBytes($Bytes)
+        $Result = ""
+        1..$Length | ForEach {
+            $Result += $Chars[ $Bytes[$_] % $Chars.Length ]
+        }  # End ForEach
+        $Result
 }
 
 $Password = Get-RandomHexNumber -Length 30
@@ -103,11 +95,9 @@ $Password = Get-RandomHexNumber -Length 30
 Function Reset-Password($Upn) {
 
     $NewPassword = ([System.Web.Security.Membership]::GeneratePassword(16,2))
-
     Set-MsolUserPassword –UserPrincipalName $Upn –NewPassword $NewPassword -ForceChangePassword $True
 
-    Write-Host "Password for the user $Upn was changed to $NewPassword. Make sure you record this and share with the user, or be ready to reset the password again. They will have to reset their password on the next logon." -ForegroundColor Cyan 
-
+    Write-Host "Password for the user $Upn was changed to $NewPassword. Make sure you record this and share with the user, or be ready to reset the password again. They will have to reset their password on the next logon." -ForegroundColor Cyan
     Set-MsolUser -UserPrincipalName $Upn -StrongPasswordRequired $True
 
 } # End Function Reset-Password
@@ -117,11 +107,9 @@ Function Reset-Password($Upn) {
 Function Enable-MailboxAuditing($Upn) {
 
     Write-Host "Mailbox auditing for user is being enabled..."
-
     Set-Mailbox $Upn -AuditEnabled $True -AuditLogAgeLimit 365
 
-    Write-Host "Current auditing configuration."    
-
+    Write-Host "Current auditing configuration."
     Get-Mailbox -Identity $Upn | Select-Object -Property Name, AuditEnabled, AuditLogAgeLimit
 
 } # End Functgion Enable-MailboxAuditing
@@ -131,12 +119,10 @@ Function Enable-MailboxAuditing($Upn) {
 Function Remove-MailboxDelegates($Upn) {
 
     Write-Host "Removing Mailbox Delegate Permissions for the affected user $upn." -ForegroundColor Cyan
-
     $MailboxDelegates = Get-MailboxPermission -Identity $Upn | Where-Object {($_.IsInherited -ne "True") -and ($_.User -notlike "*SELF*")}
 
     Get-MailboxPermission -Identity $Upn | Where-Object {($_.IsInherited -ne "True") -and ($_.User -notlike "*SELF*")}
-
-    ForEach ($Delegate in $MailboxDelegates) 
+    ForEach ($Delegate in $MailboxDelegates)
     {
 
         Remove-MailboxPermission -Identity $Upn -User $Delegate.User -AccessRights $Delegate.AccessRights -InheritanceType All -Confirm:$False
@@ -150,13 +136,10 @@ Function Remove-MailboxDelegates($Upn) {
 Function Disable-MailforwardingRulesToExternalDomains($Upn) {
 
     Write-Host "Disabling mailforwarding rules to external domains for the affected user $Upn."
-
     Write-Host "Found the following rules that forward or redirect mail to other accounts: "
 
     Get-InboxRule -Mailbox $Upn | Select-Object -Property Name, Description, Enabled, Priority, ForwardTo, ForwardAsAttachmentTo, RedirectTo, DeleteMessage, SendTextMessageNotificationTo | Where-Object {(($_.Enabled -eq $True) -and (($_.ForwardTo -ne $Null) -or ($_.ForwardAsAttachmentTo -ne $Null) -or ($_.RedirectTo -ne $Null) -or ($_.SendTextMessageNotificationTo -ne $Null)))} | Format-Table
-
     Get-InboxRule -Mailbox $Upn | Where-Object {(($_.Enabled -eq $true) -and (($_.ForwardTo -ne $Null) -or ($_.ForwardAsAttachmentTo -ne $Null) -or ($_.RedirectTo -ne $Null) -or ($_.SendTextMessageNotificationTo -ne $Null)))} | Disable-InboxRule -Confirm:$False
-
     Write-Output "Completed disabling of rules being forwarded to outside domains"
 
 } # Disable Disable-MailforwardingRulesToExternalDomains
@@ -166,13 +149,10 @@ Function Disable-MailforwardingRulesToExternalDomains($Upn) {
 Function Remove-MailboxForwarding($Upn) {
 
     Write-Output "Removing Mailbox Forwarding configurations for the affected user $Upn. Current configuration is:"
-
     Get-Mailbox -Identity $Upn | Select-Object -Property Name, DeliverToMailboxAndForward, ForwardingSmtpAddress
-
     Set-Mailbox -Identity $Upn -DeliverToMailboxAndForward $False -ForwardingSmtpAddress $Null
 
     Write-Host "Mailbox forwarding removal completed. Current configuration is:"
-
     Get-Mailbox -Identity $Upn | Select-Object -Property Name, DeliverToMailboxAndForward, ForwardingSmtpAddress
 
 } # End Function Remove-MailboxForwarding
@@ -182,22 +162,15 @@ Function Remove-MailboxForwarding($Upn) {
 Function Get-AuditLog ($Upn) {
 
     Write-Host "$Upn account has been remediated. There may be things missed. Review the audit transcript for this user to be super-sure you've got everything." -ForegroundColor Red
-
     $UserName = $Upn -split "@"
-
     $AuditLogPath = ".\" + $UserName[0] + "AuditLog" + (Get-Date).ToString('MM-dd-yyyy') + ".csv"
-
-    $StartDate = (Get-Date).AddDays(-7).ToString('MM/dd/yyyy') 
-
+    $StartDate = (Get-Date).AddDays(-7).ToString('MM/dd/yyyy')
     $EndDate = (Get-Date).ToString('MM/dd/yyyy')
-
     $Results = Search-UnifiedAuditLog -StartDate $StartDate -EndDate $EndDate -UserIds $Upn
-
     $Results | Export-Csv -Path $AuditLogPath
 
     Write-Host "Log of this command can be found here: $AuditLogPath. You can also review the activity below." -ForegroundColor Green
-
-    $Results | Format-Table    
+    $Results | Format-Table
 
 } # End Function Get-AuditLog
 
@@ -207,17 +180,12 @@ Function Get-AuditLog ($Upn) {
 # BELOW THIS LINE EXECUTES THE ABOVE CREATED FUNCTIONS---------------------------------------------------------------------------
 
     Reset-Password $Upn
-
     Enable-MailboxAuditing $Upn
-
     Remove-MailboxDelegates $Upn
-
     Disable-MailforwardingRulesToExternalDomains $Upn
-
     Remove-MailboxForwarding $Upn
 
     Get-AuditLog $Upn
-
     Stop-Transcript
 
 } # End Else
@@ -225,8 +193,8 @@ Function Get-AuditLog ($Upn) {
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUE4Y2OWegptIawqXgKPS+c1KK
-# p9agggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUx2ZopiuZEKPSXh5TC6jDCPAz
+# mjygggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -286,11 +254,11 @@ Function Get-AuditLog ($Upn) {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FBBG/ehx0SzphmtVY/3DKnQm1EfzMA0GCSqGSIb3DQEBAQUABIIBAKZpmYQIt+KE
-# E9OdYCoqa3qchMf6+A+WcrxG18UF4Rt8JKjvtEqgfuyNgGwF5vfnako66NbRAxxJ
-# qFgoVpPA2pl6ZWDUW0aiFqOBrdCAm22WbRdnuslZBmy8qfXZ6juYGs63n1DDwiMR
-# 5XrA21IXpWmAI6vjAHgoIG1iZQLYveWu54Y4Uirz4Ogq7Ce8s79WGH0sZTJOCIbU
-# 0XeX8oJajNfCwoZr9Kb/LPJt75uVX26x1qklHDSCbE06CY5tGwNLxAGwMaJXAZtK
-# 7c+wcma9vjzd7AzuRZ637ooVZPoxMtkt9FIP4UnagJ8DBGLMRhUbcuKEyTlkvgQk
-# zmuhSv15C7Y=
+# FAqU6376u+0txmaXjh2SAMxyiomAMA0GCSqGSIb3DQEBAQUABIIBAHj3bBGICfQA
+# HaryeWHm56hNMTnljHZ72zIi5kdXo01wQYzT+P8IvvMfdYq3q928qV0ir0IvaT9c
+# NmnP2640Na/9KgsX68XxzaRcj5jXQo8bNFRH22vZmD90liY3OsgNOpgh12hxqmh0
+# lhJu3mmKgv0xLPpH37oD5NMKoVfsXROxuv2RWZ543mYoXL4ZMaLb9QhkgIzGuRB5
+# dNmj8vrwJL1+Z78zhE79RtsLLm+Ep0PGkAkzk7OUVjz8mfFFpzxpPB6KDiFs3czv
+# qKzzc9B1OoPUw7yj2lq/6qqprMvqNt8fRAZjX7NrUc91pUYXvkChJBKt+oIrUr+c
+# E6BfEF4IG0A=
 # SIG # End signature block

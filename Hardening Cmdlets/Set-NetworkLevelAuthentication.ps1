@@ -35,13 +35,13 @@ Contact: rosborne@osbornepro.com
 
 
 .LINK
-https://roberthsoborne.com
 https://osbornepro.com
+https://writeups.osbornepro.com
 https://github.com/tobor88
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
-https://www.youracclaim.com/users/roberthosborne/badges
+https://www.credly.com/users/roberthosborne/badges
 https://www.hackthebox.eu/profile/52286
 
 
@@ -131,8 +131,8 @@ END
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUOF03xPHDN5TB3djTsCb7ZCph
-# gFmgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUT2LLhOKIwMDhOPX75QhMBNo/
+# Asygggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -192,11 +192,11 @@ END
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FBNS1DQ+fq10C8m2QHaIsE7pgo+wMA0GCSqGSIb3DQEBAQUABIIBAKIPwvr3Vsj7
-# Ha3QbTvkA11KWG2BbYqLy/GA6idhDz99QD20LM5SUNkK0ZAH7sDCVZi9/PdM3d8p
-# CnPOJcV60faMHnWHlC/E2714/KAW6B0qM3aTN2uNfCBt2tM525eRAgXj5OZAmF0d
-# GpNYLXL4G4t29rYBE2uqawk016qtJTVgI2FC8DRhUMerNXZlr/HYABBUQNPbV3Di
-# jnuXPhQHVbn4KnGdOoG8JUO1SM9mnP+R9mybWY3oNjuvNQBgRU/Q838o9pH8wN6J
-# 4ardoMEkMT2ty+BHxWr8jYRto+5zr7L0FLPq6NLl/x1bT5xkfb6yGMdpCnyFV7NN
-# Vk2w2YI7EQc=
+# FOPjuBNqYx5SY9UBDOli5VewBXcuMA0GCSqGSIb3DQEBAQUABIIBAMTltMTK/jA7
+# 8H/Vtj+4kfbxABejKMgpDD7cWH8v0ddzrGavLFomDdjesOZbM945Tzp8t+IjrMbd
+# lq8m5i0JRZF17nHNSSCloc/LLiSypsHddZ1cYG0tCglZ0naxPhlaDyxmm4/Jcsm9
+# 4kbCEGwJb4Lo5OYmDD8L95cs2LjW9FGaI4n7U86SE0vkhT/bCMy4Jfj1gOYdo5gM
+# 6N03O+BBhNMLY8TcO5ugtObePygNPJ5o1tO3HidFTVrnBNi/ixj7unesA2xj0Oph
+# VbeCIQlCDuL7y3B8h3d6nQb8OeqWjkt2iri1O5hF03h5tAdvA81RvriifnuGz5Rg
+# 1esgyHqHItk=
 # SIG # End signature block

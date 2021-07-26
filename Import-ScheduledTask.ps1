@@ -28,7 +28,7 @@ Import-ScheduledTask -Path C:\Windows\Temp\TaskImportName.xml -TaskName "My Task
 # This example imports a scheduled task xml file and creates a task on the local device
 
 .EXAMPLE
-Import-ScheduledTask -Path C:\Windows\Temp\TaskImportName.xml -TaskName "My Task" -TaskPath "\" -User SYSTEM -ComputerName 'DC01.osbornepro.com', '10.0.1.1' 
+Import-ScheduledTask -Path C:\Windows\Temp\TaskImportName.xml -TaskName "My Task" -TaskPath "\" -User SYSTEM -ComputerName 'DC01.osbornepro.com', '10.0.1.1'
 # This example imports a scheduled task xml file and creates a task on DC01.domain.com and 10.0.1.1
 
 
@@ -47,14 +47,14 @@ Microsoft.Management.Infrastructure.CimInstance#MSFT_ScheduledTask
 
 
 .LINK
-https://roberthosborne.com
 https://osbornepro.com
+https://writeups.osbornepro.com
 https://github.com/tobor88
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.hackthebox.eu/profile/52286
 https://www.linkedin.com/in/roberthosborne/
-https://www.youracclaim.com/users/roberthosborne/badges
+https://www.credly.com/users/roberthosborne/badges
 #>
 Function Import-ScheduledTask {
     [CmdletBinding()]
@@ -94,7 +94,7 @@ Function Import-ScheduledTask {
             [String[]]$ComputerName = $env:COMPUTERNAME
         )  # End param
 
-    
+
     $Xml = Get-Content -Path $Path | Out-String
 
     ForEach ($C in $ComputerName)
@@ -110,8 +110,8 @@ Function Import-ScheduledTask {
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUCCpcViZN1aWBIti1Lr1Z4ZIQ
-# xaWgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUklI9RHFgscub3dTwkj5iRaGV
+# uFmgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -171,11 +171,11 @@ Function Import-ScheduledTask {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FD7F9yDFcnm4mzHYLqLC9okVqSl+MA0GCSqGSIb3DQEBAQUABIIBAF6kMvSCxEWF
-# uPlYaKrPcf7WTtvR+uFEFSTulWtOmudmP7Z/pKJSxnv1CjCQXtMMFLBwSBHoRyiY
-# K5X3ZjDyRydWvRAnydxZ6ovriJK4QSedJftkHmvj+2swOtHbBhjnVQ6x9N3dqLun
-# gYGsqs2qgqzYiNzCGChMEjvYAU7SO5oizs5EbhwH/1vGOMITya53lkLkcORmJXCG
-# QoIGFDWu2BNeyHhWnv+v+XOnainSvq0ErewjE71yeltXAPhtnmuwdJYuQmi25QPN
-# k1vK7XHZXdSnjZ/EdI8Hwz9awfN1lGfWOKyS6pJ9YByT5TQMYsNJ4LFk6Z0A6j25
-# tVXz42CQsME=
+# FBtvD4EeQbFa/3CFr2VBFMKS51l5MA0GCSqGSIb3DQEBAQUABIIBAKTES27fQUgW
+# mjAqyk36+nQNwKn6LMSrOBzlMddylNN276QFCrWmnreMyz9vl9hvjconCDqY3/x2
+# uQEhi3eWEFBJQbNDfQF7kvLSn8tehzXHxzbrbfwNRRqhjzmD8Y3RNnwPKSmrOWXz
+# X5MKJm+JiygwKoDq6dNRKavJYK74Tf1kf7HViMxsDCmqVdU4ANDJTuyif48MXHKE
+# svcFsAzxY08NYGPch52CS+MjUvQgXhdmD3S1bRQE9bOM5wJuTVft31tY565ms+eZ
+# CJGRgR9dEzNQlcJ2BIIQGKhugxmIgzmxiqa6aRzTSbfUJwSo1Y8plSFXBfoDvreR
+# m4SNruMOMac=
 # SIG # End signature block

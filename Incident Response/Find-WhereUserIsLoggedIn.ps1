@@ -46,14 +46,14 @@ PSCustomObject
 
 
 .LINK
-https://roberthsoborne.com
 https://osbornepro.com
+https://writeups.osbornepro.com
 https://btps-secpack.com
 https://github.com/tobor88
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
-https://www.youracclaim.com/users/roberthosborne/badges
+https://www.credly.com/users/roberthosborne/badges
 https://www.hackthebox.eu/profile/52286
 #>
 Function Find-WhereUserIsLoggedIn {
@@ -66,7 +66,7 @@ Function Find-WhereUserIsLoggedIn {
 				ValueFromPipelineByPropertyName=$False,
 				HelpMessage="`n[H] Enter the SamAccountName of the user you are looking for. `n[E] EXAMPLE: john.wick")]  # End Parameter
 			[String]$Username,
-			
+
 			[Parameter(
 				ParameterSetName='Prefix',
 				Position=1,
@@ -85,7 +85,7 @@ Function Find-WhereUserIsLoggedIn {
 			[String[]]$ComputerName
         )  # End param
 
-BEGIN 
+BEGIN
 {
 
 	$Obj = @()
@@ -113,7 +113,7 @@ PROCESS
 			Write-Verbose "Building list of possible computers using the pattern : $Prefix"
 			$CutOffDate = (Get-Date).AddDays(-60)
 			$ComputerNames = Get-ADComputer -Properties Name,SamAccountName,Enabled,LastLogonDate -Filter {LastLogonDate -gt $CutOffDate -and Enabled -eq 'true' -and SamAccountName -like $Prefix}
-		
+
 			Write-Verbose "Searching for $Username on Computers that have a hostname starting with $Prefix`n"
 			ForEach ($Computer in $ComputerNames)
 			{
@@ -195,8 +195,8 @@ END
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUgIouDzRenJkDV59hAA8ysKYa
-# 81igggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUnhwP7xqvYF45dKW23EJ6Y2eL
+# EhOgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -256,11 +256,11 @@ END
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FOf1pwuHn+V5ILB2oZsPVpdxJt5IMA0GCSqGSIb3DQEBAQUABIIBAMRzgLVuV6Us
-# c7fGuC4hdYrhg4VTXPDNlguptBeJnEnYbwyD1t10cKc8ECn23+qSlO9J0bPKQmA1
-# u1Y4tb1LX6wKdqixmaqAWvctWxXPuLzwR/FVRDjAcGi+Va6f/QL+eMuWRXgycrfK
-# DVif5iWabXQ4n4TtXirnW8S8CSvzkPFzPtSC7jw8eFpCgumNahxZsrtHJA06c6U9
-# JSdZRZitY71HFBiogIF3W8YNPP5XMvzjMnxSuLKMKP5ekk7LNy75RGyRLOOcfO9M
-# sMlsV5kzXfKpjYcfpI5zqLwSbOekRNZU86fO57PW+0XNja+GfRzD0H9cTacu0FJR
-# SAf5oTs2Mbo=
+# FHKuLRyqPfb8aTx7NYQgGcvh688kMA0GCSqGSIb3DQEBAQUABIIBAEJqpC/lK3Z4
+# G07zUJ8ltAZGxk0oJADbhTty9LAvxAzTRrMS1mbILW39ChHEDHBYCuUMSY/SNbGc
+# joNzv9omdLuFpbFwARirPLnljyr4H3DLcIMIYhEgaw7a+dTRGgcE/4BQ156amkt/
+# pKFWL2SmeMSyVJJA8GXia1O5ifu78iQQFvXSV9EzSDoiJXiEG61wj/0Wej/XsRC5
+# wyeIaamMunWu07BZ4ePrMulSzUs9ZdeGOmN74gGCnrHhdW1J2WL7176D4gPPV1K7
+# E5fZcOAQkYiOIMZAB1TJbaU/KKC4Cv8e34CHsl4n6yaB2a7oKwqeVtlnKAGU9zbj
+# lJqzgKDxUtA=
 # SIG # End signature block
