@@ -92,13 +92,9 @@ Useful WinRM Info and Commands To Know
 Setup WinRM over HTTPS may require the need to know a few commands. I have included these commands below.
 
 ``Enable-PSRemoting -Force # Enables firewall rules for WinRM``
-
 ``winrm qc -q # Qucik config for WinRM 5985``
-
 ``winrm enum winrm/config/listener # Enumerate cert thumbprint used on different winrm ports``
-
 ``winrm delete winrm/config/listener?Address=*+Transport=HTTPS # Delete winrm certificate and stop listener on 5986. This allows new cert to be attached to port``
-
 ``winrm create winrm/config/listener?Address=*+Transport=HTTPS # Creates a WinRM listener on 5986 using any available certificate``
 
 The below command defines a certificate to use on port 5986. Certificate Template needed is a Web Server certificate from Windows PKI
@@ -109,9 +105,9 @@ The below command defines a certificate to use on port 5986. Certificate Templat
 The certificate thumbprint value that you are going to need in "Group Policy Setting 1" below is from your internal domains Private Key Infrastructure (PKI). This value will vary as these values are unique to the certificate. The Root Certificate Authority (CA) assigns certificates to your devices. When a device receives a certificate, it gets assigned under the Root CA's certificate. This creates what is called a Certificate Chain. If it helps to see this represented in a directory tree format, it would look something like the below tree structure. Your domain would not have an Intermediate CA most likely but I included it for the visual.
 
 * Root CA Certificate <-- This is the certificate thumbprint you need
-  * Intermediate CA Certificate
-    * Assigned Device Certificate
-    * Assigned Device Certificate <-- This certificate's thumbprint gets assigned to port 5986 on the client device.
+    * Intermediate CA Certificate
+        * Assigned Device Certificate
+        * Assigned Device Certificate <-- This certificate's thumbprint gets assigned to port 5986 on the client device.
 
 **CLIENT CERTIFICATE:**
 * In the above tree, "Assigned Device Certificate" is where the command
