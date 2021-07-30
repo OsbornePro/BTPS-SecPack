@@ -33,141 +33,136 @@ Functionality in The Blue Team PowerShell Security Package
 ----------------------------------------------------------
 
 **Account Lockout Notification**
-
-.. image:: images/AccountLockout.png
+.. image:: img/AccountLockout.png
    :scale: 100
    :alt: Account Lockout
 
 
 **Attempted Port Scan**
-
-.. image:: images/AttemptedPortScan.png
+.. image:: img/AttemptedPortScan.png
     :scale: 100
     :alt: Attempted Port Scan
 
 
 **AutoRuns Logging**
-
-.. image:: images/AutoRuns.png
+.. image:: img/AutoRuns.png
     :scale: 100
     :alt: AutoRuns
 
 
 **Blacklisted IP Logging**
-
-.. image:: images/BlacklistedIP.png
+.. image:: img/BlacklistedIP.png
     :scale: 100
    :alt: Blacklisted IP Logging
 
 
 **Check Forwarding Rules**
-
-.. image:: images/CheckForwardingRules.png
+.. image:: img/CheckForwardingRules.png
     :scale: 100
     :alt: Check Forwarding Rules
 
 
 **Track Network Connection History**
 
-.. image:: images/ConnectionHistory.png
+.. image:: img/ConnectionHistory.png
     :scale: 100
     :alt: Track Network Connection History
 
 
 **Disable Weak SSL Ciphers**
 
-.. image:: images/DisableWeakCiphers.png
+.. image:: img/DisableWeakCiphers.png
     :scale: 100
     :alt: Disable Weak SSL Ciphers
 
 
 **DNS Zone Transfer Alerts**
 
-.. image:: images/DNSZoneTransfer.png
+.. image:: img/DNSZoneTransfer.png
     :scale: 100
    :alt: DNS Zone Transfer Alerts
 
 
 **Enable DNS over HTTPS**
 
-.. image:: images/EnableDNSoverHTTPS.png
+.. image:: img/EnableDNSoverHTTPS.png
     :scale: 100
     :alt: Enable DNS over HTTPS
 
 
 **Insecure LDAP Bind Notifications**
 
-.. image:: images/InsecureLdapBinds.png
+.. image:: img/InsecureLdapBinds.png
     :scale: 100
     :alt: Insecure LDAP Bind Notifications
 
 
 **New Device Joined Network Discovery**
 
-.. image:: images/NewDeviceCheck.png
+.. image:: img/NewDeviceCheck.png
     :scale: 100
    :alt: New Device Check Discovery
 
 
 **User Changed Password Notification**
 
-.. image:: images/NormalPasswordChange.png
+.. image:: img/NormalPasswordChange.png
     :scale: 100
     :alt: User Changed Password Notification
 
 
 **Admin Changed Another Users Password Notification**
 
-.. image:: images/PasswordChanged.png
+.. image:: img/PasswordChanged.png
     :scale: 100
     :alt: Admin changed another users password notification
 
 
 **List of Expiring Passwords Notification**
 
-.. image:: images/PasswordsExpiring.png
+.. image:: img/PasswordsExpiring.png
     :scale: 100
    :alt: List of Expiring Passwords Notification
 
 
 **Local Port Scan Notification**
 
-.. image:: images/PortScanDetection.png
+.. image:: img/PortScanDetection.png
     :scale: 100
     :alt: Local Port Scan Notification
 
 
 **Remediate a compromised Office365 account**
 
-.. image:: images/RemediateCompromisedOfficeAccount.png
+.. image:: img/RemediateCompromisedOfficeAccount.png
     :scale: 100
     :alt: Remediate a compromised Office365 account
 
 
 **Suspicious Event Occurred**
 
-.. image:: images/SuspiciousEventTriggered.png
+.. image:: img/SuspiciousEventTriggered.png
     :scale: 100
     :alt: Suspicious Event Occurred
 
 
 **Unusual Sign In Alert**
 
-.. image:: images/UnusualSignIn.png
+.. image:: img/UnusualSignIn.png
     :scale: 100
    :alt: Unusual Sign In Alert
 
 
 **User Account Expiring Notification**
 
-.. image:: images/UserAccountExpiring.png
+.. image:: img/UserAccountExpiring.png
     :scale: 100
     :alt: User Account Expiring Notification
 
 
 **User Account Unlocked**
 
-.. image:: images/UserAccountUnlocked.png
+.. image:: img/UserAccountUnlocked.png
     :scale: 100
     :alt: User Account Unlocked
 
