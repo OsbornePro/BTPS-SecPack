@@ -67,6 +67,12 @@ As an FYI there are multiple ways to download files from the PowerShell session.
 * ``bitsadmin /transfer debjob /download /priority normal https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/Installer.ps1" "$env:USERPROFILE\Downloads\Installer.ps1"``
 
 
+Download PDF Instructions for Installer.ps1
+-------------------------------------------
+Below link contains images and walks you through the Installer.ps1 setup steps and process.
+https://github.com/OsbornePro/Documents/raw/main/Installer.ps1%20Demo.pdf
+
+
 Configure WinRM over HTTPS
 ==========================
 I cover the settings configured for WinRM over HTTPS communication through the use of Group Policy. These settings can be seen in the sections below.
@@ -207,23 +213,20 @@ Create a Registry Setting that gets pushed out through Group Policy containing t
 WinRM over HTTPS is now configured for your environment. Great work! When you now use PowerShell commands such as ``Invoke-Command`` or ``New-PSSession`` you will need to specify the ``-UseSSL`` parameter in order to use WinRM over HTTPS. Port 5985 will not accept connections in an ideal setup.
 
 
-Download an Instructional PDF with images and descriptions for Installer.ps1 at the below link
-----------------------------------------------------------------------------------------------
-https://github.com/OsbornePro/Documents/raw/main/Installer.ps1%20Demo.pdf
-
-Download an Instructional PDF with images and descriptions for installing Sysmon at the below link
---------------------------------------------------------------------------------------------------
-https://github.com/OsbornePro/Documents/raw/main/Sysmon%20Setup-0001.pdf
-
-
-Execute Script with Task scheduler
-----------------------------------
+Execute Scripts with Task Scheduler
+===================================
 External Link to a site that covers executing PowerShell scripts with Task Scheduler
 https://www.windowscentral.com/how-create-automated-task-using-task-scheduler-windows-10
 
 
+Solo Sysmon Setup
+=================
+In case you wish only to set up Sysmon in your environment; I have put together a PDF walkthrough on how to use my configuration. The below link contains images and a step by step walkthrough for deploying Sysmon in your domain environment.
+https://github.com/OsbornePro/Documents/raw/main/Sysmon%20Setup-0001.pdf
+
+
 Disclaimer
-----------
+==========
 **DISCLAIMER:** This suite nor any other security suite or tool can completely prevent or detect all security vulnerabilities. This tool adds monitoring to an environment and may not catch every possible scenario and is no guarantee of discovery.
 
 
