@@ -34,6 +34,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 
 **Account Lockout Notification**
+This alert lets you know when a user account has been locked out. There is also an alert to be notified when a locked out account has been manually unlocked.
 
 .. image:: img/AccountLockout.png
    :scale: 100
@@ -50,6 +51,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 
 **AutoRuns Logging**
+This is showing the Autoruns Event Viewer entry that gets created. An easy to read CSV file also gets saved to C:\Program FIles\AutorunsToWinEventLog\AutorunsOutput.csv Thanks to:  https://github.com/palantir/windows-event-forwarding/tree/master/AutorunsToWinEventLog
 
 .. image:: img/AutoRuns.png
     :scale: 100
@@ -58,6 +60,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 
 **Blacklisted IP Logging**
+When a device establishes a connection to an IP that is on 4 or more blacklists or a domain that is less than 2 years old you will be informed. The events are also stored in the Event Viewer under "MaliciousIPs". It seems that an IP address on 3 blacklists does not necessarily mean it is dangerous or something to do anything about. Correct me if my analysis is wrong.
 
 .. image:: img/BlacklistedIP.png
     :scale: 100
@@ -66,6 +69,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 
 **Check Forwarding Rules**
+This alert is meant to come in once a week. It allows administrators to easily view any email forwarding rules and ensure that no information is being compromised unknowingly.
 
 .. image:: img/CheckForwardingRules.png
     :scale: 100
@@ -74,6 +78,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 
 **Track Network Connection History**
+`ListenPortMonitor.ps1's <https://github.com/OsbornePro/BTPS-SecPack/blob/master/Local%20Port%20Scan%20Monitor/ListenPortMonitor.ps1>`_ main goal is to keep an eye open for newly opened ports on a server to discover possible Reverse Shells or Bind Shells. A connection history log is kept to help trace connections that have been established with a server.
 
 .. image:: img/ConnectionHistory.png
     :scale: 100
@@ -82,6 +87,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 
 **Disable Weak SSL Ciphers**
+Hardening cmdlet allows you to quickly and easily disable weak TLS protocols and associated ciphers to prevent weak encryption methods from being used.
 
 .. image:: img/DisableWeakCiphers.png
     :scale: 100
@@ -90,6 +96,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 
 **DNS Zone Transfer Alerts**
+This alert was triggered by an executed DNS Zone transfer. Normal DNS server communication does not trigger this alert. Manually requesting a zone transfer will, allowing you to discover any attackers looking to learn about your environment.
 
 .. image:: img/DNSZoneTransfer.png
     :scale: 100
@@ -98,6 +105,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 
 **Enable DNS over HTTPS**
+This hardening cmdlet allows you to easily enable or if desired disable DNS over HTTPS on any Windows 10+ Device in your environment
 
 .. image:: img/EnabledDNSoverHTTPS.png
     :scale: 100
@@ -106,6 +114,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 
 **Insecure LDAP Bind Notifications**
+This alert is to let you know when an LDAP Bind occurs that is not encrypted with LDAP over SSL. This can help to implement LDAP over SSL in an environment or discover possible LDAP enumeration attempts from an attacker.
 
 .. image:: img/InsecureLdapBinds.png
     :scale: 100
@@ -114,6 +123,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 
 **New Device Joined Network Discovery**
+This alert is displaying 4 devices that recently were physically plugged into an Ethernet cable or joined the Wi-Fi network. Now that these devices are known they will not be detected again unless you remove them from the CSV file containing device history info.
 
 .. image:: img/NewDeviceCheck.png
     :scale: 100
@@ -122,6 +132,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 
 **User Changed Password Notification**
+Receive an alert whenever a user has changed their password. Compare this value to the Administrator list you receive. This allow you to notice any passwords changing outside normal conditions.
 
 .. image:: img/NormalPasswordChange.png
     :scale: 100
@@ -130,6 +141,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 
 **Admin Changed Another Users Password Notification**
+This alert informs you when a users password has been changed by an Administrator or other user. Allowing user to change passwords through Azure will generate this alert as well.
 
 .. image:: img/PasswordChanged.png
     :scale: 100
@@ -138,6 +150,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 
 **List of Expiring Passwords Notification**
+Receive a list of users whose passwords are expiring in the next 2 weeks. This helps you keep tabs and who is expected to be changing their passwords. Someone not on this list who has their password changed may be under attack.
 
 .. image:: img/PasswordsExpiring.png
     :scale: 100
@@ -146,6 +159,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 
 **Local Port Scan Notification**
+This alert informs the cyber security team when a port scan has been attempted against a server. This currently does not work for File Servers or VoIP servers which have hundreds of unique IP addresses connecting a minute.
 
 .. image:: img/PortScanDetection.png
     :scale: 100
@@ -154,6 +168,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 
 **Remediate a compromised Office365 account**
+This is some output showing the results of what happens when the `RemediateCompromisedOfficeAccount.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/Incident%20Response/RemediateCompromisedOfficeAccount.ps1>`_ is run. For more information on what this does click `HERE <https://github.com/OsbornePro/BTPS-SecPack/blob/master/RemediateCompromisedOfficeAccount.ps1>`_`.
 
 .. image:: img/RemediateCompromisedOfficeAccount.png
     :scale: 100
@@ -162,6 +177,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 
 **Suspicious Event Occurred**
+This alert was triggered from centralized logs using Windows Event Forwarding. System Update, when run on Lenovo computers as a standard user, will create a temp account, add it to the local administrators group and install missing updates. It then removes the created account from the local Administrators group and deletes the account. If this were an attacker trying to cover their tracks this would have caught it.
 
 .. image:: img/SuspiciousEventTriggered.png
     :scale: 100
@@ -170,6 +186,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 
 **Unusual Sign In Alert**
+This alert is letting the recipient know the reception account signed into a device outside of its normal assignments
 
 .. image:: img/UnusualSignIn.png
     :scale: 100
@@ -178,6 +195,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 
 **User Account Expiring Notification**
+This alert lets IT Administrators know when a user account is about to expire.
 
 .. image:: img/UserAccountExpiring.png
     :scale: 100
@@ -186,6 +204,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 
 **User Account Unlocked**
+This alert informs administrators when a user account has been manually unlocked as well as who unlocked what account.
 
 .. image:: img/UserAccountUnlocked.png
     :scale: 100
@@ -373,6 +392,85 @@ Create a Registry Setting that gets pushed out through Group Policy containing t
 
 **CONCLUSION**
 WinRM over HTTPS is now configured for your environment. Great work! When you now use PowerShell commands such as ``Invoke-Command`` or ``New-PSSession`` you will need to specify the ``-UseSSL`` parameter in order to use WinRM over HTTPS. Port 5985 will not accept connections in an ideal setup.
+
+
+Windows Event Forwarding (WEF) Application
+==========================================
+
+.. image:: img/WEFApplication.png
+    :scale: 100
+    :alt: Windows Event Forwarding Application
+
+**Summary**
+
+The purpose of this web application is to easily investigate any email alerts received that indicate a possible compromise. This server has Windows Event Forwarding (WEF), configured in a "source collector" set up. This means that the clients in the environment initiate connections to the server before sending logs. When one of the suspicious event ID's occur on any of the devices, the event info is forwarded to the WEF source collector server using WinRM over HTTPS. Once an hour the collected event logs are imported into a SQL database. Any newly discovered events that indicate possible compromise trigger an email alert which is then sent to the IT Administrators. This application can be used to search that SQL database and view the details of an event. The SQL database is useful because searching a SQL database is 100x faster than parsing the Windows Event Logs through XML. It also stores critical events for a longer period of time than the events would normally exists inside Event Viewer. This is because when Event Viewer logs reach a certain size, old logs are removed to make room for new ones.
+
+
+Protection against SQL injections and CSRF have been implemented. Penetration testing has been performed to ensure the security of the application. There are no presently discovered vulnerabilities. Security is a feature! If you find a vulnerability that I have not please let me know so I can fix it. rosborne@osbornepro.com
+
+
+**Functionality**
+
+* **REORDER:** The columns in the database table can be organized by ascending or descending order. This is done by clicking the linked column header.
+* **SEARCH:** The search will parse the database by searching for the specified term in all of the columns. There are presently 10 items that will be displayed per page.
+* **DETAILED:** Events can also be shown in a detailed view by clicking the "Details" button next to an event in the table. This will display a few more bits of info for the event.
+
+
+**Table View of WEF Application**
+This WEF Application is used to view and st log files that are a high likelihood to be indications of compromise. These logs get collected from all devices in the environment. The following Event ID's are collected and put into the database:
+1, 2, 1102, 4732, 4733, 4720, 4726, 7045, 4756, 4757, 4728, 4729, 4649, 4723,
+
+.. image:: img/WEFTableView.png
+    :scale: 100
+    :alt: Table View of WEF Application
+
+
+**Detail View in WEF Application**
+Events can also be shown in a detailed view by clicking the "Details" button next to an event in the table. This will display a few more bits of info for the event.
+
+.. image:: img/WEFDetailsView.png
+    :scale: 100
+    :alt: Table View of WEF Application
+
+
+Perquisites and Setup Instructions
+----------------------------------
+
+This `REPO <https://github.com/OsbornePro/BTPS-SecPack/tree/master/WEF%20Application>`_ contains all the files needed for using Windows Event Forwarding to monitor an environment for intruders. This assumes that you have referenced the Windows Event Logging Cheat Sheet for logging in your environment. Use `LOG-MD <https://www.imfsecurity.com/free>`_ or `CIS-CAT <https://learn.cisecurity.org/benchmarks#:~:text=CIS%20Benchmarks%20are%20the%20only%20consensus-based%2C%20best-practice%20security,and%20accepted%20by%20government%2C%20business%2C%20industry%2C%20and%20academia>`_ to ensure the recommended logging is configured. You will also need to configure WinRM in your environment. This can be done by following the instructions at the WinRM over HTTPS page on this site.
+
+
+General steps to set up this package.
+
+**CONFIGURE** (This should be configured in your environment)
+1. WinRM over HTTPS
+
+**DOWNLOAD & INSTALL** (I suggest installing these on the centralized WEF collection server to get started)
+1. `SSMS (SQL Server Management Studio) <https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-ver15>`_
+2. `Microsoft SQL Server (Express a.k.a Free Version Will Work) <https://www.microsoft.com/en-us/sql-server/sql-server-downloads>`_
+3. `ASP.NET 3.1 Core Runtime <https://dotnet.microsoft.com/download/dotnet-core/3.1>`_
+4. `ASP.NET 3.1 SDK <https://dotnet.microsoft.com/download/dotnet-core/3.1>`_
+5. `Visual Studio <https://visualstudio.microsoft.com/vs/>`_
+
+
+**SIDE NOTE 1:** It is considered best practice to have the SQL server installed on a separate device than the one hosting the application. I did not abide by this here. As long as there are not any SQL Injections and least privilege permissions are applied to accounts that can access the SQL database, this should not be a concern.
+
+
+**SIDE NOTE 2:** It is also best practice to have a development server that pushes out web application builds to the production server. I do not know what resources or extras may be available to a company. As such I am treating this to be as bare minimum as possible. These are subjects that can be learned in other areas of the web. I am just showing you how to set up this security package and need to draw the line somewhere. Feel free to use my instructions and then uninstall Visual Studio from the server when you are done with setup.
+
+
+File List Overview
+------------------
+
+* `DomainComputers.xml <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/DomainComputers.xml>`_ Windows Event Forwarding Config file for Domain Computers. can be applied on the source collector using the command: wecutil cs DomainComputers.xml
+* `DomainControllers.xml <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/DomainControllers.xml>`_ Windows Event Forwarding Config file for Domain Controllers can be applied on the source collector using the command: wecutil cs DomainControllers.xml
+* `Import-EventsHourly.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/Import-EventsHourly.ps1>`_ PowerShell script that imports collected WEF events into SQL database
+* `Query to Create MSSQL DB Table <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/Query%20to%20Create%20MSSQL%20DB%20Table>`_ Creates the required database and table configuration for the MSSQL server database. Open the SSMS application, start a New Query, and execute the contents of this file inside the query. This will build the SQL database used by the WEF Application.
+* `ImportTheScheduledTasks.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/ImportTheScheduledTasks.ps1>`_ This is an optional script that can be used to import XML files to the task scheduler, effectively creating the required scheduled tasks on the centralized WEF server
+* `SQL-Query-Suspicious-Events.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/SQL-Query-Suspicous-Events.ps1>`_ PowerShell script that discovers possible indicators of compromise and sends and an email alert.
+* `TaskForSQLQueryEventsMonitor.xml <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/TaskForSQLQueryEventsMonitor.xml>`_ Task Scheduler import file that goes with SQL-Query-Suspicious-Events.ps1. This executes on SQL-Query-Suspicious-Events.ps1 on the hour. If any new events are viewed as possible indications of compromise an alert email will be sent out.
+* `TaskImportFile.xml <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/TaskImportFile.xml>`_ Task Scheduler Import file that goes with Import-EventsHourly.ps1. This task will execute the Import-EventsHourly.ps1 script once an hour on the half hour, importing the most recent events into the SQL database.
+* `WEFStartupScript.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/WEFStartupScript.ps1>`_ This should be the startup script on all devices sending events to the source WEF collector. This ensures that the WinRM service has the correct permissions, the service is running, and the service is available to send info to the source event collector.
+
 
 
 Execute Scripts with Task Scheduler
