@@ -216,6 +216,12 @@ Download an Instructional PDF with images and descriptions for installing Sysmon
 https://github.com/OsbornePro/Documents/raw/main/Sysmon%20Setup-0001.pdf
 
 
+Execute Script with Task scheduler
+----------------------------------
+External Link to a site that covers executing PowerShell scripts with Task Scheduler
+https://www.windowscentral.com/how-create-automated-task-using-task-scheduler-windows-10
+
+
 Disclaimer
 ----------
 **DISCLAIMER:** This suite nor any other security suite or tool can completely prevent or detect all security vulnerabilities. This tool adds monitoring to an environment and may not catch every possible scenario and is no guarantee of discovery.
