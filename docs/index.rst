@@ -573,7 +573,7 @@ Below is an example of what the table view of an event looks like
 
 **Detail View in WEF Application**
 
-Events can also be shown in a detailed view by clicking the "Details" button next to an event in the table. This will display a few more bits of info for the event.
+Events can also be shown in a detailed view by clicking the **"Details"** button next to an event in the table. This will display a few more bits of info for the event.
 
 .. image:: img/WEFDetailsView.png
     :scale: 100
