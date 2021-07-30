@@ -39,7 +39,7 @@ For the case of organizations with 1,000’s of devices; you may find that this 
 
 Indices and tables
 ==================
-* :ref:`installer.rst`
+* `Installer.ps1 Docs <https://the-btps-security-package.readthedocs.io/en/latest/installer.html>`_
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
