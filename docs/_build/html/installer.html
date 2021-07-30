@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>USING THE INSTALLER.PS1 FILE TO GET STARTED &#8212; The B.T.P.S Security Package 2020 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="using-the-installer-ps1-file-to-get-started">
+<h1>USING THE INSTALLER.PS1 FILE TO GET STARTED<a class="headerlink" href="#using-the-installer-ps1-file-to-get-started" title="Permalink to this headline">¶</a></h1>
+<p>I wrote the <a class="reference external" href="https://github.com/tobor88/BTPS-SecPack/blob/master/Installer.ps1">Installer.ps1</a> script allow anyone to quickly and easily install as many protections as possible offered by the B.T.P.S. Security Package. Running this script requires very minimal to zero know how. You do not need to know how to download the Git repository. <a class="reference external" href="https://github.com/tobor88/BTPS-SecPack/blob/master/Installer.ps1">Installer.ps1</a> will do it for you :-)</p>
+<p><strong>How can i get started using the Installer.ps1 install file?</strong>
+Here is what you need to do in order to execute this file.</p>
+<ol class="arabic simple">
+<li><p>Log into your Primary Domain Controller using an account with Administrator permissions.</p></li>
+<li><p>Open an Administrative PowerShell session (Windows Key + X, The press A).</p></li>
+<li><p>Execute the command in step 4. This can be done by highlighting the command (starting from IEX all the way too /Installers.ps1. This command is all one line.). Right click the highlighted text and select “COPY”. Then Right Click inside your PowerShell window. If this does not paste right away you can paste by doing the key combo (Ctrl + V). This command executes all the text on that webpage inside of your powershell session without downloading the file to your disk drive.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IEX</span> <span class="pre">(New-Object</span> <span class="pre">-TypeName</span> <span class="pre">System.Net.WebClient).downloadString('https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Installer.ps1')</span></code></p></li>
+<li><p>The installation of the B.T.P.S Security Package should then start. Some Next Generation Anti-Virus providers may block script execution in this manner. If that is the case use the below method to accomplish the same task.</p></li>
+</ol>
+<p><strong>IF ABOVE COMMAND METHOD DOES NOT WORK</strong>
+Some Next Generation Anti-Virus providers may block script execution in this manner. If that is the case use the below method to accomplish the same task.</p>
+<ol class="arabic simple">
+<li><p>Log into your Primary Domain Controller using an account with Administrator permissions.</p></li>
+<li><p>Open an Administrative PowerShell session (Windows Key + X, The press A).</p></li>
+<li><p>The command displayed in step 4 will download the script to your disk in your Downloads directory. Copy and paste the command into your admin powershell session and press ENTER to execute it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Invoke-WebRequest</span> <span class="pre">-Uri</span> <span class="pre">&quot;https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Installer.ps1&quot;</span> <span class="pre">-OutFile</span> <span class="pre">&quot;$env:USERPROFILE\Downloads\Installer.ps1&quot;</span></code></p></li>
+<li><p>Execute the command line in step 6 to ensure your Execution Policy allows the script to execute easily. Copy and paste the command into your admin powershell session and press ENTER to execute it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Set-ExecutionPolicy</span> <span class="pre">RemoteSigned</span> <span class="pre">-Force</span></code></p></li>
+<li><p>Execute the command line in step 8 to run the script and being installation. Include the period at the beginning of the command. Copy and paste the command into your admin powershell session and press ENTER to execute it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.&quot;$env:USERPROFILE\Downlods\Installer.ps1&quot;</span></code></p></li>
+<li><p>The installation of the B.T.P.S. Security Package should then begin.</p></li>
+</ol>
+<p><strong>OTHER DOWNLOAD FILE COMMANDS</strong>
+As an FYI there are multiple ways to download files from the PowerShell session. If <code class="docutils literal notranslate"><span class="pre">Invoke-WebRequest</span></code> is blocked or does not work for you try the below commands instead. Each command does the same thing in a different way and each command is one line.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">(New-Object</span> <span class="pre">Net.WebClient).DownloadFile('https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Installer.ps1',</span> <span class="pre">&quot;$env:USERPROFILE\Downloads\Installer.ps1&quot;)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Start-BitsTransfer</span> <span class="pre">&quot;https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Installer.ps1&quot;</span> <span class="pre">-Destinations</span> <span class="pre">&quot;$env:USERPROFILE\Downloads\Installer.ps1&quot;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">certutil.exe</span> <span class="pre">-urlcache</span> <span class="pre">-split</span> <span class="pre">-f</span> <span class="pre">https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Installer.ps1</span> <span class="pre">&quot;$env:USERPROFILE\Downloads\Installer.ps1&quot;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bitsadmin</span> <span class="pre">/transfer</span> <span class="pre">debjob</span> <span class="pre">/download</span> <span class="pre">/priority</span> <span class="pre">normal</span> <span class="pre">https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Installer.ps1&quot;</span> <span class="pre">&quot;$env:USERPROFILE\Downloads\Installer.ps1&quot;</span></code></p></li>
+</ul>
+<section id="download-an-instructional-pdf-with-images-and-descriptions-for-installer-ps1-at-the-below-link">
+<h2>Download an Instructional PDF with images and descriptions for Installer.ps1 at the below link<a class="headerlink" href="#download-an-instructional-pdf-with-images-and-descriptions-for-installer-ps1-at-the-below-link" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://github.com/OsbornePro/Documents/raw/main/Installer.ps1%20Demo.pdf">https://github.com/OsbornePro/Documents/raw/main/Installer.ps1%20Demo.pdf</a></p>
+</section>
+<section id="download-an-instructional-pdf-with-images-and-descriptions-for-installing-sysmon-at-the-below-link">
+<h2>Download an Instructional PDF with images and descriptions for installing Sysmon at the below link<a class="headerlink" href="#download-an-instructional-pdf-with-images-and-descriptions-for-installing-sysmon-at-the-below-link" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://github.com/OsbornePro/Documents/raw/main/Sysmon%20Setup-0001.pdf">https://github.com/OsbornePro/Documents/raw/main/Sysmon%20Setup-0001.pdf</a></p>
+<p><a class="reference external" href="https://btps-secpack.com/winrm-over-https">Configure WinRM over HTTPS Instructions</a></p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">The B.T.P.S Security Package</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Robert H. Osborne.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/installer.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
