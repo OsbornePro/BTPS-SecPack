@@ -13,7 +13,7 @@ The Installer.ps1 script is good to go. I created a virtual environment and ran 
 
 **FEATURES COMING SOON**
 
-* **ELK SIEM Tool:** I am going to set up a configuration for the ELK SIEM tool. This tool is free for certain uses and offers a purchase if desired. It will include `Elasticsearch <https://www.elastic.co/elasticsearch/>`_, `Kibana <https://www.elastic.co/kibana>`_, `Logstash <https://www.elastic.co/logstash>`_, `Winlogbeat <https://www.elastic.co/beats/winlogbeat>`_, and `GeoIP <https://www.elastic.co/blog/geoip-in-the-elastic-stack>`_. The configuration is going to use the Windows Event Forwarding (WEF) configuration I cover in the `WEF Application Setup <https://btps-secpack.com/wef-application>`_. The purpose of this is to prevent the need to install agents on the devices in your environment. The free version does not offer LDAP authentication unfortunately. The configuration will use TLS certificates to encrypt communications on the local host and listen for outside connections if you decide to install other stack programs such as `APM-Server <https://www.elastic.co/apm>`_, `Heartbeat <https://www.elastic.co/beats/heartbeat>`_, or `Metricbeat <https://www.elastic.co/beats/metricbeat>`_. `Winlogbeat <https://www.elastic.co/beats/winlogbeat>`_ logs will be sent to `Logstash <https://www.elastic.co/logstash>`_ and modified to included `GeoIP <https://www.elastic.co/blog/geoip-in-the-elastic-stack>`_ tags that can be used for mapping IP addresses. Default passwords will of course also be changed. I will also create a Docker file that can be used to prevent the need for too much manual set up. When available it can be obtained from the Official OsbornePro LLC docker site: https://hub.docker.com/orgs/osbornepro
+* **ELK SIEM Tool:** I am going to set up a configuration for the ELK SIEM tool. This tool is free for certain uses and offers a purchase if desired. It will include `Elasticsearch <https://www.elastic.co/elasticsearch/>`_, `Kibana <https://www.elastic.co/kibana>`_, and `Winlogbeat <https://www.elastic.co/beats/winlogbeat>`_. The configuration is going to use the Windows Event Forwarding (WEF) configuration. The purpose of this is to prevent the need to install agents on the devices in your environment. The free version does not offer LDAP authentication unfortunately. The configuration will use TLS certificates to encrypt communications on the local host and listen for outside connections if you decide to install other stack programs such as `APM-Server <https://www.elastic.co/apm>`_, `Heartbeat <https://www.elastic.co/beats/heartbeat>`_, or `Metricbeat <https://www.elastic.co/beats/metricbeat>`_. `Winlogbeat <https://www.elastic.co/beats/winlogbeat>`_ logs will be modified to include `GeoIP data <https://www.elastic.co/blog/geoip-in-the-elastic-stack>`_ tags that can be used for mapping IP addresses. Default passwords will of course also be changed. I will also create a Docker file that can be used to prevent the need for too much manual set up. When available it can be obtained from the Official OsbornePro LLC docker site: https://hub.docker.com/orgs/osbornepro
 * I am **NO** longer planning on integrating the `Virus Total API <https://support.virustotal.com/hc/en-us/articles/115002100149-API>`_ for MD5 hash comparisons. This does not provide enough cost per value however I will include a script to do this in case it is valuable to your situation.
 
 
@@ -27,14 +27,156 @@ I am always open to suggestions and ideas as well as contributions if  anyone wi
 **What Purpose Does This Serve?**
 This repository contains a collection of PowerShell tools that can be utilized to protect and defend an environment based on the recommendations of multiple cyber security researchers at Microsoft. These tools were created with a small to medium size mostly Windows environment in mind as smaller organizations do not always have the type of funding available to overly spend on security. The goal of this project lines up with the goals of `OsbornePro LLC. <https://osbornepro.com/>`_ This exists to help add value to a smaller organization's security by creating more visibility for the IT Administrator or Security Team.
 
-For the case of organizations with 1,000’s of devices; you may find that this entire suite does not apply to you. This has to do with how some of the discoveries operate. For example the alert I have in the `Device Discovery <https://github.com/tobor88/BTPS-SecPack/tree/master/Device%20Discovery>`_ directory relies on DHCP assigned IP addresses. All DHCP servers in an environment are queried to create a list of known MAC addresses. This information is then saved to a CSV file for reference in discovering any new devices that join a network. This file could become too large to be effective. The other alert I can see not being effective is the `"Local Port Scan Alert" <https://github.com/tobor88/BTPS-SecPack/blob/master/Local%20Port%20Scan%20Monitor/Watch-PortScan.ps1>`_. This is because if there is an over abundance of connections the script will not be able to cover all of the connections quickly enough. Other alerts in this security package are still appropriate no matter the network size as they are Event ID based typically. To begin, I suggest `Setting up WinRM over HTTPS <https://btps-secpack.com/winrm-over-https>`_ in your environment.
+For the case of organizations with 1,000’s of devices; you may find that this entire suite does not apply to you. This has to do with how some of the discoveries operate. For example the alert I have in the `Device Discovery <https://github.com/tobor88/BTPS-SecPack/tree/master/Device%20Discovery>`_ directory relies on DHCP assigned IP addresses. All DHCP servers in an environment are queried to create a list of known MAC addresses. This information is then saved to a CSV file for reference in discovering any new devices that join a network. This file could become too large to be effective. The other alert I can see not being effective is the `"Local Port Scan Alert" <https://github.com/tobor88/BTPS-SecPack/blob/master/Local%20Port%20Scan%20Monitor/Watch-PortScan.ps1>`_. This is because if there is an over abundance of connections the script will not be able to cover all of the connections quickly enough. Other alerts in this security package are still appropriate no matter the network size as they are Event ID based typically. To begin, I suggest setting up WinRM over HTTPS in your environment.
+
+Functionality in The Blue Team PowerShell Security Package
+----------------------------------------------------------
+**Account Lockout Notification**
+.. image:: images/AccountLockout.png
+   :height: 100
+   :width: 200
+   :scale: 50
+   :alt: Account Lockout
+
+**Attempted Port Scan**
+.. image:: images/AttemptedPortScan.png
+    :height: 100
+    :width: 200
+    :scale: 50
+    :alt: Attempted Port Scan
+
+**AutoRuns Logging**
+.. image:: images/AutoRuns.png
+    :height: 100
+    :width: 200
+    :scale: 50
+    :alt: AutoRuns
+
+**Blacklisted IP Logging**
+.. image:: images/BlacklistedIP.png
+   :height: 100
+   :width: 200
+   :scale: 50
+   :alt: Blacklisted IP Logging
+
+**Check Forwarding Rules**
+.. image:: images/CheckForwardingRules.png
+    :height: 100
+    :width: 200
+    :scale: 50
+    :alt: Check Forwarding Rules
+
+**Track Network Connection History**
+.. image:: images/ConnectionHistory.png
+    :height: 100
+    :width: 200
+    :scale: 50
+    :alt: Track Network Connection History
+
+**Disable Weak SSL Ciphers**
+.. image:: images/DisableWeakCiphers.png
+    :height: 100
+    :width: 200
+    :scale: 50
+    :alt: Disable Weak SSL Ciphers
+
+**DNS Zone Transfer Alerts**
+.. image:: images/DNSZoneTransfer.png
+   :height: 100
+   :width: 200
+   :scale: 50
+   :alt: DNS Zone Transfer Alerts
+
+**Enable DNS over HTTPS**
+.. image:: images/EnableDNSoverHTTPS.png
+    :height: 100
+    :width: 200
+    :scale: 50
+    :alt: Enable DNS over HTTPS
+
+**Insecure LDAP Bind Notifications**
+.. image:: images/InsecureLdapBinds.png
+    :height: 100
+    :width: 200
+    :scale: 50
+    :alt: Insecure LDAP Bind Notifications
+
+**New Device Joined Network Discovery**
+.. image:: images/NewDeviceCheck.png
+   :height: 100
+   :width: 200
+   :scale: 50
+   :alt: New Device Check Discovery
+
+**User Changed Password Notification**
+.. image:: images/NormalPasswordChange.png
+    :height: 100
+    :width: 200
+    :scale: 50
+    :alt: User Changed Password Notification
+
+**Admin Changed Another Users Password Notification**
+.. image:: images/PasswordChanged.png
+    :height: 100
+    :width: 200
+    :scale: 50
+    :alt: Admin changed another users password notification
+
+**List of Expiring Passwords Notification**
+.. image:: images/PasswordsExpiring.png
+   :height: 100
+   :width: 200
+   :scale: 50
+   :alt: List of Expiring Passwords Notification
+
+**Local Port Scan Notification**
+.. image:: images/PortScanDetection.png
+    :height: 100
+    :width: 200
+    :scale: 50
+    :alt: Local Port Scan Notification
+
+**Remediate a compromised Office365 account**
+.. image:: images/RemediateCompromisedOfficeAccount.png
+    :height: 100
+    :width: 200
+    :scale: 50
+    :alt: Remediate a compromised Office365 account
+
+**Suspicious Event Occurred**
+.. image:: images/SuspiciousEventTriggered.png
+    :height: 100
+    :width: 200
+    :scale: 50
+    :alt: Suspicious Event Occurred
+
+**Unusual Sign In Alert**
+.. image:: images/UnusualSignIn.png
+   :height: 100
+   :width: 200
+   :scale: 50
+   :alt: Unusual Sign In Alert
+
+**User Account Expiring Notification**
+.. image:: images/UserAccountExpiring.png
+    :height: 100
+    :width: 200
+    :scale: 50
+    :alt: User Account Expiring Notification
+
+**User Account Unlocked**
+.. image:: images/UserAccountUnlocked.png
+    :height: 100
+    :width: 200
+    :scale: 50
+    :alt: User Account Unlocked
 
 
 Using the Installer.ps1 File to Get Started
 ===========================================
 I wrote the `Installer.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/Installer.ps1>`_ script allow anyone to quickly and easily install as many protections as possible offered by the B.T.P.S. Security Package. Running this script requires very minimal to zero know how. You do not need to know how to download the Git repository. `Installer.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/Installer.ps1>`_ will do it for you :-)
 
-**How can i get started using the Installer.ps1 install file?**
+**How can I get started using the Installer.ps1 install file?**
 Here is what you need to do in order to execute this file.
 
 1. Log into your Primary Domain Controller using an account with Administrator permissions.
@@ -75,8 +217,8 @@ https://github.com/OsbornePro/Documents/raw/main/Installer.ps1%20Demo.pdf
 
 Configure WinRM over HTTPS
 ==========================
-I cover the settings configured for WinRM over HTTPS communication through the use of Group Policy. These settings can be seen in the sections below.
-`Configure WinRM over HTTPS Instructions <https://youtu.be/UcU2Iu9AXpM>`_
+I posted a YouTube video covering the settings configured for WinRM over HTTPS communication through the use of Group Policy. These settings can be seen in the sections below.
+`YouTube Video : Configure WinRM over HTTPS Instructions <https://youtu.be/UcU2Iu9AXpM>`_
 
 
 Useful WinRM Info and Commands To Know
