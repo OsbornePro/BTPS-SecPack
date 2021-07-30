@@ -71,16 +71,154 @@ As an FYI there are multiple ways to download files from the PowerShell session.
 * ``certutil.exe -urlcache -split -f https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/Installer.ps1 "$env:USERPROFILE\Downloads\Installer.ps1"``
 * ``bitsadmin /transfer debjob /download /priority normal https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/Installer.ps1" "$env:USERPROFILE\Downloads\Installer.ps1"``
 
+
 Download an Instructional PDF with images and descriptions for Installer.ps1 at the below link
-==============================================================================================
+----------------------------------------------------------------------------------------------
 https://github.com/OsbornePro/Documents/raw/main/Installer.ps1%20Demo.pdf
 
 Download an Instructional PDF with images and descriptions for installing Sysmon at the below link
-==================================================================================================
+--------------------------------------------------------------------------------------------------
 https://github.com/OsbornePro/Documents/raw/main/Sysmon%20Setup-0001.pdf
 
 
-`Configure WinRM over HTTPS Instructions <https://btps-secpack.com/winrm-over-https>`_
+Configure WinRM over HTTPS
+--------------------------
+I cover the settings configured for WinRM over HTTPS communication through the use of Group Policy. These settings can be seen in the sections below.
+`Configure WinRM over HTTPS Instructions <https://youtu.be/UcU2Iu9AXpM>`_
+
+
+Useful WinRM Info and Commands To Know
+--------------------------------------
+Setup WinRM over HTTPS may require the need to know a few commands. I have included these commands below.
+
+``Enable-PSRemoting -Force # Enables firewall rules for WinRM``
+
+``winrm qc -q # Qucik config for WinRM 5985``
+
+``winrm enum winrm/config/listener # Enumerate cert thumbprint used on different winrm ports``
+
+``winrm delete winrm/config/listener?Address=*+Transport=HTTPS # Delete winrm certificate and stop listener on 5986. This allows new cert to be attached to port``
+
+``winrm create winrm/config/listener?Address=*+Transport=HTTPS # Creates a WinRM listener on 5986 using any available certificate``
+
+The below command defines a certificate to use on port 5986. Certificate Template needed is a Web Server certificate from Windows PKI
+``New-WSManInstance -ResourceUri WinRM/Config/Listener -SelectorSet @{Address = "*"; Transport = "HTTPS"} -ValueSet @{Hostname = FqdnRequiredHere.domain.com; CertificateThumbprint = $Thumbprint }``
+
+
+**SERVER CERTIFICATE:**
+The certificate thumbprint value that you are going to need in "Group Policy Setting 1" below is from your internal domains Private Key Infrastructure (PKI). This value will vary as these values are unique to the certificate. The Root Certificate Authority (CA) assigns certificates to your devices. When a device receives a certificate, it gets assigned under the Root CA's certificate. This creates what is called a Certificate Chain. If it helps to see this represented in a directory tree format, it would look something like the below tree structure. Your domain would not have an Intermediate CA most likely but I included it for the visual.
+
+* Root CA Certificate <-- This is the certificate thumbprint you need
+  * Intermediate CA Certificate
+    * Assigned Device Certificate
+    * Assigned Device Certificate <-- This certificate's thumbprint gets assigned to port 5986 on the client device.
+
+**CLIENT CERTIFICATE:**
+* In the above tree, "Assigned Device Certificate" is where the command
+``New-WSManInstance -ResourceUri WinRM/Config/Listener -SelectorSet @{Address = "*"; Transport = "HTTPS"} -ValueSet @{Hostname = FqdnRequiredHere.domain.com; CertificateThumbprint = $Thumbprint }``
+would come in.
+* Notice the "Hostname" value includes the domain you are in. This needs to also be true for the "Common Name" value when the client device requests the WinRM certificate. This means your CN value is required to be devicename.domainname.com. If you do not include the domain name in the Common Name value your WinRM over HTTPS communication will not work. Subject Alternative Name's (SAN) will not work either. I have tried adding more than one Common Name values to a certificate and this communication still failed.
+* If you are using a Windows Server Certificate Authority, the "WebServer" certificate template can be used to request the certificate needed.
+
+
+Group Policy Windows Event Forwarding (WEF) Settings
+----------------------------------------------------
+**GROUP POLICY SETTING 1**
+The Group Policy setting "Computer Configuration > Policies > Administrative Templates > Windows Components > Event Forwarding > Configure Target Subscription Manager" needs to be set to WinRM over HTTPS (Port 5986): In my environment I added 2 entries for this to cover all basis. One has the CA certificate thumbprint with with spaces after every 2 numbers, and the other entry is without spaces. The example values are below.
+
+1. **Example Entry 1**
+``Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900,IssuerCA=ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff``
+
+2. **Example Entry 2**
+``Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900,IssuerCA=ffffffffffffffffffffffffffffffffffffffff``
+**NOTE:** The default Refresh rate value is 900 seconds or 15 minutes. This does not need to be defined. I included it to be thorough.
+
+3. **Example Entry 3**
+Using the below value without a certificate defined will allow/use Kerberos for authentication which is fine to use
+``Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900``
+
+
+**GROUP POLICY SETTING 2**
+The Group Policy Setting "Computer Configuration > Policies > Administrative Templates > Windows Components > Event Log Service > Security > Change Log Access" needs to be set to the value of the property "ChannelAccess" after issuing the below command:
+``wevtutil gl security``
+
+Group Policy Setting "Computer Configuration > Policies > Administrative Templates > Windows Components > Event Log Service > Security > Change Log Access (Legacy)" needs to be set to the value of the property "ChannelAccess" after issuing the below command:
+``wevtutil gl security``
+
+
+Group Policy WinRM Settings
+---------------------------
+
+**GROUP POLICY SETTING 3**
+In your group policy settings go to "Computer Configuration > Preferences > Control Panel Settings > Services". Then right click and add a New Service. Set the "Startup Type" to "Automatic". Set the "Service Name" to WinRM, set the "Service Action" to "Start Service", set the "Wait Timeout" to 30 seconds. In the recovery tab select "Restart the Service" from the three failure options. Set "Reset Fail Count after" to 0 days and "Reset Service after" to 1 minutes. Then click OK to save.
+
+
+**GROUP POLICY SETTING 4**
+Next, still on the same policy object, is the list of IP addresses that are allowed to do remote management access  on the target computer. Go to Computer Configuration > Policies > Administrative Templates > Windows Components > Windows Remote Management (WinRM) > WinRM Services. Then double click on “Allow remote server management through WinRM” to modify the setting as follows:
+Set the policy to "Enabled"
+Set the IPv4 Filter to * or an all encompassing subnet for your environment such as ``10.0.0.0/16``
+Leave the IPv6 Filter blank or set it to a wildcard * as well. Click OK to save.
+
+
+**GROUP POLICY SETTING 5**
+Edit the settings — Opening Firewall ports
+Next we will create a new rule for the Firewall on the targeted client PC's. Go to Computer  Configurations > Policies > Security Settings > Windows  Firewall and Advanced Security > Windows Firewall and Advanced  Security then right click on Inbound Rules > New Rule
+
+Create a new rule called Allow WinRM over HTTPS. We want to allow the inbound connection on port 5986. Leave the Tick mark on "Domain" and "Private". We then want to create a few more firewall rules using the default firewall rules "Remote Event Log Management (RPC-EPMAP)", "Remote Event Monitor (RPC-EPMAP)", "Remote Event Log Management (RPC)", "Remote Event Monitor (RPC)", "Remote Service Management (RPC-EPMAP)", "Remote Service Management (RPC)", "Remote Scheduled Tasks Management (RPC-EPMAP)", "Remote Scheduled Tasks Management (RPC)". This should be enabled to Allow inbound traffic in the "Domain", and "Private" profiles.  For good measure if you like you can deny traffic on port 5985. This is done by adding firewall default firewall rule "Windows Remote Management (HTTP-In)", and Blocking traffic to that port.
+
+
+**GROUP POLICY SETTING 6**
+Under Administrative Templates > Network > Network Connections > Windows Defender Firewall > Domain Profile set the policies for Windows Defender Firewall: Allow ICMP exceptions, Windows Defender Firewall: Allow inbound remote administration exception, and Windows Defender Firewall: Allow inbound Remote Desktop exceptions to "Enabled". Define the filter you used in Group Policy Setting 4 for these allowed values. For example you may have used a Wildcard * or defined an all encompassing subnet range such as ``10.0.0.0/16``
+
+
+**GROUP POLICY SETTING 7**
+Under Administrative Templates > System > Credentials Delegation > Allow delegating fresh credentials and set the values to ``WSMAN/*.yourdomain.com``. This will allow WinRM communication between any host ending in yourdomain.com. Then set "Allow delegating fresh credentials with NTLM-only server authentication" under that same tree to that value ``WSMAN/*.yourdomain.com``. For example my email rosborne@osbornepro.com is in the domain osbornepro.com. I would set the value to ``WSMAN/*.osbornepro.com``. We also want to Enable "Encryption Oracle Remediation" and set the drop down value to "Force Updated Clients". This is to prevent CVE-2018-0886 exploitation.
+
+
+**GROUP POLICY SETTING 8**
+Under Administrative Templates > Windows Components/Windows Remote Management (WinRM)/WinRM Client set the below settings.
+
+Allow Basic authentication Enabled
+Allow CredSSP authentication Enabled
+Allow remote server management through WinRM Enabled
+IPv4 filter: *
+IPv6 filter: *
+Allow unencrypted traffic Disabled
+Disallow Kerberos authentication Disabled  # If you are have CCPD than enable this
+Disallow WinRM from storing RunAs credentials Enabled
+
+
+**GROUP POLICY SETTING 9**
+Under Administrative Templates > Windows Components/Windows Remote Management (WinRM)/WinRM Service set the below settings
+
+Allow Basic authentication Enabled
+Allow CredSSP authentication Enabled
+Allow remote server management through WinRM Enabled
+IPv4 filter: *
+IPv6 filter: *
+Allow unencrypted traffic Disabled
+Disallow Kerberos authentication Disabled
+Disallow WinRM from storing RunAs credentials Enabled
+Turn On Compatibility HTTP Listener Disabled
+Turn On Compatibility HTTPS Listener Enabled
+
+
+**GROUP POLICY SETTING 10**
+Create a Registry Setting that gets pushed out through Group Policy containing the below value
+
+**SETTING:**
+``HKLM:\Software\Policies\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\010103000F0000F0010000000F0000F0C967A3643C3AD745950DA7859209176EF5B87C875FA20DF21951640E807D7C24\Category``
+``State``
+``1``
+
+
+**CONCLUSION**
+WinRM over HTTPS is now configured for your environment. Great work! When you now use PowerShell commands such as ``Invoke-Command`` or ``New-PSSession`` you will need to specify the ``-UseSSL`` parameter in order to use WinRM over HTTPS. Port 5985 will not accept connections in an ideal setup.
+
+
+Disclaimer
+----------
+**DISCLAIMER:** This suite nor any other security suite or tool can completely prevent or detect all security vulnerabilities. This tool adds monitoring to an environment and may not catch every possible scenario and is no guarantee of discovery.
 
 
 .. toctree::
