@@ -39,7 +39,7 @@ For the case of organizations with 1,000’s of devices; you may find that this 
 
 Indices and tables
 ==================
-
+* :ref:`installer.rst`
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
