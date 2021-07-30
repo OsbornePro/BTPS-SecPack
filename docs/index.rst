@@ -12,8 +12,8 @@ Welcome to The B.T.P.S Security Package's documentation!
 
 The Installer.ps1 script is good to go. I created a virtual environment and ran everything from scratch to ensure you get the max protection and visibility possible with the least amount of fuss. If you experience any trouble please let me know so I am aware and can fix it. If you experience any issues or need help, feel free to reach out to me. My aim is to make this as easy to get going as possible. If something is to difficult or confusing please tell me about it. rosborne@osbornepro.com I am still adding content to this site as it is fairly new.
 
-**FEATURE COMING SOON:**
-
+FEATURES COMING SOON
+--------------------
 * **ELK SIEM Tool:** I am going to set up a configuration for the ELK SIEM tool. This tool is free for certain uses and offers a purchase if desired. It will include `Elasticsearch <https://www.elastic.co/elasticsearch/>`_, `Kibana <https://www.elastic.co/kibana>`_, `Logstash <https://www.elastic.co/logstash>`_, `Winlogbeat <https://www.elastic.co/beats/winlogbeat>`_, and `GeoIP <https://www.elastic.co/blog/geoip-in-the-elastic-stack>`_. The configuration is going to use the Windows Event Forwarding (WEF) configuration I cover in the `WEF Application Setup <https://btps-secpack.com/wef-application>`_. The purpose of this is to prevent the need to install agents on the devices in your environment. The free version does not offer LDAP authentication unfortunately. The configuration will use TLS certificates to encrypt communications on the local host and listen for outside connections if you decide to install other stack programs such as `APM-Server <https://www.elastic.co/apm>`_, `Heartbeat <https://www.elastic.co/beats/heartbeat>`_, or `Metricbeat <https://www.elastic.co/beats/metricbeat>`_. `Winlogbeat <https://www.elastic.co/beats/winlogbeat>`_ logs will be sent to `Logstash <https://www.elastic.co/logstash>`_ and modified to included `GeoIP <https://www.elastic.co/blog/geoip-in-the-elastic-stack>`_ tags that can be used for mapping IP addresses. Default passwords will of course also be changed. I will also create a Docker file that can be used to prevent the need for too much manual set up. When available it can be obtained from the Official OsbornePro LLC docker site: https://hub.docker.com/orgs/osbornepro
 * I am **NO** longer planning on integrating the `Virus Total API <https://support.virustotal.com/hc/en-us/articles/115002100149-API>`_ for MD5 hash comparisons. This does not provide enough cost per value however I will include a script to do this in case it is valuable to your situation.
 
@@ -34,6 +34,7 @@ For the case of organizations with 1,000’s of devices; you may find that this 
 .. toctree::
    :maxdepth: 4
    :caption: Contents: Installer.ps1 Script
+
 
 Using the Installer.ps1 File to Get Started
 ===========================================
@@ -72,17 +73,8 @@ As an FYI there are multiple ways to download files from the PowerShell session.
 * ``bitsadmin /transfer debjob /download /priority normal https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/Installer.ps1" "$env:USERPROFILE\Downloads\Installer.ps1"``
 
 
-Download an Instructional PDF with images and descriptions for Installer.ps1 at the below link
-----------------------------------------------------------------------------------------------
-https://github.com/OsbornePro/Documents/raw/main/Installer.ps1%20Demo.pdf
-
-Download an Instructional PDF with images and descriptions for installing Sysmon at the below link
---------------------------------------------------------------------------------------------------
-https://github.com/OsbornePro/Documents/raw/main/Sysmon%20Setup-0001.pdf
-
-
 Configure WinRM over HTTPS
---------------------------
+==========================
 I cover the settings configured for WinRM over HTTPS communication through the use of Group Policy. These settings can be seen in the sections below.
 `Configure WinRM over HTTPS Instructions <https://youtu.be/UcU2Iu9AXpM>`_
 
@@ -120,6 +112,7 @@ would come in.
 Group Policy Windows Event Forwarding (WEF) Settings
 ----------------------------------------------------
 **GROUP POLICY SETTING 1**
+
 The Group Policy setting "Computer Configuration > Policies > Administrative Templates > Windows Components > Event Forwarding > Configure Target Subscription Manager" needs to be set to WinRM over HTTPS (Port 5986): In my environment I added 2 entries for this to cover all basis. One has the CA certificate thumbprint with with spaces after every 2 numbers, and the other entry is without spaces. The example values are below.
 
 1. **Example Entry 1**
@@ -135,6 +128,7 @@ Using the below value without a certificate defined will allow/use Kerberos for 
 
 
 **GROUP POLICY SETTING 2**
+
 The Group Policy Setting "Computer Configuration > Policies > Administrative Templates > Windows Components > Event Log Service > Security > Change Log Access" needs to be set to the value of the property "ChannelAccess" after issuing the below command:
 ``wevtutil gl security``
 
@@ -146,10 +140,12 @@ Group Policy WinRM Settings
 ---------------------------
 
 **GROUP POLICY SETTING 3**
+
 In your group policy settings go to "Computer Configuration > Preferences > Control Panel Settings > Services". Then right click and add a New Service. Set the "Startup Type" to "Automatic". Set the "Service Name" to WinRM, set the "Service Action" to "Start Service", set the "Wait Timeout" to 30 seconds. In the recovery tab select "Restart the Service" from the three failure options. Set "Reset Fail Count after" to 0 days and "Reset Service after" to 1 minutes. Then click OK to save.
 
 
 **GROUP POLICY SETTING 4**
+
 Next, still on the same policy object, is the list of IP addresses that are allowed to do remote management access  on the target computer. Go to Computer Configuration > Policies > Administrative Templates > Windows Components > Windows Remote Management (WinRM) > WinRM Services. Then double click on “Allow remote server management through WinRM” to modify the setting as follows:
 Set the policy to "Enabled"
 Set the IPv4 Filter to * or an all encompassing subnet for your environment such as ``10.0.0.0/16``
@@ -157,6 +153,7 @@ Leave the IPv6 Filter blank or set it to a wildcard * as well. Click OK to save.
 
 
 **GROUP POLICY SETTING 5**
+
 Edit the settings — Opening Firewall ports
 Next we will create a new rule for the Firewall on the targeted client PC's. Go to Computer  Configurations > Policies > Security Settings > Windows  Firewall and Advanced Security > Windows Firewall and Advanced  Security then right click on Inbound Rules > New Rule
 
@@ -164,14 +161,17 @@ Create a new rule called Allow WinRM over HTTPS. We want to allow the inbound co
 
 
 **GROUP POLICY SETTING 6**
+
 Under Administrative Templates > Network > Network Connections > Windows Defender Firewall > Domain Profile set the policies for Windows Defender Firewall: Allow ICMP exceptions, Windows Defender Firewall: Allow inbound remote administration exception, and Windows Defender Firewall: Allow inbound Remote Desktop exceptions to "Enabled". Define the filter you used in Group Policy Setting 4 for these allowed values. For example you may have used a Wildcard * or defined an all encompassing subnet range such as ``10.0.0.0/16``
 
 
 **GROUP POLICY SETTING 7**
+
 Under Administrative Templates > System > Credentials Delegation > Allow delegating fresh credentials and set the values to ``WSMAN/*.yourdomain.com``. This will allow WinRM communication between any host ending in yourdomain.com. Then set "Allow delegating fresh credentials with NTLM-only server authentication" under that same tree to that value ``WSMAN/*.yourdomain.com``. For example my email rosborne@osbornepro.com is in the domain osbornepro.com. I would set the value to ``WSMAN/*.osbornepro.com``. We also want to Enable "Encryption Oracle Remediation" and set the drop down value to "Force Updated Clients". This is to prevent CVE-2018-0886 exploitation.
 
 
 **GROUP POLICY SETTING 8**
+
 Under Administrative Templates > Windows Components/Windows Remote Management (WinRM)/WinRM Client set the below settings.
 
 Allow Basic authentication Enabled
@@ -185,6 +185,7 @@ Disallow WinRM from storing RunAs credentials Enabled
 
 
 **GROUP POLICY SETTING 9**
+
 Under Administrative Templates > Windows Components/Windows Remote Management (WinRM)/WinRM Service set the below settings
 
 Allow Basic authentication Enabled
@@ -210,6 +211,15 @@ Create a Registry Setting that gets pushed out through Group Policy containing t
 
 **CONCLUSION**
 WinRM over HTTPS is now configured for your environment. Great work! When you now use PowerShell commands such as ``Invoke-Command`` or ``New-PSSession`` you will need to specify the ``-UseSSL`` parameter in order to use WinRM over HTTPS. Port 5985 will not accept connections in an ideal setup.
+
+
+Download an Instructional PDF with images and descriptions for Installer.ps1 at the below link
+----------------------------------------------------------------------------------------------
+https://github.com/OsbornePro/Documents/raw/main/Installer.ps1%20Demo.pdf
+
+Download an Instructional PDF with images and descriptions for installing Sysmon at the below link
+--------------------------------------------------------------------------------------------------
+https://github.com/OsbornePro/Documents/raw/main/Sysmon%20Setup-0001.pdf
 
 
 Disclaimer
