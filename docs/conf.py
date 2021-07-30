@@ -26,7 +26,7 @@ release = '2020'
 
 
 # -- General configuration ---------------------------------------------------
-
+display_version = 'True'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
@@ -54,3 +54,14 @@ html_logo = "Logo.png"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# Navigation options
+collapse_navigation = 'False'
+sticky_navigation = 'True'
+navigation_depth = -1
+includehidden = 'True'
+titles_only = 'False'
+
+# Google Analytics # ID
+analytics_id = 'UA-145050521-2'
+analytics_anonymize_ip = 'False'
