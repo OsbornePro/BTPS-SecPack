@@ -55,7 +55,7 @@ This alert informs the cyber security team when a port scan has been attempted a
 
 
 **AutoRuns Logging**
-This is showing the Autoruns Event Viewer entry that gets created. An easy to read CSV file also gets saved to C:\Program FIles\AutorunsToWinEventLog\AutorunsOutput.csv Thanks to:  `https://github.com/palantir/windows-event-forwarding/tree/master/AutorunsToWinEventLog <https://github.com/palantir/windows-event-forwarding/tree/master/AutorunsToWinEventLog>`_
+This is showing the Autoruns Event Viewer entry that gets created. An easy to read CSV file also gets saved to ``C:\\Program Files\\AutorunsToWinEventLog\\AutorunsOutput.csv`` Thanks to:  `https://github.com/palantir/windows-event-forwarding/tree/master/AutorunsToWinEventLog <https://github.com/palantir/windows-event-forwarding/tree/master/AutorunsToWinEventLog>`_
 
 .. image:: img/AutoRuns.png
     :scale: 100
@@ -64,7 +64,7 @@ This is showing the Autoruns Event Viewer entry that gets created. An easy to re
 
 
 **Blacklisted IP Logging**
-When a device establishes a connection to an IP that is on 4 or more blacklists or a domain that is less than 2 years old you will be informed. The events are also stored in the Event Viewer under "MaliciousIPs". It seems that an IP address on 3 blacklists does not necessarily mean it is dangerous or something to do anything about. Correct me if my analysis is wrong.
+When a device establishes a connection to an IP that is on 4 or more blacklists or a domain that is less than 2 years old you will be informed. The events are also stored in the Event Viewer under **"MaliciousIPs"**. It seems that an IP address on 3 blacklists does not necessarily mean it is dangerous or something to do anything about. Correct me if my analysis is wrong.
 
 .. image:: img/BlacklistedIP.png
     :scale: 100
