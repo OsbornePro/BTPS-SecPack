@@ -418,8 +418,42 @@ Protection against SQL injections and CSRF have been implemented. Penetration te
 
 
 **Table View of WEF Application**
-This WEF Application is used to view and st log files that are a high likelihood to be indications of compromise. These logs get collected from all devices in the environment. The following Event ID's are collected and put into the database:
-1, 2, 1102, 4732, 4733, 4720, 4726, 7045, 4756, 4757, 4728, 4729, 4649, 4723,
+
+This WEF Application is used to view and list log files that are a high likelihood to be indications of compromise. These logs get collected from all devices in the environment. The following Event ID's are collected and put into the database: 1, 2, 1102, 4732, 4733, 4720, 4726, 7045, 4756, 4757, 4728, 4729, 4649, and 4723
+
++------------+------------------------------------------------------------+
+| Event ID   | Description                                                |
++============+============================================================+
+| 1          | Blacklisted IP Connected too                               |
++------------+------------------------------------------------------------+
+| 2          | Connection to domain less that 2 years old                 |
++------------+------------------------------------------------------------+
+| 1102       | Event log cleared                                          |
++------------+------------------------------------------------------------+
+| 4732       | User added to a security enabled local group               |
++------------+------------------------------------------------------------+
+| 4733       | User removed to a security enabled local group             |
++------------+------------------------------------------------------------+
+| 4720       | User account was created                                   |
++------------+------------------------------------------------------------+
+| 4726       | User account was deleted                                   |
++------------+------------------------------------------------------------+
+| 7045       | A new service was installed                                |
++------------+------------------------------------------------------------+
+| 4756       | A user was added to a security enabled universal group     |
++------------+------------------------------------------------------------+
+| 4757       | A user was removed from a security enabled universal group |
++------------+------------------------------------------------------------+
+| 4728       | A member was added to a security-enabled global group      |
++------------+------------------------------------------------------------+
+| 4729       | A member was removed from a security-enabled global group  |
++------------+------------------------------------------------------------+
+| 4649       | A replay attack was detected                               |
++------------+------------------------------------------------------------+
+| 4723       | An attempt was made to change an accounts password         |
++------------+------------------------------------------------------------+
+
+
 
 .. image:: img/WEFTableView.png
     :scale: 100
@@ -494,8 +528,11 @@ In order to use the `DomainComputers.xml <https://github.com/OsbornePro/BTPS-Sec
 Create the SQL database schema and table.
 
 1. Open SSMS (SQL Server Management Studio)
+
 2. Sign in using an Administrator account to the default selected instance
+
 3. Click "Execute New Query" in the top ribbon. This will open a text window
+
 4. Copy and paste the contents of Query to Create MSSQL DB Table into the query and click "Execute". This builds your SQL Database table where events will be imported.
 
 
