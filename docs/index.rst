@@ -99,7 +99,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 **Enable DNS over HTTPS**
 
-.. image:: img/EnableDNSoverHTTPS.png
+.. image:: img/EnabledDNSoverHTTPS.png
     :scale: 100
     :alt: Enable DNS over HTTPS
 
