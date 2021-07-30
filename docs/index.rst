@@ -31,144 +31,144 @@ For the case of organizations with 1,000’s of devices; you may find that this 
 
 Functionality in The Blue Team PowerShell Security Package
 ----------------------------------------------------------
+
 **Account Lockout Notification**
+
 .. image:: images/AccountLockout.png
-   :height: 100
-   :width: 200
-   :scale: 50
+   :scale: 100
    :alt: Account Lockout
 
+
 **Attempted Port Scan**
+
 .. image:: images/AttemptedPortScan.png
-    :height: 100
-    :width: 200
-    :scale: 50
+    :scale: 100
     :alt: Attempted Port Scan
 
+
 **AutoRuns Logging**
+
 .. image:: images/AutoRuns.png
-    :height: 100
-    :width: 200
-    :scale: 50
+    :scale: 100
     :alt: AutoRuns
 
+
 **Blacklisted IP Logging**
+
 .. image:: images/BlacklistedIP.png
-   :height: 100
-   :width: 200
-   :scale: 50
+    :scale: 100
    :alt: Blacklisted IP Logging
 
+
 **Check Forwarding Rules**
+
 .. image:: images/CheckForwardingRules.png
-    :height: 100
-    :width: 200
-    :scale: 50
+    :scale: 100
     :alt: Check Forwarding Rules
 
+
 **Track Network Connection History**
+
 .. image:: images/ConnectionHistory.png
-    :height: 100
-    :width: 200
-    :scale: 50
+    :scale: 100
     :alt: Track Network Connection History
 
+
 **Disable Weak SSL Ciphers**
+
 .. image:: images/DisableWeakCiphers.png
-    :height: 100
-    :width: 200
-    :scale: 50
+    :scale: 100
     :alt: Disable Weak SSL Ciphers
 
+
 **DNS Zone Transfer Alerts**
+
 .. image:: images/DNSZoneTransfer.png
-   :height: 100
-   :width: 200
-   :scale: 50
+    :scale: 100
    :alt: DNS Zone Transfer Alerts
 
+
 **Enable DNS over HTTPS**
+
 .. image:: images/EnableDNSoverHTTPS.png
-    :height: 100
-    :width: 200
-    :scale: 50
+    :scale: 100
     :alt: Enable DNS over HTTPS
 
+
 **Insecure LDAP Bind Notifications**
+
 .. image:: images/InsecureLdapBinds.png
-    :height: 100
-    :width: 200
-    :scale: 50
+    :scale: 100
     :alt: Insecure LDAP Bind Notifications
 
+
 **New Device Joined Network Discovery**
+
 .. image:: images/NewDeviceCheck.png
-   :height: 100
-   :width: 200
-   :scale: 50
+    :scale: 100
    :alt: New Device Check Discovery
 
+
 **User Changed Password Notification**
+
 .. image:: images/NormalPasswordChange.png
-    :height: 100
-    :width: 200
-    :scale: 50
+    :scale: 100
     :alt: User Changed Password Notification
 
+
 **Admin Changed Another Users Password Notification**
+
 .. image:: images/PasswordChanged.png
-    :height: 100
-    :width: 200
-    :scale: 50
+    :scale: 100
     :alt: Admin changed another users password notification
 
+
 **List of Expiring Passwords Notification**
+
 .. image:: images/PasswordsExpiring.png
-   :height: 100
-   :width: 200
-   :scale: 50
+    :scale: 100
    :alt: List of Expiring Passwords Notification
 
+
 **Local Port Scan Notification**
+
 .. image:: images/PortScanDetection.png
-    :height: 100
-    :width: 200
-    :scale: 50
+    :scale: 100
     :alt: Local Port Scan Notification
 
+
 **Remediate a compromised Office365 account**
+
 .. image:: images/RemediateCompromisedOfficeAccount.png
-    :height: 100
-    :width: 200
-    :scale: 50
+    :scale: 100
     :alt: Remediate a compromised Office365 account
 
+
 **Suspicious Event Occurred**
+
 .. image:: images/SuspiciousEventTriggered.png
-    :height: 100
-    :width: 200
-    :scale: 50
+    :scale: 100
     :alt: Suspicious Event Occurred
 
+
 **Unusual Sign In Alert**
+
 .. image:: images/UnusualSignIn.png
-   :height: 100
-   :width: 200
-   :scale: 50
+    :scale: 100
    :alt: Unusual Sign In Alert
 
+
 **User Account Expiring Notification**
+
 .. image:: images/UserAccountExpiring.png
-    :height: 100
-    :width: 200
-    :scale: 50
+    :scale: 100
     :alt: User Account Expiring Notification
 
+
 **User Account Unlocked**
+
 .. image:: images/UserAccountUnlocked.png
-    :height: 100
-    :width: 200
-    :scale: 50
+    :scale: 100
     :alt: User Account Unlocked
 
 
