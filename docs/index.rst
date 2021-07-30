@@ -61,7 +61,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 .. image:: img/BlacklistedIP.png
     :scale: 100
-   :alt: Blacklisted IP Logging
+    :alt: Blacklisted IP Logging
 
 
 
@@ -93,7 +93,7 @@ Functionality in The Blue Team PowerShell Security Package
 
 .. image:: img/DNSZoneTransfer.png
     :scale: 100
-   :alt: DNS Zone Transfer Alerts
+    :alt: DNS Zone Transfer Alerts
 
 
 
