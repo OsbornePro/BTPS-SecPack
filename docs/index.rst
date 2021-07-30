@@ -568,7 +568,7 @@ Below is an example of what the table view of an event looks like
 
 .. image:: img/WEFTableView.png
     :scale: 100
-    :alt: Table View of WEF Application
+    :alt: Table View in WEF Application
 
 
 **Detail View in WEF Application**
@@ -577,7 +577,7 @@ Events can also be shown in a detailed view by clicking the "Details" button nex
 
 .. image:: img/WEFDetailsView.png
     :scale: 100
-    :alt: Table View of WEF Application
+    :alt: Details View in WEF Application
 
 
 Perquisites and Setup Instructions
