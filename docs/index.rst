@@ -55,7 +55,7 @@ This alert informs the cyber security team when a port scan has been attempted a
 
 
 **AutoRuns Logging**
-This is showing the Autoruns Event Viewer entry that gets created. An easy to read CSV file also gets saved to C:\Program FIles\AutorunsToWinEventLog\AutorunsOutput.csv Thanks to:  https://github.com/palantir/windows-event-forwarding/tree/master/AutorunsToWinEventLog
+This is showing the Autoruns Event Viewer entry that gets created. An easy to read CSV file also gets saved to C:\Program FIles\AutorunsToWinEventLog\AutorunsOutput.csv Thanks to:  `https://github.com/palantir/windows-event-forwarding/tree/master/AutorunsToWinEventLog <https://github.com/palantir/windows-event-forwarding/tree/master/AutorunsToWinEventLog>`_
 
 .. image:: img/AutoRuns.png
     :scale: 100
@@ -307,6 +307,7 @@ The certificate thumbprint value that you are going to need in **"Group Policy S
 
 Group Policy Windows Event Forwarding (WEF) Settings
 ----------------------------------------------------
+
 **GROUP POLICY SETTING 1**
 
 The Group Policy setting **"Computer Configuration > Policies > Administrative Templates > Windows Components > Event Forwarding > Configure Target Subscription Manager"** needs to be set to **WinRM over HTTPS (Port 5986)**: In my environment I added 2 entries for this to cover all basis. One has the CA certificate thumbprint with with spaces after every 2 numbers, and the other entry is without spaces. The example values are below.
@@ -324,6 +325,7 @@ The Group Policy setting **"Computer Configuration > Policies > Administrative T
 
 Using the below value without a certificate defined will allow/use Kerberos for authentication which is fine to use
 ``Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900``
+
 
 
 **GROUP POLICY SETTING 2**
@@ -359,6 +361,8 @@ Set **"Reset Fail Count after"** to **0** days and **"Reset Service after"** to 
 Then click **OK** to save.
 
 
+
+
 **GROUP POLICY SETTING 4**
 
 Next, still on the same policy object, is the list of IP addresses that are allowed to do remote management access  on the target computer.
@@ -374,6 +378,8 @@ Set the **IPv4 Filter** to * or an all encompassing subnet for your environment 
 Leave the **IPv6 Filter** blank or set it to a wildcard ``*`` as well.
 
 Click **OK** to save.
+
+
 
 
 **GROUP POLICY SETTING 5**
@@ -393,6 +399,7 @@ We want to allow the inbound connection on port **5986**
 Leave the Tick mark on **"Domain"** and **"Private"**
 
 We then want to create a few more firewall rules using the default firewall rules
+
 * Remote Event Log Management (RPC-EPMAP)
 * Remote Event Monitor (RPC-EPMAP)
 * Remote Event Log Management (RPC)
@@ -402,11 +409,14 @@ We then want to create a few more firewall rules using the default firewall rule
 * Remote Scheduled Tasks Management (RPC-EPMAP)
 * Remote Scheduled Tasks Management (RPC)
 
+
 This should be enabled to **Allow inbound traffic** in the **"Domain"**, and **"Private"** profiles
 
 For good measure if you like you can deny traffic on port 5985.
 
 This is done by adding firewall default firewall rule **"Windows Remote Management (HTTP-In)"**, and Blocking traffic to that port.
+
+
 
 
 **GROUP POLICY SETTING 6**
@@ -426,6 +436,8 @@ Define the filter you used in **Group Policy Setting 4** for these allowed value
 For example you may have used a Wildcard ``*`` or defined an all encompassing subnet range such as ``10.0.0.0/16``
 
 
+
+
 **GROUP POLICY SETTING 7**
 
 Under **Administrative Templates > System > Credentials Delegation > Allow delegating fresh credentials** and set the values to ``WSMAN/*.yourdomain.com``.
@@ -443,6 +455,8 @@ We also want to Enable **"Encryption Oracle Remediation"** and set the drop down
 This is to prevent `CVE-2018-0886 <https://nvd.nist.gov/vuln/detail/CVE-2018-0886>`_ exploitation.
 
 
+
+
 **GROUP POLICY SETTING 8**
 
 Under **Administrative Templates > Windows Components/Windows Remote Management (WinRM)/WinRM Client** set the below settings.
@@ -455,6 +469,8 @@ Under **Administrative Templates > Windows Components/Windows Remote Management 
 * **Allow unencrypted traffic:** ``Disabled``
 * **Disallow WinRM from storing RunAs credentials:** ``Enabled``
 * **Disallow Kerberos authentication:** ``Disabled`` : **IMPORTANT:** If you are using `CIS-CAT Pro Dashboard (CCPD) <https://www.cisecurity.org/cybersecurity-tools/cis-cat-pro/>`_ or are using Kerberos authentication with Windows Event Forwarding **ENABLE** this instead)
+
+
 
 
 **GROUP POLICY SETTING 9**
@@ -473,14 +489,16 @@ Under **Administrative Templates > Windows Components/Windows Remote Management 
 * **Turn On Compatibility HTTPS Listener:** ``Enabled``
 
 
+
+
 **GROUP POLICY SETTING 10**
 Create a Registry Setting that gets pushed out through Group Policy containing the below value
 
 **SETTING:**
 
-    Path: ``HKLM:\Software\Policies\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\010103000F0000F0010000000F0000F0C967A3643C3AD745950DA7859209176EF5B87C875FA20DF21951640E807D7C24\Category``
-    Name: ``State``
-    Value: ``1``
+|    Path: ``HKLM:\Software\Policies\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\010103000F0000F0010000000F0000F0C967A3643C3AD745950DA7859209176EF5B87C875FA20DF21951640E807D7C24\Category``
+|    Name: ``State``
+|    Value: ``1``
 
 
 **CONCLUSION**
@@ -546,6 +564,7 @@ This WEF Application is used to view and list log files that are a high likeliho
 +------------+------------------------------------------------------------+
 
 
+Below is an example of what the table view of an event looks like
 
 .. image:: img/WEFTableView.png
     :scale: 100
@@ -553,6 +572,7 @@ This WEF Application is used to view and list log files that are a high likeliho
 
 
 **Detail View in WEF Application**
+
 Events can also be shown in a detailed view by clicking the "Details" button next to an event in the table. This will display a few more bits of info for the event.
 
 .. image:: img/WEFDetailsView.png
