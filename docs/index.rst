@@ -480,11 +480,17 @@ General steps to set up this package.
 1. WinRM over HTTPS
 
 **DOWNLOAD & INSTALL** (I suggest installing these on the centralized WEF collection server to get started)
+
 1. `SSMS (SQL Server Management Studio) <https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-ver15>`_
+
 2. `Microsoft SQL Server (Express a.k.a Free Version Will Work) <https://www.microsoft.com/en-us/sql-server/sql-server-downloads>`_
+
 3. `ASP.NET 3.1 Core Runtime <https://dotnet.microsoft.com/download/dotnet-core/3.1>`_
+
 4. `ASP.NET 3.1 SDK <https://dotnet.microsoft.com/download/dotnet-core/3.1>`_
+
 5. `Visual Studio <https://visualstudio.microsoft.com/vs/>`_
+
 
 
 **SIDE NOTE 1:** It is considered best practice to have the SQL server installed on a separate device than the one hosting the application. I did not abide by this here. As long as there are not any SQL Injections and least privilege permissions are applied to accounts that can access the SQL database, this should not be a concern.
@@ -527,13 +533,13 @@ In order to use the `DomainComputers.xml <https://github.com/OsbornePro/BTPS-Sec
 
 Create the SQL database schema and table.
 
-1. Open SSMS (SQL Server Management Studio)
+1. Open **SSMS** (SQL Server Management Studio)
 
 2. Sign in using an Administrator account to the default selected instance
 
-3. Click "Execute New Query" in the top ribbon. This will open a text window
+3. Click **"Execute New Query"** in the top ribbon. This will open a text window
 
-4. Copy and paste the contents of Query to Create MSSQL DB Table into the query and click "Execute". This builds your SQL Database table where events will be imported.
+4. Copy and paste the contents of `Query to Create MSSQL DB Table <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/Query%20to%20Create%20MSSQL%20DB%20Table>`_ into the query and click "Execute". This builds your SQL Database table where events will be imported.
 
 
 **(Step 3 and Step 4)**
@@ -541,20 +547,20 @@ Create the SQL database schema and table.
 The below two steps can be accomplished by executing the `ImportTheScheduledTasks.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/ImportTheScheduledTasks.ps1>`_. I have this automatically search for the XML files that need to be imported into Task Scheduler. Long as you do not rename the files in this repository this should go off without a hitch.
 
 
-**USER YOU SELECT:** The above script will prompt you for a username to use in the Task Schedulers execution of alerting and import files. The user you define will need to have been configured to have "Log on as batch job" permissions and "Log on as service" permissions. This is done through Group Policy at "Computer Configuration > Windows Settings > Security Settings > User Rights Assignment" Both of the mentioned settings will be in this GPO location.
+**USER YOU SELECT:** The above script will prompt you for a username to use in the Task Schedulers execution of alerting and import files. The user you define will need to have been configured to have "Log on as batch job" permissions and "Log on as service" permissions. This is done through Group Policy at **"Computer Configuration > Windows Settings > Security Settings > User Rights Assignment"** Both of the mentioned settings will be in this GPO location.
 
 
 **SQL USER PERMISSIONS:** Once this is done you will need to assign this user with "Log on as batch job" permissions to have read and write access to the SQL database. Do this by opening SSMS and signing into the default instance. In the "Object Explorer Window" on the left hand side you will need to expand the Databases tree, expand the Security Tree, expand the Users tree. The right click on User and select Add User if the name is not there. Add the user with "Log on as batch" permissions. Right click on the newly added user who is now existing in the expanded User tree. Assign the user db_datareader and db_datawriter permissions.
 
 
-**SKIP:** You can skip to Step 5 if you have imported the tasks by executing "ImportTheScheduledTasks.ps1"
+**SKIP:** You can skip to Step 5 if you have imported the tasks by executing `ImportTheScheduledTasks.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/ImportTheScheduledTasks.ps1>`_
 
 
 **Step 3**
 
 Create the Scheduled Task to Import Events into SQL Database
 
-* Place the powershell script `Import-EventsHourly.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/Import-EventsHourly.ps1>`_ into ``C:\Users\Public\Documents`` (this is to match the Task Template in this repo) or wherever you prefer to store this script. Be sure to sign it with a trusted Code Signing Certificate in your environment (Import Code Signing Cert Info "Trusted Publishers" store in ``certmgr.msc``). This prevents it from running malicious code. Modify the permissions so  only administrators can modify the script. Have this run every hour on minute 55. This leaves time for the events to get imported into the SQL database. Then on the hour, have the next task run.
+* Place the powershell script `Import-EventsHourly.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/Import-EventsHourly.ps1>`_ into ``C:\Users\Public\Documents`` (*this is to match the Task Template in this repo*) or wherever you prefer to store this script. Be sure to sign it with a trusted Code Signing Certificate in your environment (*Import Code Signing Cert Info **"Trusted Publishers"** store in* ``certmgr.msc``). This prevents it from running malicious code. Modify the permissions so  only administrators can modify the script. Have this run every hour on minute 55. This leaves time for the events to get imported into the SQL database. Then on the hour, have the next task run.
 * Create a scheduled task that runs once an hour on the hour. You can use my template `TaskImportFile.xml <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/TaskImportFile.xml>`_. Import this task and you should only need to define the user with Batch and Service permissions to run the script.
 
 
@@ -567,14 +573,14 @@ Below is the PowerShell Command to use code signing certificates to sign a scrip
 
 Create Monitoring and Alert Task
 
-Add `SQL-Query-Suspicious-Events.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/SQL-Query-Suspicous-Events.ps1>`_ to ``C:\Users\Public\Documents`` which will match with the location of my XML template. Be sure to sign in with a trusted Code Signing Certificate (Import Code Signing Cert Info "Trusted Publishers" store in ``certmgr.msc``) in your environment to prevent it from running malicious code. Modify  the permissions so only administrators can modify the script. Have this task run on the hour.
+Add `SQL-Query-Suspicious-Events.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/SQL-Query-Suspicous-Events.ps1>`_ to ``C:\Users\Public\Documents`` which will match with the location of my XML template. Be sure to sign in with a trusted Code Signing Certificate (*Import Code Signing Cert Info **"Trusted Publishers"** store in* ``certmgr.msc``) in your environment to prevent it from running malicious code. Modify  the permissions so only administrators can modify the script. Have this task run on the hour.
 
 Below is the PowerShell Command to use code signing certificate to sign a script
 
 ``Set-AuthenticodeSignature C:\Users\Public\Documents\Import-EventsHourly.ps1 @(Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert)[0]``
 
-* Open Task Scheduler (taskschd.msc) and import the task from TaskForSQLQueryEventsMonitor.xml that runs once a day. This is done to execute `SQL-Query-Suspicious-Events.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/SQL-Query-Suspicous-Events.ps1>`_. This is the script that alerts you when a suspicious event has been discovered.
-* Edit the file `SQL-Query-Suspicious-Events.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/SQL-Query-Suspicous-Events.ps1>`_ so the  email variables are set to match your environment. Some of the SQL queries will also need to be modified in order to add accounts that commonly receive special permissions such as accounts that are used for LDAP binds or domain controllers system accounts (Example: DC01$). Or don't use any special filtering. Whatever floats your boat. The SQL queries only return events from the  last hour. This is significantly faster than filtering the Windows Event  log through XML which also will eventually delete logs to make room for  newer logs.
+* Open Task Scheduler (``taskschd.msc``) and import the task from `TaskForSQLQueryEventsMonitor.xml <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/TaskForSQLQueryEventsMonitor.xml>`_ that runs once a day. This is done to execute `SQL-Query-Suspicious-Events.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/SQL-Query-Suspicous-Events.ps1>`_. This is the script that alerts you when a suspicious event has been discovered.
+* Edit the file `SQL-Query-Suspicious-Events.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/SQL-Query-Suspicous-Events.ps1>`_ so the  email variables are set to match your environment. Some of the SQL queries will also need to be modified in order to add accounts that commonly receive special permissions such as accounts that are used for LDAP binds or domain controllers system accounts **(Example: DC01$)**. Or don't use any special filtering. Whatever floats your boat. The SQL queries only return events from the  last hour. This is significantly faster than filtering the Windows Event  log through XML which also will eventually delete logs to make room for  newer logs.
 
 
 Once run, the script returns event information on the below possible indications of compromise from all those devices forwarding events.
@@ -602,7 +608,9 @@ To ensure the correct permissions are set on the Windows Event Log  Source Colle
 
 **So What Now?**
 
-If you are having troubles with some Desktops and Servers that are not connecting to the source collector then push out the `WEFStartupScript.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/WEFStartupScript.ps1>`_ through Group Policy by making it a startup script. This startup script will run the WinRM service as it's own parent process which frees up it's usage for WEF. When the script gets triggered it performs a search on all collected targeted events for the last 1 hour and 5 minutes only. You can change this in the task and/or SQL Query script. The results will not always mean compromise but they will definitely help to discover them when they happen. (Microsoft says the max limit of machines to source collect events from is 2,000 to 4,000).
+If you are having troubles with some Desktops and Servers that are not connecting to the source collector then push out the `WEFStartupScript.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/WEFStartupScript.ps1>`_ through Group Policy by making it a startup script. This startup script will run the WinRM service as it's own parent process which frees up it's usage for WEF. When the script gets triggered it performs a search on all collected targeted events for the last 1 hour and 5 minutes only. You can change this in the task and/or SQL Query script. The results will not always mean compromise but they will definitely help to discover them when they happen.
+
+**NOTE:** Microsoft says the max limit of machines to source collect events from is 2,000 to 4,000.
 
 **REFERENCE:**
 https://support.microsoft.com/en-gb/help/4494356/best-practice-eventlog-forwarding-performance
