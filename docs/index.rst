@@ -32,8 +32,8 @@ For the case of organizations with 1,000’s of devices; you may find that this 
 
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 4
+   :caption: Contents: Installer.ps1 Script
 
 Using the Installer.ps1 File to Get Started
 ===========================================
@@ -90,7 +90,6 @@ https://github.com/OsbornePro/Documents/raw/main/Sysmon%20Setup-0001.pdf
 
 Indices and tables
 ==================
-* `Installer.ps1 Docs <https://the-btps-security-package.readthedocs.io/en/latest/installer.html>`_
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
