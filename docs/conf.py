@@ -54,14 +54,20 @@ html_logo = "Logo.png"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-
-# Navigation options
-collapse_navigation = 'False'
-sticky_navigation = 'True'
-navigation_depth = -1
-includehidden = 'True'
-titles_only = 'False'
-
+html_theme_options = {
 # Google Analytics # ID
-analytics_id = 'UA-145050521-2'
-analytics_anonymize_ip = 'False'
+    'analytics_id' = 'UA-145050521-2', #  Provided by Google in your dashboard
+    'analytics_anonymize_ip' = False,
+    'logo_only': False,
+    'display_version': True,
+    'prev_next_buttons_location': 'bottom',
+    'style_external_links': False,
+    'vcs_pageview_mode': '',
+    'style_nav_header_background': 'white',
+    # Toc options
+    'collapse_navigation': False,
+    'sticky_navigation': True,
+    'navigation_depth': -1,
+    'includehidden': True,
+    'titles_only': False
+}
