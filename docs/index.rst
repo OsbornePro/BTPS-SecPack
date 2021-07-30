@@ -32,34 +32,45 @@ For the case of organizations with 1,000’s of devices; you may find that this 
 Functionality in The Blue Team PowerShell Security Package
 ----------------------------------------------------------
 
+
 **Account Lockout Notification**
+
 .. image:: img/AccountLockout.png
    :scale: 100
    :alt: Account Lockout
 
 
+
 **Attempted Port Scan**
+
 .. image:: img/AttemptedPortScan.png
     :scale: 100
     :alt: Attempted Port Scan
 
 
+
 **AutoRuns Logging**
+
 .. image:: img/AutoRuns.png
     :scale: 100
     :alt: AutoRuns
 
 
+
 **Blacklisted IP Logging**
+
 .. image:: img/BlacklistedIP.png
     :scale: 100
    :alt: Blacklisted IP Logging
 
 
+
 **Check Forwarding Rules**
+
 .. image:: img/CheckForwardingRules.png
     :scale: 100
     :alt: Check Forwarding Rules
+
 
 
 **Track Network Connection History**
@@ -69,11 +80,13 @@ Functionality in The Blue Team PowerShell Security Package
     :alt: Track Network Connection History
 
 
+
 **Disable Weak SSL Ciphers**
 
 .. image:: img/DisableWeakCiphers.png
     :scale: 100
     :alt: Disable Weak SSL Ciphers
+
 
 
 **DNS Zone Transfer Alerts**
@@ -83,11 +96,13 @@ Functionality in The Blue Team PowerShell Security Package
    :alt: DNS Zone Transfer Alerts
 
 
+
 **Enable DNS over HTTPS**
 
 .. image:: img/EnableDNSoverHTTPS.png
     :scale: 100
     :alt: Enable DNS over HTTPS
+
 
 
 **Insecure LDAP Bind Notifications**
@@ -97,11 +112,13 @@ Functionality in The Blue Team PowerShell Security Package
     :alt: Insecure LDAP Bind Notifications
 
 
+
 **New Device Joined Network Discovery**
 
 .. image:: img/NewDeviceCheck.png
     :scale: 100
-   :alt: New Device Check Discovery
+    :alt: New Device Check Discovery
+
 
 
 **User Changed Password Notification**
@@ -111,6 +128,7 @@ Functionality in The Blue Team PowerShell Security Package
     :alt: User Changed Password Notification
 
 
+
 **Admin Changed Another Users Password Notification**
 
 .. image:: img/PasswordChanged.png
@@ -118,11 +136,13 @@ Functionality in The Blue Team PowerShell Security Package
     :alt: Admin changed another users password notification
 
 
+
 **List of Expiring Passwords Notification**
 
 .. image:: img/PasswordsExpiring.png
     :scale: 100
-   :alt: List of Expiring Passwords Notification
+    :alt: List of Expiring Passwords Notification
+
 
 
 **Local Port Scan Notification**
@@ -132,11 +152,13 @@ Functionality in The Blue Team PowerShell Security Package
     :alt: Local Port Scan Notification
 
 
+
 **Remediate a compromised Office365 account**
 
 .. image:: img/RemediateCompromisedOfficeAccount.png
     :scale: 100
     :alt: Remediate a compromised Office365 account
+
 
 
 **Suspicious Event Occurred**
@@ -146,11 +168,13 @@ Functionality in The Blue Team PowerShell Security Package
     :alt: Suspicious Event Occurred
 
 
+
 **Unusual Sign In Alert**
 
 .. image:: img/UnusualSignIn.png
     :scale: 100
-   :alt: Unusual Sign In Alert
+    :alt: Unusual Sign In Alert
+
 
 
 **User Account Expiring Notification**
@@ -158,6 +182,7 @@ Functionality in The Blue Team PowerShell Security Package
 .. image:: img/UserAccountExpiring.png
     :scale: 100
     :alt: User Account Expiring Notification
+
 
 
 **User Account Unlocked**
