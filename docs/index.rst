@@ -43,6 +43,7 @@ This alert lets you know when a user account has been locked out. There is also 
 
 
 **Attempted Port Scan**
+This alert informs the cyber security team when a port scan has been attempted against a server. This currently does not work for File Servers or VoIP servers which have hundreds of unique IP addresses connecting a minute.
 
 .. image:: img/AttemptedPortScan.png
     :scale: 100
