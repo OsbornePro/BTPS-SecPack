@@ -30,7 +30,7 @@ This repository contains a collection of PowerShell tools that can be utilized t
 
 **IMPORTANT NOTE FOR LARGE ENVIRONMENTS**
 
-For the case of organizations with 1,000’s of devices; you may find that this entire suite does not apply to you. This has to do with how some of the discoveries operate. For example the alert I have in the `Device Discovery <https://github.com/tobor88/BTPS-SecPack/tree/master/Device%20Discovery>`_ directory relies on DHCP assigned IP addresses. All DHCP servers in an environment are queried to create a list of known MAC addresses. This information is then saved to a CSV file for reference in discovering any new devices that join a network. This file could become too large to be effective. The other alert I can see not being effective is the `"Local Port Scan Alert" <https://github.com/tobor88/BTPS-SecPack/blob/master/Local%20Port%20Scan%20Monitor/Watch-PortScan.ps1>`_. This is because if there is an over abundance of connections the script will not be able to cover all of the connections quickly enough. Other alerts in this security package are still appropriate no matter the network size as they are Event ID based typically. To begin, I suggest setting up WinRM over HTTPS in your environment.
+For the case of organizations with 1,000’s of devices; you may find that this entire suite does not apply to you. This has to do with how some of the discoveries operate. For example the alert I have in the `Device Discovery <https://github.com/OsbornePro/BTPS-SecPack/tree/master/Device%20Discovery>`_ directory relies on DHCP assigned IP addresses. All DHCP servers in an environment are queried to create a list of known MAC addresses. This information is then saved to a CSV file for reference in discovering any new devices that join a network. This file could become too large to be effective. The other alert I can see not being effective is the `"Local Port Scan Alert" <https://github.com/tobor88/BTPS-SecPack/blob/master/Local%20Port%20Scan%20Monitor/Watch-PortScan.ps1>`_. This is because if there is an over abundance of connections the script will not be able to cover all of the connections quickly enough. Other alerts in this security package are still appropriate no matter the network size as they are Event ID based typically. To begin, I suggest setting up WinRM over HTTPS in your environment.
 
 Functionality in The Blue Team PowerShell Security Package
 ----------------------------------------------------------
@@ -172,7 +172,7 @@ This alert informs the cyber security team when a port scan has been attempted a
 
 
 **Remediate a compromised Office365 account**
-This is some output showing the results of what happens when the `RemediateCompromisedOfficeAccount.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/Incident%20Response/RemediateCompromisedOfficeAccount.ps1>`_ is run. For more information on what this does click `HERE <https://github.com/OsbornePro/BTPS-SecPack/blob/master/RemediateCompromisedOfficeAccount.ps1>`_`.
+This is some output showing the results of what happens when the `RemediateCompromisedOfficeAccount.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/Incident%20Response/RemediateCompromisedOfficeAccount.ps1>`_ is run. For more information on what this does click `HERE <https://github.com/OsbornePro/BTPS-SecPack/blob/master/RemediateCompromisedOfficeAccount.ps1>`_.
 
 .. image:: img/RemediateCompromisedOfficeAccount.png
     :scale: 100
@@ -231,7 +231,7 @@ Here is what you need to do in order to execute this file.
 
 **IF ABOVE COMMAND METHOD DOES NOT WORK**
 
-Some Next Generation Anti-Virus providers may block script execution in this manner. If that is the case use the below method to accomplish the same task.
+Some Endpoint Detection and Response (EDR) and Next Generation Anti-Virus providers may block script execution in this manner. If that is the case use the below method to accomplish the same task.
 
 1. Log into your Primary Domain Controller using an account with Administrator permissions.
 2. Open an Administrative PowerShell session **(Windows Key + X, The press A)**.
@@ -250,15 +250,9 @@ As an FYI there are multiple ways to download files from the PowerShell session.
 
 * ``(New-Object Net.WebClient).DownloadFile('https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/Installer.ps1', "$env:USERPROFILE\Downloads\Installer.ps1")``
 
-Or
-
 * ``Start-BitsTransfer "https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/Installer.ps1" -Destinations "$env:USERPROFILE\Downloads\Installer.ps1"``
 
-Or
-
 * ``certutil.exe -urlcache -split -f https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/Installer.ps1 "$env:USERPROFILE\Downloads\Installer.ps1"``
-
-Or
 
 * ``bitsadmin /transfer debjob /download /priority normal https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/Installer.ps1" "$env:USERPROFILE\Downloads\Installer.ps1"``
 
@@ -303,29 +297,31 @@ The certificate thumbprint value that you are going to need in **"Group Policy S
 
 **CLIENT CERTIFICATE INFO:**
 
-* In the above tree, "Assigned Device Certificate" is where the command
+* In the above tree, **"Assigned Device Certificate"** is where the below command would be used
 ``New-WSManInstance -ResourceUri WinRM/Config/Listener -SelectorSet @{Address = "*"; Transport = "HTTPS"} -ValueSet @{Hostname = FqdnRequiredHere.domain.com; CertificateThumbprint = $Thumbprint }``
-would come in.
 
 * Notice the **"Hostname"** value includes the domain you are in. This needs to also be true for the **"Common Name"** value when the client device requests the WinRM certificate. This means your CN value is required to be devicename.domainname.com. If you do not include the domain name in the Common Name value your WinRM over HTTPS communication will not work. Subject Alternative Name's (SAN) will not work either. I have tried adding more than one Common Name values to a certificate and this communication still failed.
 
-* If you are using a Windows Server Certificate Authority, the "WebServer" certificate template can be used to request the certificate needed.
+* If you are using a Windows Server Certificate Authority, the **"WebServer"** certificate template can be used to request the certificate needed.
 
 
 Group Policy Windows Event Forwarding (WEF) Settings
 ----------------------------------------------------
 **GROUP POLICY SETTING 1**
 
-The Group Policy setting **"Computer Configuration > Policies > Administrative Templates > Windows Components > Event Forwarding > Configure Target Subscription Manager"** needs to be set to WinRM over HTTPS (Port 5986): In my environment I added 2 entries for this to cover all basis. One has the CA certificate thumbprint with with spaces after every 2 numbers, and the other entry is without spaces. The example values are below.
+The Group Policy setting **"Computer Configuration > Policies > Administrative Templates > Windows Components > Event Forwarding > Configure Target Subscription Manager"** needs to be set to **WinRM over HTTPS (Port 5986)**: In my environment I added 2 entries for this to cover all basis. One has the CA certificate thumbprint with with spaces after every 2 numbers, and the other entry is without spaces. The example values are below.
 
 1. **Example Entry 1**
+
 ``Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900,IssuerCA=ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff``
 
 2. **Example Entry 2**
+
 ``Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900,IssuerCA=ffffffffffffffffffffffffffffffffffffffff``
 **NOTE:** The default Refresh rate value is 900 seconds or 15 minutes. This does not need to be defined. I included it to be thorough.
 
-3. **Example Entry 3**
+3. **Kerberos Example Entry 3**
+
 Using the below value without a certificate defined will allow/use Kerberos for authentication which is fine to use
 ``Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900``
 
@@ -335,6 +331,7 @@ Using the below value without a certificate defined will allow/use Kerberos for 
 The Group Policy Setting **"Computer Configuration > Policies > Administrative Templates > Windows Components > Event Log Service > Security > Change Log Access"** needs to be set to the value of the property **"ChannelAccess"** after issuing the below command:
 
 ``wevtutil gl security``
+
 
 
 Group Policy Setting **"Computer Configuration > Policies > Administrative Templates > Windows Components > Event Log Service > Security > Change Log Access (Legacy)"** needs to be set to the value of the property **"ChannelAccess"** after issuing the below command:
@@ -347,63 +344,133 @@ Group Policy WinRM Settings
 
 **GROUP POLICY SETTING 3**
 
-In your group policy settings go to **"Computer Configuration > Preferences > Control Panel Settings > Services"**. Then right click and add a New Service. Set the **"Startup Type"** to **"Automatic"**. Set the "Service Name" to **WinRM**, set the **"Service Action"** to **"Start Service"**, set the **"Wait Timeout"** to **30** seconds. In the recovery tab select **"Restart the Service"** from the three failure options. Set **"Reset Fail Count after"** to **0** days and **"Reset Service after"** to **1** minutes. Then click **OK** to save.
+In your group policy settings go to **"Computer Configuration > Preferences > Control Panel Settings > Services"**.
+
+Then right click and add a New Service.
+
+Set the **"Startup Type"** to **"Automatic"**.
+
+Set the "Service Name" to **WinRM**, set the **"Service Action"** to **"Start Service"**, set the **"Wait Timeout"** to **30** seconds.
+
+In the recovery tab select **"Restart the Service"** from the three failure options.
+
+Set **"Reset Fail Count after"** to **0** days and **"Reset Service after"** to **1** minutes.
+
+Then click **OK** to save.
 
 
 **GROUP POLICY SETTING 4**
 
-Next, still on the same policy object, is the list of IP addresses that are allowed to do remote management access  on the target computer. Go to **Computer Configuration > Policies > Administrative Templates > Windows Components > Windows Remote Management (WinRM) > WinRM Services**. Then double click on **"Allow remote server management through WinRM"**" to modify the setting as follows:
+Next, still on the same policy object, is the list of IP addresses that are allowed to do remote management access  on the target computer.
+
+Go to **Computer Configuration > Policies > Administrative Templates > Windows Components > Windows Remote Management (WinRM) > WinRM Services**.
+
+Then double click on **"Allow remote server management through WinRM"**" to modify the setting as follows:
+
 Set the policy to **"Enabled"**
+
 Set the **IPv4 Filter** to * or an all encompassing subnet for your environment such as ``10.0.0.0/16``
-Leave the **IPv6 Filter** blank or set it to a wildcard ``*`` as well. Click **OK** to save.
+
+Leave the **IPv6 Filter** blank or set it to a wildcard ``*`` as well.
+
+Click **OK** to save.
 
 
 **GROUP POLICY SETTING 5**
 
 Edit the settings — Opening Firewall ports
-Next we will create a new rule for the Firewall on the targeted client PC's. Go to **Computer Configurations > Policies > Security Settings > Windows  Firewall and Advanced Security > Windows Firewall and Advanced  Security** then right click on **Inbound Rules** > **New Rule**
 
-Create a new rule called ``Allow WinRM over HTTPS``. We want to allow the inbound connection on port **5986**. Leave the Tick mark on **"Domain"** and **"Private"**. We then want to create a few more firewall rules using the default firewall rules **"Remote Event Log Management (RPC-EPMAP)", "Remote Event Monitor (RPC-EPMAP)", "Remote Event Log Management (RPC)", "Remote Event Monitor (RPC)", "Remote Service Management (RPC-EPMAP)", "Remote Service Management (RPC)", "Remote Scheduled Tasks Management (RPC-EPMAP)", "Remote Scheduled Tasks Management (RPC)"**. This should be enabled to **Allow inbound traffic** in the **"Domain"**, and **"Private"** profiles.  For good measure if you like you can deny traffic on port 5985. This is done by adding firewall default firewall rule **"Windows Remote Management (HTTP-In)"**, and Blocking traffic to that port.
+Next we will create a new rule for the Firewall on the targeted client PC's.
+
+Go to **Computer Configurations > Policies > Security Settings > Windows  Firewall and Advanced Security > Windows Firewall and Advanced  Security**
+
+Then right click on **Inbound Rules** > **New Rule**
+
+Create a new rule called ``Allow WinRM over HTTPS``
+
+We want to allow the inbound connection on port **5986**
+
+Leave the Tick mark on **"Domain"** and **"Private"**
+
+We then want to create a few more firewall rules using the default firewall rules
+* Remote Event Log Management (RPC-EPMAP)
+* Remote Event Monitor (RPC-EPMAP)
+* Remote Event Log Management (RPC)
+* Remote Event Monitor (RPC)
+* Remote Service Management (RPC-EPMAP)
+* Remote Service Management (RPC)
+* Remote Scheduled Tasks Management (RPC-EPMAP)
+* Remote Scheduled Tasks Management (RPC)
+
+This should be enabled to **Allow inbound traffic** in the **"Domain"**, and **"Private"** profiles
+
+For good measure if you like you can deny traffic on port 5985.
+
+This is done by adding firewall default firewall rule **"Windows Remote Management (HTTP-In)"**, and Blocking traffic to that port.
 
 
 **GROUP POLICY SETTING 6**
 
-Under **Administrative Templates > Network > Network Connections > Windows Defender Firewall > Domain Profile** set the policies for **Windows Defender Firewall: Allow ICMP exceptions, Windows Defender Firewall: Allow inbound remote administration exception, and Windows Defender Firewall: Allow inbound Remote Desktop** exceptions to **"Enabled"**. Define the filter you used in **Group Policy Setting 4** for these allowed values. For example you may have used a Wildcard ``*`` or defined an all encompassing subnet range such as ``10.0.0.0/16``
+Under **Administrative Templates > Network > Network Connections > Windows Defender Firewall > Domain Profile**
+
+Set the policies for
+
+* Windows Defender Firewall: Allow ICMP exceptions
+* Windows Defender Firewall: Allow inbound remote administration exception
+* Windows Defender Firewall: Allow inbound Remote Desktop
+
+Set to **"Enabled"**
+
+Define the filter you used in **Group Policy Setting 4** for these allowed values.
+
+For example you may have used a Wildcard ``*`` or defined an all encompassing subnet range such as ``10.0.0.0/16``
 
 
 **GROUP POLICY SETTING 7**
 
-Under **Administrative Templates > System > Credentials Delegation > Allow delegating fresh credentials** and set the values to ``WSMAN/*.yourdomain.com``. This will allow WinRM communication between any host ending in yourdomain.com. Then set **"Allow delegating fresh credentials with NTLM-only server authentication"** under that same tree to that value ``WSMAN/*.yourdomain.com``. For example my email rosborne@osbornepro.com is in the domain osbornepro.com. I would set the value to ``WSMAN/*.osbornepro.com``. We also want to Enable **"Encryption Oracle Remediation"** and set the drop down value to **"Force Updated Clients"**. This is to prevent `CVE-2018-0886 <https://nvd.nist.gov/vuln/detail/CVE-2018-0886>`_ exploitation.
+Under **Administrative Templates > System > Credentials Delegation > Allow delegating fresh credentials** and set the values to ``WSMAN/*.yourdomain.com``.
+
+This will allow WinRM communication between any host ending in yourdomain.com.
+
+Then set **"Allow delegating fresh credentials with NTLM-only server authentication"** under that same tree to that value ``WSMAN/*.yourdomain.com``.
+
+For example my email rosborne@osbornepro.com is in the domain osbornepro.com.
+
+I would set the value to ``WSMAN/*.osbornepro.com``.
+
+We also want to Enable **"Encryption Oracle Remediation"** and set the drop down value to **"Force Updated Clients"**.
+
+This is to prevent `CVE-2018-0886 <https://nvd.nist.gov/vuln/detail/CVE-2018-0886>`_ exploitation.
 
 
 **GROUP POLICY SETTING 8**
 
 Under **Administrative Templates > Windows Components/Windows Remote Management (WinRM)/WinRM Client** set the below settings.
 
-* Allow Basic authentication Enabled
-* Allow CredSSP authentication Enabled
-* IPv4 filter: ``*``
-* Allow remote server management through WinRM Enabled
-* IPv6 filter: ``*``
-* Allow unencrypted traffic Disabled
-* Disallow Kerberos authentication Disabled  # IMPORTANT: If you are using `CIS-CAT Pro Dashboard (CCPD) <https://www.cisecurity.org/cybersecurity-tools/cis-cat-pro/>`_ or are using Kerberos authentication with Windows Event Forwarding **ENABLE** this instead)
-* Disallow WinRM from storing RunAs credentials Enabled
+* **Allow Basic authentication:** ``Enabled``
+* **Allow CredSSP authentication:** ``Enabled``
+* **IPv4 filter:** ``*``
+* **Allow remote server management through WinRM:** ``Enabled``
+* **IPv6 filter:** ``*``
+* **Allow unencrypted traffic:** ``Disabled``
+* **Disallow WinRM from storing RunAs credentials:** ``Enabled``
+* **Disallow Kerberos authentication:** ``Disabled`` : **IMPORTANT:** If you are using `CIS-CAT Pro Dashboard (CCPD) <https://www.cisecurity.org/cybersecurity-tools/cis-cat-pro/>`_ or are using Kerberos authentication with Windows Event Forwarding **ENABLE** this instead)
 
 
 **GROUP POLICY SETTING 9**
 
 Under **Administrative Templates > Windows Components/Windows Remote Management (WinRM)/WinRM Service** set the below settings
 
-* Allow Basic authentication Enabled
-* Allow remote server management through WinRM Enabled
-* Allow CredSSP authentication Enabled
-* IPv4 filter: ``*``
-* IPv6 filter: ``*``
-* Allow unencrypted traffic Disabled
-* Disallow Kerberos authentication Disabled
-* Disallow WinRM from storing RunAs credentials Enabled
-* Turn On Compatibility HTTP Listener Disabled
-* Turn On Compatibility HTTPS Listener Enabled
+* **Allow Basic authentication:** ``Enabled``
+* **Allow remote server management through WinRM:** ``Enabled``
+* **Allow CredSSP authentication:** ``Enabled``
+* **IPv4 filter:** ``*``
+* **IPv6 filter:** ``*``
+* **Allow unencrypted traffic:** ``Disabled``
+* **Disallow Kerberos authentication:** ``Disabled``
+* **Disallow WinRM from storing RunAs credentials:** ``Enabled``
+* **Turn On Compatibility HTTP Listener:** ``Disabled``
+* **Turn On Compatibility HTTPS Listener:** ``Enabled``
 
 
 **GROUP POLICY SETTING 10**
@@ -411,11 +478,9 @@ Create a Registry Setting that gets pushed out through Group Policy containing t
 
 **SETTING:**
 
-PATH: ``HKLM:\Software\Policies\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\010103000F0000F0010000000F0000F0C967A3643C3AD745950DA7859209176EF5B87C875FA20DF21951640E807D7C24\Category``
-
-NAME: ``State``
-
-VALUE: ``1``
+    Path: ``HKLM:\Software\Policies\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\010103000F0000F0010000000F0000F0C967A3643C3AD745950DA7859209176EF5B87C875FA20DF21951640E807D7C24\Category``
+    Name: ``State``
+    Value: ``1``
 
 
 **CONCLUSION**
@@ -501,10 +566,10 @@ Perquisites and Setup Instructions
 This `REPO <https://github.com/OsbornePro/BTPS-SecPack/tree/master/WEF%20Application>`_ contains all the files needed for using Windows Event Forwarding to monitor an environment for intruders. This assumes that you have referenced the Windows Event Logging Cheat Sheet for logging in your environment. Use `LOG-MD <https://www.imfsecurity.com/free>`_ or `CIS-CAT <https://learn.cisecurity.org/benchmarks#:~:text=CIS%20Benchmarks%20are%20the%20only%20consensus-based%2C%20best-practice%20security,and%20accepted%20by%20government%2C%20business%2C%20industry%2C%20and%20academia>`_ to ensure the recommended logging is configured. You will also need to configure WinRM in your environment. This can be done by following the instructions at the WinRM over HTTPS page on this site.
 
 
-General steps to set up this package.
-
 **CONFIGURE** (This should be configured in your environment)
+
 1. WinRM over HTTPS
+
 
 **DOWNLOAD & INSTALL** (I suggest installing these on the centralized WEF collection server to get started)
 
@@ -574,10 +639,10 @@ Create the SQL database schema and table.
 The below two steps can be accomplished by executing the `ImportTheScheduledTasks.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/ImportTheScheduledTasks.ps1>`_. I have this automatically search for the XML files that need to be imported into Task Scheduler. Long as you do not rename the files in this repository this should go off without a hitch.
 
 
-**USER YOU SELECT:** The above script will prompt you for a username to use in the Task Schedulers execution of alerting and import files. The user you define will need to have been configured to have "Log on as batch job" permissions and "Log on as service" permissions. This is done through Group Policy at **"Computer Configuration > Windows Settings > Security Settings > User Rights Assignment"** Both of the mentioned settings will be in this GPO location.
+**USER YOU SELECT:** The above script will prompt you for a username to use in the Task Schedulers execution of alerting and import files. The user you define will need to have been configured to have **"Log on as batch job"** permissions and **"Log on as service"** permissions. This is done through Group Policy at **"Computer Configuration > Windows Settings > Security Settings > User Rights Assignment"** Both of the mentioned settings will be in this GPO location.
 
 
-**SQL USER PERMISSIONS:** Once this is done you will need to assign this user with "Log on as batch job" permissions to have read and write access to the SQL database. Do this by opening SSMS and signing into the default instance. In the "Object Explorer Window" on the left hand side you will need to expand the Databases tree, expand the Security Tree, expand the Users tree. The right click on User and select Add User if the name is not there. Add the user with "Log on as batch" permissions. Right click on the newly added user who is now existing in the expanded User tree. Assign the user db_datareader and db_datawriter permissions.
+**SQL USER PERMISSIONS:** Once this is done you will need to assign this user with **"Log on as batch job"** permissions to have read and write access to the SQL database. Do this by opening SSMS and signing into the default instance. In the **"Object Explorer Window"** on the left hand side you will need to expand the Databases tree, expand the Security Tree, expand the Users tree. The right click on User and select Add User if the name is not there. Add the user with "Log on as batch" permissions. Right click on the newly added user who is now existing in the expanded User tree. Assign the user **db_datareader** and **db_datawriter** permissions.
 
 
 **SKIP:** You can skip to Step 5 if you have imported the tasks by executing `ImportTheScheduledTasks.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/ImportTheScheduledTasks.ps1>`_
@@ -587,7 +652,7 @@ The below two steps can be accomplished by executing the `ImportTheScheduledTask
 
 Create the Scheduled Task to Import Events into SQL Database
 
-* Place the powershell script `Import-EventsHourly.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/Import-EventsHourly.ps1>`_ into ``C:\Users\Public\Documents`` (*this is to match the Task Template in this repo*) or wherever you prefer to store this script. Be sure to sign it with a trusted Code Signing Certificate in your environment (*Import Code Signing Cert Info **"Trusted Publishers"** store in* ``certmgr.msc``). This prevents it from running malicious code. Modify the permissions so  only administrators can modify the script. Have this run every hour on minute 55. This leaves time for the events to get imported into the SQL database. Then on the hour, have the next task run.
+* Place the powershell script `Import-EventsHourly.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/Import-EventsHourly.ps1>`_ into ``C:\Users\Public\Documents`` (*this is to match the Task Template in this repo*) or wherever you prefer to store this script. Be sure to sign it with a trusted Code Signing Certificate in your environment (*Import Code Signing Cert Info* **"Trusted Publishers"** *store in* ``certmgr.msc``). This prevents it from running malicious code. Modify the permissions so  only administrators can modify the script. Have this run every **hour on minute 55**. This leaves time for the events to get imported into the SQL database. Then on the hour, have the next task run.
 * Create a scheduled task that runs once an hour on the hour. You can use my template `TaskImportFile.xml <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/TaskImportFile.xml>`_. Import this task and you should only need to define the user with Batch and Service permissions to run the script.
 
 
@@ -600,7 +665,7 @@ Below is the PowerShell Command to use code signing certificates to sign a scrip
 
 Create Monitoring and Alert Task
 
-Add `SQL-Query-Suspicious-Events.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/SQL-Query-Suspicous-Events.ps1>`_ to ``C:\Users\Public\Documents`` which will match with the location of my XML template. Be sure to sign in with a trusted Code Signing Certificate (*Import Code Signing Cert Info **"Trusted Publishers"** store in* ``certmgr.msc``) in your environment to prevent it from running malicious code. Modify  the permissions so only administrators can modify the script. Have this task run on the hour.
+Add `SQL-Query-Suspicious-Events.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/SQL-Query-Suspicous-Events.ps1>`_ to ``C:\Users\Public\Documents`` which will match with the location of my XML template. Be sure to sign in with a trusted Code Signing Certificate (*Import Code Signing Cert Info* **"Trusted Publishers"** *store in* ``certmgr.msc``) in your environment to prevent it from running malicious code. Modify  the permissions so only administrators can modify the script. **Have this task run on the hour**.
 
 Below is the PowerShell Command to use code signing certificate to sign a script
 
@@ -625,7 +690,7 @@ Once run, the script returns event information on the below possible indications
 
 **Step 5**
 
-To ensure the correct permissions are set on the Windows Event Log  Source Collector issue the below commands (on the Windows Event  Forwarding Collection Server). Open an Administrator PowerShell or Command Prompt session **(Windows Key + X, A)**. Then execute the below commands:
+To ensure the correct permissions are set on the Windows Event Log  Source Collector issue the below commands (*on the Windows Event  Forwarding Collection Server*). Open an Administrator PowerShell or Command Prompt session **(Windows Key + X, A)**. Then execute the below commands:
 
 ``netsh http delete urlacl url=http://+:5985/wsman/``
 ``netsh http add urlacl url=http://+:5985/wsman/ sddl=D:(A;;GX;;;S-1-5-80-569256582-2953403351-2909559716-1301513147-412116970)(A;;GX;;;S-1-5-80-4059739203-877974739-1245631912-527174227-2996563517)``
