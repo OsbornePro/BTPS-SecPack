@@ -57,6 +57,36 @@ and
 <Query Id="6" Path="Hash Validations">
   <Select Path="Hash Validations">*[System[(EventID=4444)]]</Select>
 </Query>
+  <Query Id="7" Path="DNS Server">
+    <Select Path="DNS Server">*[System[(Level=1 or Level=2 or Level=3 or Level=4 or Level=0 or Level=5)]]</Select>
+  </Query>
+  <Query Id="8" Path="Autoruns">
+    <!-- All Autoruns Events -->
+    <Select Path="Autoruns">*</Select>
+  </Query>
+  <Query Id="9">
+    <!-- 104: Log File Cleared -->
+    <Select Path="System">*[System[Provider[@Name='Microsoft-Windows-Eventlog'] and Level=4 and EventID=104]]</Select>
+  </Query>
+<Query Id="10" Path="Security">
+        <!-- 4616: System Time Changed  -->
+        <Select Path="Security">*[System[(EventID=4616)]]</Select>
+      </Query>
+  <Query Id="11">
+    <!-- Printing Jobs -->
+    <Select Path="Microsoft-Windows-PrintService/Operational">*[System[Provider[@Name='Microsoft-Windows-PrintService'] and Level=4 and EventID=307]]</Select>
+  </Query>
+<Query Id="11" Path="Microsoft-Windows-Windows Defender/Operational">
+        <!-- Modern Windows Defender event provider Detection events (1006-1009) and (1116-1119) -->
+        <Select Path="Microsoft-Windows-Windows Defender/Operational">*[System[( (EventID &gt;= 1006 and EventID &lt;= 1009) )]]</Select>
+        <Select Path="Microsoft-Windows-Windows Defender/Operational">*[System[( (EventID &gt;= 1116 and EventID &lt;= 1119) )]]</Select>
+      </Query>
+<Query Id="12" >
+        <!-- Windows Update Service Errors -->
+        <Select Path="Microsoft-Windows-WindowsUpdateClient/Operational">*[System[Provider[@Name='Microsoft-Windows-WindowsUpdateClient'] and Level=2 and (EventID=19 or EventID=20 or EventID=24 or EventID=25 or EventID=31 or EventID=34 or EventID=35)]]</Select>
+        <!-- Hotpatching Errors -->
+        <Select Path="Setup">*[System[Provider[@Name='Microsoft-Windows-Servicing'] and Level=0 and EventID=1009]]</Select>
+      </Query>
 </QueryList>]]>
 </Query>
 <ReadExistingEvents>True</ReadExistingEvents>
