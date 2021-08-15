@@ -7,7 +7,7 @@ Welcome to The B.T.P.S Security Package's documentation!
 * `Report Issues <https://osbornepro.com/schedule-or-contact>`_
 
 
-**General Summary for this project can be read at** https://github.com/tobor88/BTPS-SecPack/blob/master/README.md
+**General Summary for this project can be read at** https://github.com/OsbornePro/BTPS-SecPack/blob/master/README.md
 
 The `Installer.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/Installer.ps1>`_ script is good to go. I created a virtual environment and ran everything from scratch to ensure you get the max protection and visibility possible with the least amount of fuss. If you experience any trouble please let me know so I am aware and can fix it. If you experience any issues or need help, feel free to reach out to me. My aim is to make this as easy to get going as possible. If something is to difficult or confusing please tell me about it. rosborne@osbornepro.com I am still adding content to this site as it is fairly new.
 
