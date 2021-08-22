@@ -6,7 +6,14 @@ Welcome to The B.T.P.S Security Package's documentation!
 * `LiberPay Donations <https://liberapay.com/tobor/donate>`_
 * `Report Issues <https://osbornepro.com/schedule-or-contact>`_
 
+
+**Code Signing**
+
+If for whatever reason you would like me to use my legitimate Code Signing Certificate to sign any of the scripts in this repository that you have modified in some way, feel free to email me your request at info@osbornepro.com and include the script in TXT file attachment. I will then sign it ASAP and send it back to you.
+
+
 **Contributions**
+
 This is open source so if you wish to help contribute to the contents of this project feel free to reach out to me at rosborne@osbornepro.com with your thoughts and ideas. For more general information on this feel free to refer to the `CONTRIBUTING <https://github.com/OsbornePro/BTPS-SecPack/blob/master/CONTRIBUTING.md>`_ documentation.
 
 **General Summary for this project can be read at** https://github.com/OsbornePro/BTPS-SecPack/blob/master/README.md
