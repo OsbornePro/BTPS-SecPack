@@ -2,6 +2,9 @@
 
 ![OsbornePro](https://raw.githubusercontent.com/tobor88/OsbornePro-The-Blue-Team-PowerShell-Security-Package/master/WEF%20Application/WEF/WEF/wwwroot/images/Logo.png)
 
+## CODE SIGNING ##
+If for whatever reason you would like me to use my legitimate Code Signing Certificate to sign any of the scripts in this repository that you have modified in some way feel free to email me your request at info@osbornepro.com and include the script in TXT file attachment. I will then sign it ASAP and send it back to you.
+
 ### CONTRIBUTE TO THE PROJECT
 If you wish to help contribute to the contents of this project feel free to reach out to me at rosborne@osbornepro.com with your thoughts and ideas. For more general information on this feel free to refer to the [CONTRIBUTING](https://github.com/tobor88/BTPS-SecPack/blob/master/CONTRIBUTING.md) documentation.
 
