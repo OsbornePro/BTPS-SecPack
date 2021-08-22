@@ -7,7 +7,7 @@ Welcome to The B.T.P.S Security Package's documentation!
 * `Report Issues <https://osbornepro.com/schedule-or-contact>`_
 
 **Contributions**
-This is open source so if you wish to help contribute to the contents of this project feel free to reach out to me at rosborne@osbornepro.com with your thoughts and ideas. For more general information on this feel free to refer to the `CONTRIBUTING <https://github.com/OsbornePro/BTPS-SecPack/blob/master/CONTRIBUTING.md>` documentation.
+This is open source so if you wish to help contribute to the contents of this project feel free to reach out to me at rosborne@osbornepro.com with your thoughts and ideas. For more general information on this feel free to refer to the `CONTRIBUTING <https://github.com/OsbornePro/BTPS-SecPack/blob/master/CONTRIBUTING.md>`_ documentation.
 
 **General Summary for this project can be read at** https://github.com/OsbornePro/BTPS-SecPack/blob/master/README.md
 This repo contains a collection of PowerShell tools that can be utilized to protect defend an environment based Microsoft's recommendations.
