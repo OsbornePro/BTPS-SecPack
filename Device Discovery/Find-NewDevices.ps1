@@ -30,8 +30,9 @@ Find-NewDevices -DhcpServers 'DHCP1','10.10.10.10','DHCP3.domain.com' -ComparePa
 
 .LINK
 https://osbornepro.com
+https://btpssecpack.osbornepro.com
 https://writeups.osbornepro.com
-https://github.com/tobor88
+https://github.com/OsbornePro
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
@@ -72,8 +73,7 @@ Function Find-NewDevices {
 
     Import-Module -Name DhcpServer
 
-    ForEach ($DhcpServer in $DhcpServers)
-    {
+    ForEach ($DhcpServer in $DhcpServers) {
 
         Clear-Variable TableInfo,MailBody,PreContent,PostContent,NoteLine -ErrorAction SilentlyContinue
 
@@ -82,38 +82,32 @@ Function Find-NewDevices {
         $Scopes = (Get-DhcpServerv4Scope -ComputerName $DhcpServer | Select-Object -ExpandProperty "ScopeID").IPAddressToString
 
         Write-Verbose '[*] Finding Active Address Leases'
-        Try
-        {
+        Try {
 
             Write-Verbose "[*] Building list of all clients in all DHCP scopes on $DhcpServer"
 
             $CurrentDhcpList = @()
-            $CurrentDhcpList = ForEach ($Scope in $Scopes)
-            {
+            $CurrentDhcpList = ForEach ($Scope in $Scopes) {
 
                 Get-DHCPServerv4Lease -ComputerName $DhcpServer -ScopeID $Scope -AllLeases -ErrorAction SilentlyContinue | Where-Object { $_.AddressState -like '*Active' }
 
             } # End Foreach
 
-            If (Test-Path -Path "$ComparePath")
-            {
+            If (Test-Path -Path "$ComparePath") {
 
                 Write-Verbose "[*] List of known MAC Addresses has been found."
 
             } # End If
-            Else
-            {
+            Else {
 
                 Write-Verbose "[*] Initial Build of file containing MAC Address history is being created at $ComparePath"
-
                 $CurrentDhcpList | Select-Object -Property ClientID,IPAddress,ScopeID,Hostname,AddressState,LeaseExpiryTime | Export-Csv -Path "$ComparePath" -NoTypeInformation
 
             } # End Else
 
             $HistoryDhcpList = Import-Csv -Path "$ComparePath" -Header ClientID
 
-            If ($CurrentDhcpList)
-            {
+            If ($CurrentDhcpList) {
 
                 Write-Verbose "[*] Comparing Client ID History with Current Leases"
 
@@ -121,23 +115,19 @@ Function Find-NewDevices {
                 $NewMacAddresses = (Compare-Object -ReferenceObject $HistoryDhcpList -DifferenceObject $CurrentDhcpList -Property ClientId | Where-Object {$_.SideIndicator -like "=>"}) | Select-Object -Property ClientId -ExcludeProperty SideIndicator -ExpandProperty ClientId -Unique
 
             } # End If
-            Else
-            {
+            Else {
 
                 Write-Output "[!] There were not any DHCP clients retrieved from $DhcpServer"
-
                 Break
 
             } # End Else
 
-            If ($NewMacAddresses)
-            {
+            If ($NewMacAddresses) {
 
                 Write-Verbose "[*] Obtaining client lease information for newly found devices. "
 
                 $AllInfo = @()
-                $AllInfo = ForEach ($Scope in $Scopes)
-                {
+                $AllInfo = ForEach ($Scope in $Scopes) {
                     # Uncomment and modify the where-object part of this pipe if you wish to exclude certain hostnames for whatever reason
                     (Get-DhcpServerv4Lease -ComputerName $DhcpServer -ClientId $NewMacAddresses -ScopeId $Scope -ErrorAction SilentlyContinue) # | Where-Object -Property HostName -NotLike "DESKTOP*"
 
@@ -145,60 +135,50 @@ Function Find-NewDevices {
 
 
                 Write-Verbose "[*] Updating Client ID History"
-                If ($AllInfo)
-                {
+                If ($AllInfo) {
 
                     Write-Verbose "[*] Appending list of known MAC Addresses"
-
                     $AllInfo | Select-Object -Property IPAddress,ScopeID,ClientID,Hostname,AddressState,LeaseExpiryTime | Export-Csv -Path $ComparePath -Append # Updates the HistoryDhcpList File
 
                 }  # End If
-                Else
-                {
+                Else {
 
                     Write-Verbose "[*] No accompanying information obtained for that MAC Address"
 
                 }  # End Else
 
                 Write-Verbose "[*] Getting Vendor Information from MAC Addresses of newly discovered devies"
-
                 Import-module -Function ."$MacVendorps1" -Force
 
                 $VendorList = @()
                 $VendorList = Get-MACVendor -MacAddress $NewMacAddresses
 
-                If (!($VendorList))
-                {
+                If (!($VendorList)) {
 
                     Write-Output "[*] No matching vendor could be determined from the current MAC vendor list. If you believe this to be an error check the Get-MacVendor.ps1 file at $MacVendorps1"
 
                 } # End If
 
             }  # End If
-            Else
-            {
+            Else {
 
                 Write-Output "[*] No new devices were discovered on $DhcpServer."
 
             }  # End Else
 
         }  # End Try
-        Catch
-        {
+        Catch {
 
             Write-Output "[x] Error encountered with $DhcpServer"
-
             $Error[0]
 
         }  # End Catch
-        Finally
-        {
+        Finally {
 
             Import-Module -Function ."$MacVendorps1" -Force
 
             $Table = @()
-            $Table = ForEach ($Vendor in $AllInfo)
-            {
+            $Table = ForEach ($Vendor in $AllInfo) {
 
                 $VendorAssignment = Get-MacVendor -MACAddress $Vendor.ClientId
 
@@ -249,17 +229,14 @@ td {
 
         $MailBody = $TableInfo | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "This is a list of the newest devices to have joined the Network." | Out-String
 
-            If ($Table)
-            {
+            If ($Table) {
 
                 Send-MailMessage -From FromEmail -To ToEmail -Subject "AD Event: New Device Check $DhcpServer" -BodyAsHtml -Body $MailBody -SmtpServer UseSmtpServer -UseSSL -Port 587  -Credential $Credential
 
                 Write-Verbose 'Email sent.'
 
             } # End if
-
-           Else
-           {
+           Else {
 
                 Write-Verbose "No new devices found."
 
@@ -274,8 +251,8 @@ td {
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUwVGXqVRVnIM5xnC0+zr2RBPB
-# BDCgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU0A9mVW/dshQtLe0eTp5zb2Vo
+# JfWgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -335,11 +312,11 @@ td {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FH47p0TQbtqZPu4jL+429QNWKe+vMA0GCSqGSIb3DQEBAQUABIIBAIlRVuKKwW9N
-# V7wZJbBPcq/ITOUn/eAJZVGoVCUxHGfXnPokvYvutg5i/uQ3zhFibWNhZe+v+5wT
-# D+rARZEXPVO6ZZlH8/6qgnrF3MO+j/OM4xU8WhGOVWnrvyWxXbSNPXdXuc02FzKz
-# W30mAK7RtvaOMt9YhLaE3MnHj1mEMYmMzLFd5NUrtN5tjyoPNI/LWbAWhQnwSnOF
-# ovtCYibBZ3mPI9aF3YyXIanCZXMrm/EN6RdF0Z3VBR2V61J73wfITfOjj6zpDIur
-# iSFl5xijCi/CelyjDYa5Xn1cWmcvyDbc7FjjaWP7wT2tQ0bIt+TH5sh6Rby9DMHY
-# jBAUwrEzrPU=
+# FKMNM2zJRN+gY09i5qwFx8oxRoO+MA0GCSqGSIb3DQEBAQUABIIBACF9JDO0BiYs
+# tPP8TvLO8cOCpeELd56zyAoxW7eJWtZDln/AR6+varc1j8zo4S2YELffifPPQeMh
+# VdffbAQxDqNb4BKEtyO0Wbwz13AwEAa6q8JrQwU8Egdgg9xdGLMQnZia9ec3VOsh
+# BYMaER7Z32lkA1BXQ2R3JDzlZAoCZkgBOCbLG/rV4k4WYAivlxWJMjxdzy0ZSivT
+# Bc102eeRsPd0EuXb5IWg9pumMEGYtSPoiiNZDR4IeziccyOd0xetLRpWUA5W3Uwi
+# dOR08rXNy0lJ8TOB2hfRZb+hk40fgmZtktlj6bshqOq4KyZf1vZ8Ss3gQfBgg/q1
+# W6ObeHFFFqU=
 # SIG # End signature block

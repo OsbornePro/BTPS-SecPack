@@ -32,8 +32,9 @@ None
 
 .LINK
 https://osbornepro.com
+https://btpssecpack.osbornepro.com
 https://writeups.osbornepro.com
-https://github.com/tobor88
+https://github.com/OsbornePro
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
@@ -46,14 +47,12 @@ Function Test-Admin {
 
     Write-Verbose "Verifying permissions"
     $IsAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
-    If ($IsAdmin)
-    {
+    If ($IsAdmin) {
 
         Write-Verbose "Permissions verified, continuing execution"
 
     }  # End If
-    Else
-    {
+    Else {
 
         Throw "[x] Insufficient permissions detected. Run this cmdlet in an adminsitrative prompt."
 
@@ -102,8 +101,9 @@ None
 
 .LINK
 https://osbornepro.com
+https://btpssecpack.osbornepro.com
 https://writeups.osbornepro.com
-https://github.com/tobor88
+https://github.com/OsbornePro
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
@@ -111,8 +111,7 @@ https://www.credly.com/users/roberthosborne/badges
 https://www.hackthebox.eu/profile/52286
 
 #>
-Function New-FirewallLogFile
-{
+Function New-FirewallLogFile {
     [CmdletBinding()]
         param (
             [Parameter(
@@ -124,18 +123,15 @@ Function New-FirewallLogFile
             [String]$Path = "C:\Windows\System32\LogFiles\Firewall"
         )  # End param
 
-BEGIN
-{
+BEGIN {
 
     Test-Admin
 
     $FirewallLogFiles = "$Path\domainfw.log","$Path\domainfw.log.old","$Path\privatefw.log","$Path\privatefw.log.old","$Path\publicfw.log","$Path\publicfw.log.old","$Path"
-
     New-Item -Path $Path -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
 }  # End BEGIN
-PROCESS
-{
+PROCESS {
 
   Write-Output "[*] Creating firewall log files in $Path"
   New-Item -Path $FirewallLogFiles -Type File -Force -ErrorAction SilentlyContinue | Out-Null
@@ -147,20 +143,16 @@ PROCESS
 
 
   $PermittedUsers = @('NT AUTHORITY\SYSTEM', 'BUILTIN\Administrators', 'BUILTIN\Network Configuration Operators', 'NT SERVICE\MpsSvc')
-  ForEach ($User in $PermittedUsers)
-  {
+  ForEach ($User in $PermittedUsers) {
 
     $Permission = $User, 'FullControl', 'Allow'
-
     $AccessRule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $Permission
-
     $Acl.AddAccessRule($AccessRule)
 
   }  # End ForEach
 
 }  # End PROCESS
-END
-{
+END {
 
     $Acl.SetOwner((New-Object -TypeName System.Security.Principal.NTAccount('BUILTIN\Administrators')))
     $Acl | Set-Acl -Path $FirewallLogFiles
@@ -204,13 +196,14 @@ None
 
 
 .LINK
-https://roberthsoborne.com
 https://osbornepro.com
-https://github.com/tobor88
+https://btpssecpack.osbornepro.com
+https://writeups.osbornepro.com
+https://github.com/OsbornePro
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
-https://www.youracclaim.com/users/roberthosborne/badges
+https://www.credly.com/users/roberthosborne/badges
 https://www.hackthebox.eu/profile/52286
 
 #>
@@ -235,11 +228,9 @@ Function Enable-FirewallLogging {
 
     $Result = Get-NetFirewallProfile | Select-Object -Property Name,Enabled
 
-    ForEach ($Re in $Result)
-    {
+    ForEach ($Re in $Result) {
 
-        If ((($Re).Enabled) -eq 'True')
-        {
+        If ((($Re).Enabled) -eq 'True') {
 
             Write-Output "[*] Firewall has been enabled"
 
@@ -247,8 +238,7 @@ Function Enable-FirewallLogging {
             "[*] LOG ENABLE : " + $Re.Enabled
 
         }   # End If
-        ElseIf (($Re.Enabled) -eq 'False')
-        {
+        ElseIf (($Re.Enabled) -eq 'False') {
 
             Write-Output "[x] Firewall is disabled. This may because of group policy settings. Your current settings are below"
 
@@ -267,12 +257,9 @@ Function Enable-FirewallLogging {
     Set-NetFirewallProfile -Name Public -LogAllowed False -LogBlocked True -LogFileName "$Path\publicfw.log"
 
     $Results = Get-NetFirewallProfile | Select-Object -Property Name,LogAllowed,LogBlocked,LogFileName
+    ForEach ($R in $Results) {
 
-    ForEach ($R in $Results)
-    {
-
-        If ((($R).LogBlocked) -eq 'True')
-        {
+        If ((($R).LogBlocked) -eq 'True') {
 
             Write-Output "[*] Firewall logging of blocked connections has been enabled"
 
@@ -280,8 +267,7 @@ Function Enable-FirewallLogging {
             "[*] LOG RULE  : " + $R.LogBlocked
 
         }   # End If
-        ElseIf (($R.LogBlocked) -eq 'False')
-        {
+        ElseIf (($R.LogBlocked) -eq 'False') {
 
             Write-Output "[x] Firewall logging of blocked connectiosn was NOT enabled"
 
@@ -292,7 +278,7 @@ Function Enable-FirewallLogging {
 
     }  # End ForEach
 
-}  # End Function
+}  # End Function Enable-FirewallLogging
 
 
 <#
@@ -333,9 +319,10 @@ None
 
 
 .LINK
-https://roberthsoborne.com
 https://osbornepro.com
-https://github.com/tobor88
+https://btpssecpack.osbornepro.com
+https://writeups.osbornepro.com
+https://github.com/OsbornePro
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
@@ -356,8 +343,7 @@ Function Block-IPAddress {
         )  # End param
 
 
-    ForEach ($IP in $IPAddress)
-    {
+    ForEach ($IP in $IPAddress) {
 
         Write-Verbose "Obtaining updated list of all the firewall rule names"
         $FirewallRule = New-Object -ComObject HNetCfg.FwPolicy2
@@ -368,8 +354,7 @@ Function Block-IPAddress {
         $RuleNameOut = "Blacklisted IP: - $IP -Outbound"
 
 
-        If ($FwRuleNames.Name -NotContains $RuleName)
-        {
+        If ($FwRuleNames.Name -NotContains $RuleName) {
 
             Write-Verbose "Creating firewall rule to block inbound connections to $IP"
             New-NetFirewallRule -DisplayName $RuleName -Name $RuleName -Description "Blocks the IP $IP which may be port scanning" -Direction Inbound -RemoteAddress $IP -Action Block -ErrorAction SilentlyContinue | Out-Null
@@ -380,8 +365,7 @@ Function Block-IPAddress {
             Write-Output "[*] Possible Scan Attempt detected from IP Address $IP, please check $PreserveLocation"
 
         }  # End If
-        Else
-        {
+        Else {
 
             Write-Output "[*] Firewall Rule for $IP already exists: `nRULE NAME: $RuleName"
 
@@ -423,9 +407,10 @@ Contact: rosborne@osbornepro.com
 
 
 .LINK
-https://roberthsoborne.com
 https://osbornepro.com
-https://github.com/tobor88
+https://btpssecpack.osbornepro.com
+https://writeups.osbornepro.com
+https://github.com/OsbornePro
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
@@ -463,22 +448,17 @@ Function Get-ValidIPAddressFromString {
     $Obj = @()
     $Regex='(?<Address>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))'
 
-    Switch ($PsCmdlet.ParameterSetName)
-    {
+    Switch ($PsCmdlet.ParameterSetName) {
         'File' {
 
             $FileContents = Get-Content -Path $Path -Tail 5000
-            ForEach ($Line in $FileContents)
-            {
+            ForEach ($Line in $FileContents) {
 
-                If (($Line -Match $Regex) -and ($Obj -notcontains $Matches.Address))
-                {
+                If (($Line -Match $Regex) -and ($Obj -notcontains $Matches.Address)) {
 
                         $Obj += $Matches.Address
 
                 }  # End If
-
-
 
             }  # End ForEach
 
@@ -488,8 +468,7 @@ Function Get-ValidIPAddressFromString {
 
         'Line' {
 
-            If ($String -Match $Regex)
-            {
+            If ($String -Match $Regex) {
 
                 $Obj = $Matches.Address
 
@@ -566,9 +545,10 @@ None
 
 
 .LINK
-https://roberthsoborne.com
 https://osbornepro.com
-https://github.com/tobor88
+https://btpssecpack.osbornepro.com
+https://writeups.osbornepro.com
+https://github.com/OsbornePro
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
@@ -631,15 +611,13 @@ Function Watch-PortScan {
     $DnsServers = Get-DnsClientServerAddress -AddressFamily 2 | Select-Object -ExpandProperty ServerAddresses -Unique
     $DnsServers += $ExcludeAddresses
 
-    If (!((Test-Path -Path $LogFile) -and ($FileName -like "*.log")))
-    {
+    If (!((Test-Path -Path $LogFile) -and ($FileName -like "*.log"))) {
 
         Throw "[!] The path you defined, $LogFile, needs to end in a .log file extension"
 
     }  # End If
 
-    While ($True)
-    {
+    While ($True) {
 
         Write-Verbose "Checking log entries for scanning attempts"
 
@@ -648,15 +626,13 @@ Function Watch-PortScan {
         $ArrayList = New-Object -TypeName System.Collections.ArrayList(,$IPList)
 
         Write-Verbose "Removing excluded addresses from radar"
-        ForEach ($EA in $ExcludeAddresses)
-        {
+        ForEach ($EA in $ExcludeAddresses) {
 
             $ArrayList.Remove("$EA")
 
         }  # End ForEach
 
-        ForEach ($sPI in $IPs)
-        {
+        ForEach ($sPI in $IPs) {
 
             $ArrayList.Remove("$sPI")
 
@@ -665,20 +641,17 @@ Function Watch-PortScan {
         $ArrayList.Remove("127.0.0.1")
         $ArrayList.Remove("127.0.1.1")
 
-        ForEach ($SourceAddress in $ArrayList)
-        {
+        ForEach ($SourceAddress in $ArrayList) {
 
             Write-Output "Checking $SourceAddress"
 
             $XPath = "*[System[EventID=5156 and TimeCreated[timediff(@SystemTime) <= 120000]] and EventData[Data[@Name='SourceAddress']='$SourceAddress']]"
             $Events = Get-WinEvent -LogName Security -FilterXPath $XPath -ErrorAction SilentlyContinue
 
-            For ($i = 0; $i -lt $Events.Count; $i++)
-            {
+            For ($i = 0; $i -lt $Events.Count; $i++) {
 
                 Write-Verbose "Adding first discovered result to the count"
-                If ($i -eq 0)
-                {
+                If ($i -eq 0) {
 
                     $NewObj = New-Object -TypeName PSObject -Property @{
                         Hostname=$Events[$i].MachineName;
@@ -694,11 +667,9 @@ Function Watch-PortScan {
 
                 }  # End If
 
-                If ($EntryObjList.DestinationPort -NotContains ($Events[$i].Properties[6].Value))
-                {
+                If ($EntryObjList.DestinationPort -NotContains ($Events[$i].Properties[6].Value))  {
 
-                    If ($IgnorePort.Count -eq 0)
-                    {
+                    If ($IgnorePort.Count -eq 0) {
 
                         $NewObj = New-Object -TypeName PSObject -Property @{
                             Hostname=$Events[$i].MachineName;
@@ -713,14 +684,11 @@ Function Watch-PortScan {
                         $EntryObjList.Add($NewObj)
 
                     }  # End If
-                    Else
-                    {
+                    Else {
 
-                        ForEach ($IgP in $IgnorePort)
-                        {
+                        ForEach ($IgP in $IgnorePort) {
 
-                            If (($Events[$i].Properties[6].Value) -ne $IgP)
-                            {
+                            If (($Events[$i].Properties[6].Value) -ne $IgP) {
 
                                 $NewObj = New-Object -TypeName PSObject -Property @{
                                     Hostname=$Events[$i].MachineName;
@@ -744,15 +712,12 @@ Function Watch-PortScan {
 
             }  # End For
 
-            If ($EntryObjList.Count -ge $Limit)
-            {
+            If ($EntryObjList.Count -ge $Limit) {
 
                 Write-Verbose "Alert Limit Has Been Reached!"
-
                 $ScanFound = $True
 
-                If ($EmailAlert.IsPresent)
-                {
+                If ($EmailAlert.IsPresent) {
 
                     Write-Verbose "Alerting admins"
                     $Css = @"
@@ -792,17 +757,13 @@ td {
 
                 }  # End If
 
-                If ($PSBoundParameters.Key -eq "ActiveBlockList")
-                {
+                If ($PSBoundParameters.Key -eq "ActiveBlockList") {
 
-                    For ($n = 0; $n -le $EntryObjList.Count; $n++)
-                    {
+                    For ($n = 0; $n -le $EntryObjList.Count; $n++) {
 
-                        If ($BlockIps -NotContains $EntryObjList.SourceAddress)
-                        {
+                        If ($BlockIps -NotContains $EntryObjList.SourceAddress) {
 
                             $BadGuyIP = $EntryObjList.SourceAddress
-
                             Write-Output "[*] Scan detected: Adding $BadGuyIP to the block list. If -ActiveBlockList was specified the IP will be blocked shortly"
                             $BlockIps.Add($BadGuyIP)
 
@@ -815,8 +776,7 @@ td {
                 $EntryObjList = [System.Collections.ArrayList]::New()
 
             }  # End If
-            Else
-            {
+            Else {
 
                 $EntryObjList = [System.Collections.ArrayList]::New()
 
@@ -824,11 +784,9 @@ td {
 
         }  # End ForEach
 
-        If ($ScanFound -eq $True)
-        {
+        If ($ScanFound -eq $True) {
 
-            If ($ActiveBlockList.IsPresent)
-            {
+            If ($ActiveBlockList.IsPresent) {
 
                 Block-IpAddress -IPAddress $BlockIps
 
@@ -861,8 +819,8 @@ Watch-PortScan -LogFile "$LogPath\domainfw.log" -ExcludeAddresses 'vulnscanner.o
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUlbXFoml68bb9br+l0JA8oYzK
-# B8Cgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQURjRZzxHnF8VWLG75QHYzk27R
+# bEGgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -922,11 +880,11 @@ Watch-PortScan -LogFile "$LogPath\domainfw.log" -ExcludeAddresses 'vulnscanner.o
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FGP8rbZdsteew/Coo3nL1i2efbqEMA0GCSqGSIb3DQEBAQUABIIBADKkI1I0tTEH
-# ZC8FI9sKscA31MoMK5Mwb+DHA8Hcsbya+tX53JHXjL3JGSomXgiOdsE7+awOX7OV
-# 0+Dd5SB5GYWKmcYs/SL/+ghRGYY1B6AdRjK8iSVue8PTiRRE7fZbirRObRDG/F9e
-# VeBDFGkQIGbmN+wgtK6aBo7O+aOoijRZNn8IqIX+7vAtSujKjuZCU8NyOCQeS70+
-# OcxHrY7632omy6PnplkVY7rjIZUpr1yw/Y4s1GBg46fPQzSoEs7vZgB4/7B5QTC7
-# 7LGKu5UD1P2oqWB1Zrc9IwhZKNeEm2oAx0+0yTDxf4+UQf041kB4RZWSfvGwDpEX
-# ryWIA6u8n9o=
+# FLq48ATAXtIk6AWchYpx3IRqXfa2MA0GCSqGSIb3DQEBAQUABIIBAL7811C38YvQ
+# 1Nr/uuYQOTACbPHd8erhTM/cpTBt0ehiZKaZaM/quEt/2mIcvpRciPGQN1GNjNP0
+# /OnpQ4o2f3KmtRLn7y5W9qlrPyp671TtbesW+hw6mKIY6tE+okTs0AXOeotgGX8j
+# yJnLsHORZqWE2fLL/0NpdoP6fTXl1gtF0qdqlTvy0qPLraaw3Ccqm1QZaA1i6tJ/
+# K8IQPjUN5qogwoXjNbuXWaFt9C1YJDcNAUX3vnfTAA1dgVCg8tCeSbbPORXpFp9G
+# H6Tswa8Ss9K7K+mFenRDxwtaaNfrrFKDIBb5z30PJEM9IVzkRB6GQS7Q0Ol5a3Xv
+# 8xpGrddIer4=
 # SIG # End signature block

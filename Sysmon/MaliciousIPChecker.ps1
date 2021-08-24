@@ -32,8 +32,9 @@ Contact: rosborne@osbornepro.com
 
 .LINK
 https://osbornepro.com
+https://btpssecpack.osbornepro.com
 https://writeups.osbornepro.com
-https://github.com/tobor88
+https://github.com/OsbornePro
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
@@ -71,22 +72,17 @@ Function Get-ValidIPAddressFromString {
     $Obj = @()
     $Regex=‘(?<Address>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))’
 
-    Switch ($PsCmdlet.ParameterSetName)
-    {
+    Switch ($PsCmdlet.ParameterSetName) {
         'File' {
 
             $FileContents = Get-Content -Path $Path -Tail 5000
-            ForEach ($Line in $FileContents)
-            {
+            ForEach ($Line in $FileContents) {
 
-                If (($Line -Match $Regex) -and ($Obj -notcontains $Matches.Address))
-                {
+                If (($Line -Match $Regex) -and ($Obj -notcontains $Matches.Address)) {
 
                         $Obj += $Matches.Address
 
                 }  # End If
-
-
 
             }  # End ForEach
 
@@ -96,8 +92,7 @@ Function Get-ValidIPAddressFromString {
 
         'Line' {
 
-            If ($String -Match $Regex)
-            {
+            If ($String -Match $Regex) {
 
                 $Obj = $Matches.Address
 
@@ -162,8 +157,7 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
 
     END {
 
-    If (($Query -NotLike "127.0.0.*") -and ($Query -NotLike "192.168.*.*") -and ($Query -NotLike "10.*.*.*") -and ($Query -NotLike "172.16.*.*") -and ($Query -NotLike "169.254.*.*"))
-    {
+    If (($Query -NotLike "127.0.0.*") -and ($Query -NotLike "192.168.*.*") -and ($Query -NotLike "10.*.*.*") -and ($Query -NotLike "172.16.*.*") -and ($Query -NotLike "169.254.*.*")) {
 
         $TLDs = DATA {
           @{
@@ -179,35 +173,29 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
         }
 
         $EAP, $ErrorActionPreference = $ErrorActionPreference, "Stop"
-
         $Query = $Query.Trim()
 
-        If ($Query -Match "(?:\d{1,3}\.){3}\d{1,3}")
-        {
+        If ($Query -Match "(?:\d{1,3}\.){3}\d{1,3}") {
 
             Write-Verbose "IP Lookup!"
-            If ($Query -NotMatch " ")
-            {
+            If ($Query -NotMatch " ") {
 
                 $Query = "n $Query"
 
             }  # End If
-            If (!$Server)
-            {
+            If (!$Server) {
 
                 $Server = "whois.arin.net"
 
             }  # End If
         }  # End If
-        ElseIf (!$Server)
-        {
+        ElseIf (!$Server) {
 
             $Server = $TLDs.GetEnumerator() | Where-Object { $Query -like  ("*"+$_.Name) } | Select-Object -ExpandProperty Value -First 1
 
         }  # End ElseIf
 
-        If (!$Server)
-        {
+        If (!$Server) {
 
             $Server = "whois.arin.net"
 
@@ -221,6 +209,7 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
             $Client = New-Object -TypeName System.Net.Sockets.TcpClient $Server, 43
 
             Try {
+
                 $Stream = $Client.GetStream()
 
                 Write-Verbose "Sending Query: $Query"
@@ -232,17 +221,15 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
 
                 $Result = $Reader.ReadToEnd()
 
-                If ($Result -Match "(?s)Whois Server:\s*(\S+)\s*")
-                {
+                If ($Result -Match "(?s)Whois Server:\s*(\S+)\s*") {
 
                     Write-Warning "Recommended WHOIS server: ${Server}"
 
-                    If (!$NoForward)
-                    {
+                    If (!$NoForward) {
+
                         Write-verbose "Non-Authoritative Results:`n${Result}"
                         # cache, in case we can't get an answer at the forwarder
-                        If (!$CachedResult)
-                        {
+                        If (!$CachedResult) {
 
                             $CachedResult = $Result
                             $CachedServer = $Server
@@ -254,26 +241,22 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
                         $MaxRequery--
 
                     }  # End If
-                    Else
-                    {
+                    Else {
 
                         $MaxRequery = 0
 
                     }  # End Else
                 }   # End If
-                Else
-                {
+                Else {
 
                     $MaxRequery = 0
 
                 }  # End Else
 
             }  # End Try
-            Finally
-            {
+            Finally {
 
-                If ($Stream)
-                {
+                If ($Stream) {
 
                     $Stream.Close()
                     $Stream.Dispose()
@@ -284,9 +267,7 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
         } While ($MaxRequery -gt 0)
 
         $Result
-
-        If ($CachedResult -and ($Result -Split "`n").Count -lt 5)
-        {
+        If ($CachedResult -and ($Result -Split "`n").Count -lt 5) {
 
             Write-Warning "Original Result from ${CachedServer}:"
             $CachedResult
@@ -301,7 +282,6 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
 
 }  # End Function Get-WhoIs
 
-
 # REFERENCE https://community.spiceworks.com/scripts/show/2428-powershell-rbl-blacklist-check-with-email-alerts
 Function Invoke-IPBlacklistCheck {
     [CmdletBinding()]
@@ -313,19 +293,16 @@ Function Invoke-IPBlacklistCheck {
 
 
     $LogfileExists = Get-WinEvent -ListLog "MaliciousIPs" -ErrorAction SilentlyContinue
-    If (!($LogfileExists))
-    {
+    If (!($LogfileExists)) {
 
         New-EventLog -LogName MaliciousIPs -Source MaliciousIPs
         Limit-EventLog -LogName "MaliciousIPs" -OverflowAction OverWriteAsNeeded -MaximumSize 64KB
 
     }  # End If
 
-    ForEach ($IP in $IPAddress)
-    {
+    ForEach ($IP in $IPAddress) {
 
-        If (($IP -NotLike "127.0.0.*") -and ($IP -NotLike "192.168.*.*") -and ($IP -NotLike "10.*.*.*") -and ($IP -NotLike "172.16.*.*") -and ($IP -NotLike "169.254.*.*"))
-        {
+        If (($IP -NotLike "127.0.0.*") -and ($IP -NotLike "192.168.*.*") -and ($IP -NotLike "10.*.*.*") -and ($IP -NotLike "172.16.*.*") -and ($IP -NotLike "169.254.*.*")) {
 
             $BlacklistedOn = @()
             $ReversedIP = ($IP -Split '\.')[3..0] -Join '.'
@@ -403,19 +380,16 @@ Function Invoke-IPBlacklistCheck {
                 'xbl.spamhaus.org'
                 'zombie.dnsbl.sorbs.net')
 
-            ForEach ($Server in $BlacklistServers)
-            {
+            ForEach ($Server in $BlacklistServers) {
 
                 $FQDN = "$ReversedIP.$Server"
-                Try
-                {
+                Try {
 
                     $Null = [System.Net.Dns]::GetHostEntry($FQDN)
                     $BlacklistedOn += $Server
 
                 }  # End Try
-                Catch
-                {
+                Catch {
 
                     Continue
 
@@ -423,12 +397,10 @@ Function Invoke-IPBlacklistCheck {
 
             }  # End ForEach
 
-            If ($BlacklistedOn.Count -gt 3)
-            {
+            If ($BlacklistedOn.Count -gt 3) {
 
                 Write-Verbose "Create an event in MaliciousIPs in Event Viewer Tree"
-                Foreach ($Item in $BlacklistedOn)
-                {
+                Foreach ($Item in $BlacklistedOn) {
 
                     $EventMessage = Get-WinEvent -FilterHashtable @{LogName="Microsoft-Windows-Sysmon/Operational"; Id=3} | Where-Object -Property Message -like "*$IP*" | Select-Object -First 1 -ExpandProperty Message | Out-String
                     $Message = "IP Address was found to be on the following Blacklists: `n`nIP Address: $IP`nBlacklist: " + (Write-Output $Item  | Out-String -Width 1000) + "`n`n" + (Write-Output $EventMessage | Out-String -Width 1000)
@@ -453,8 +425,7 @@ $Dateregex = "(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)[0-9]{2}
 Get-WinEvent -FilterHashTable @{LogName="Microsoft-Windows-Sysmon/Operational"; Id=3; StartTime=(Get-Date).AddHours(-1.2)} | Select-Object -ExpandProperty Message | Out-File -FilePath $TmpEventFile
 
 $IPList = Get-ValidIPAddressFromString -Path $TmpEventFile
-ForEach ($IP in $IPList)
-{
+ForEach ($IP in $IPList) {
 
     Write-Verbose "Checking $IP against blacklists"
     Invoke-IPBlacklistCheck -IPAddress $IP -Verbose
@@ -463,8 +434,7 @@ ForEach ($IP in $IPList)
     $Creation = Try { (((Get-WhoIs -Query $IP).Split(' ') | Select-String -Pattern $DateRegex)[0] -Replace 'Comment:','').Trim() } Catch { Clear-Variable -Name Creation -ErrorAction SilentlyContinue }
     $CreationDate = [Datetime]::ParseExact("$Creation", 'yyyy-MM-dd', $Null)
 
-    If (($Creation) -and (($Now.AddYears(-2) -le $CreationDate)))
-    {
+    If (($Creation) -and (($Now.AddYears(-2) -le $CreationDate))) {
 
         Write-Verbose "Creating an event in MaliciousIPs Event Viewer Tree for a young domain"
 
@@ -478,8 +448,8 @@ ForEach ($IP in $IPList)
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUVFc6DFP8UEa05t8Z00YAhp/Z
-# 3xmgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUm8SueELk1fTHpyElaiadF9P7
+# KvCgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -539,11 +509,11 @@ ForEach ($IP in $IPList)
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FPHxxNRZCVYGxuZt0hv6PyJE4ZASMA0GCSqGSIb3DQEBAQUABIIBADKssyW5Xx9s
-# z1qcUy/F6th5AwITeN9cBzpsC0IrbFeunuYAjLw6PsOpnZpTfFNGLw6m7Ma/cZ3a
-# nvM1pg8iaXI5Rd970fbRTrxMfFwfxvur+krW15FRRRmynCOhSiFV5VwxcwoEfmi/
-# ST0YJ54dzvu3VFpu03qHUlRn1VHu+CxePdgyE6+5TOJ75mhlUkue4E3QgfSkYN49
-# murV2Aefw98Dh6ghO8dcieE9fRm1b45NCAV1cWJd4Wy0bWPeuvlH5CeVugJLk0Fa
-# 7FbGOEawJYQZMcwqVprI/bTMBkBxsYmKyQl6PkMkHSZ0rN9xgUy5XT28ASavQ725
-# ZPp4T1rge1k=
+# FFFV0F/AnuRjhsIKlLxkowR3hOe8MA0GCSqGSIb3DQEBAQUABIIBAB4W6L56xRm4
+# 9YejFpHbUy2QSbl4axqDpXNXMpUmQ9W3sZRTrfFQcux1bnfBNEzIlHs0wx187CG0
+# iY3UI+eSGe7WAf5O/pM0+chLiyejbvVHPb2Ec3fruE/q5wgWA+ha8yQ+N5S6HOZm
+# qUWEKCW/FTZCpmoLNRqYVitvSG/Gy/BEdkurIGIFGHgcKSK4MigMa0vubZfSC7eX
+# f0cu19kXVJcavPdNxKkCtzk9DaAY/a/GCoMvqzYAAK53wl/cjvMy4KVlj11EwJ5s
+# mDbn2OszjPGxFJ85saSfN4Pjaw+I5ThGOQsIva+G4DudKQXsUyQJabYak+sAVJcJ
+# c3ktKmkcCGE=
 # SIG # End signature block

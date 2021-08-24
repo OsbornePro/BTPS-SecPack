@@ -48,8 +48,8 @@ PSCustomObject
 .LINK
 https://osbornepro.com
 https://writeups.osbornepro.com
-https://btps-secpack.com
-https://github.com/tobor88
+https://btpssecpack.osbornepro.com
+https://github.com/OsbornePro
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
@@ -85,8 +85,7 @@ Function Find-WhereUserIsLoggedIn {
 			[String[]]$ComputerName
         )  # End param
 
-BEGIN
-{
+BEGIN {
 
 	$Obj = @()
 	$DomainObj = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
@@ -94,19 +93,16 @@ BEGIN
 	$Username = $Username.Replace("@$Domain","")
 
 	Write-Verbose "Ensuring commands are executed on a domain controller"
-	If ("$env:COMPUTERNAME.$Domain" -notin $DomainObj.DomainControllers.Name)
-	{
+	If ("$env:COMPUTERNAME.$Domain" -notin $DomainObj.DomainControllers.Name) {
 
 		Throw "[x] This cmdlet only works when executed on a domain controller"
 
 	}  # End If
 
 }  # End BEGIN
-PROCESS
-{
+PROCESS {
 
-	Switch ($PSCmdlet.ParameterSetName)
-	{
+	Switch ($PSCmdlet.ParameterSetName)	{
 
 		'Prefix' {
 
@@ -115,20 +111,16 @@ PROCESS
 			$ComputerNames = Get-ADComputer -Properties Name,SamAccountName,Enabled,LastLogonDate -Filter {LastLogonDate -gt $CutOffDate -and Enabled -eq 'true' -and SamAccountName -like $Prefix}
 
 			Write-Verbose "Searching for $Username on Computers that have a hostname starting with $Prefix`n"
-			ForEach ($Computer in $ComputerNames)
-			{
+			ForEach ($Computer in $ComputerNames) {
 
 				$CimSession = New-CimSession -ComputerName $Computer.DNSHostName -SessionOption (New-CimSessionOption -UseSsl) -ErrorAction SilentlyContinue
-				If ($CimSession)
-				{
+				If ($CimSession) {
 
 					$CIM = Get-CimInstance -ClassName Win32_Process -CimSession $CimSession -Filter "Name = 'explorer.exe'"
-					If ($CIM)
-					{
+					If ($CIM) {
 
 						$ProcessOwner = (Invoke-CimMethod -InputObject $CIM -MethodName GetOwner -ErrorAction SilentlyContinue).User
-						If ($ProcessOwner -eq $Username)
-						{
+						If ($ProcessOwner -eq $Username) {
 
 							Write-Output "[*] $Username is logged in on " $Computer.Name
 							$Obj += New-Object -Type PSCustomObject -Property @{User=$Username; Devices=$Computer.Name}
@@ -149,20 +141,16 @@ PROCESS
 		'Computers' {
 
 			Write-Verbose "Searching for $Username on $ComputerName`n"
-			ForEach ($Computer in $ComputerName)
-			{
+			ForEach ($Computer in $ComputerName) {
 
 				$CimSession = New-CimSession -ComputerName $Computer -SessionOption (New-CimSessionOption -UseSsl) -ErrorAction SilentlyContinue
-				If ($CimSession)
-				{
+				If ($CimSession) {
 
 					$CIM = Get-CimInstance -ClassName Win32_Process -CimSession $CimSession -Filter "Name = 'explorer.exe'"
-					If ($CIM)
-					{
+					If ($CIM) {
 
 						$ProcessOwner = (Invoke-CimMethod -InputObject $CIM -MethodName GetOwner -ErrorAction SilentlyContinue).User
-						If ($ProcessOwner -eq $Username)
-						{
+						If ($ProcessOwner -eq $Username) {
 
 							Write-Output "[*] $Username is logged in on $Computer"
 							$Obj += New-Object -Type PSCustomObject -Property @{User=$Username; Devices=$Computer}
@@ -183,8 +171,7 @@ PROCESS
 	}  # End Switch
 
 }  # End PROCESS
-END
-{
+END {
 
 	Write-Output "[*] Search completed"
 	$Obj
@@ -192,11 +179,12 @@ END
 }  # End END
 
 }  # End Function Find-WhereUserIsLoggedIn
+
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUnhwP7xqvYF45dKW23EJ6Y2eL
-# EhOgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUtzdwrxEp0NBRDZHN6a22X8R2
+# tFagggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -256,11 +244,11 @@ END
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FHKuLRyqPfb8aTx7NYQgGcvh688kMA0GCSqGSIb3DQEBAQUABIIBAEJqpC/lK3Z4
-# G07zUJ8ltAZGxk0oJADbhTty9LAvxAzTRrMS1mbILW39ChHEDHBYCuUMSY/SNbGc
-# joNzv9omdLuFpbFwARirPLnljyr4H3DLcIMIYhEgaw7a+dTRGgcE/4BQ156amkt/
-# pKFWL2SmeMSyVJJA8GXia1O5ifu78iQQFvXSV9EzSDoiJXiEG61wj/0Wej/XsRC5
-# wyeIaamMunWu07BZ4ePrMulSzUs9ZdeGOmN74gGCnrHhdW1J2WL7176D4gPPV1K7
-# E5fZcOAQkYiOIMZAB1TJbaU/KKC4Cv8e34CHsl4n6yaB2a7oKwqeVtlnKAGU9zbj
-# lJqzgKDxUtA=
+# FOmI4KpMdW3rQQbYpZmf1/z7xWbeMA0GCSqGSIb3DQEBAQUABIIBAFnbRnhghUNb
+# GzF7nnC7AMlBsqk2Kizul0wF2DQfF+PgYuG1TYtXhkmRYhXOiEdEswan3uUIz7zv
+# PrrnAdLl9Y5t3uqa8TpcEUqSgw3Slj4XZ2MVuvFDYX/Yjc8kT4pHeRCAGuDw7FVs
+# pFatoPkzcZMyUU0Lovjv9w+9GibLu8BmJwP+hCopCl5OD14JlZfWs07oqa800jsO
+# BXTj/+J0X5lKpSJrmYWkVTzIXPQeUAOEMhsPHI0Ro6kl86ibehmHzygQjkNXR2Zn
+# VqpY+mLP+VQqimENc7XecEuowjXV8vx5qcDewDR80ekIHuB1zOh+e0bTfXqoaR1C
+# 7E0mAThqhng=
 # SIG # End signature block

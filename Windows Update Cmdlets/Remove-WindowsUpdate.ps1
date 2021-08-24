@@ -53,9 +53,10 @@ This cmdlet returns a job object, if you specify the AsJob parameter. Otherwise,
 
 
 .LINK
-https://roberthsoborne.com
 https://osbornepro.com
-https://github.com/tobor88
+https://btpssecpack.osbornepro.com
+https://writeups.osbornepro.com
+https://github.com/OsbornePro
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
@@ -87,29 +88,21 @@ Function Remove-WindowsUpdate {
             [switch][bool]$Restart
         )  # End param
 
-BEGIN
-{
+BEGIN {
 
-    If ($ComputerName)
-    {
+    If ($ComputerName) {
 
-        For ($i = 0; $i -lt $ComputerName.Count ; $i++)
-        {
+        For ($i = 0; $i -lt $ComputerName.Count ; $i++) {
 
-            ForEach ($Computer in $ComputerName)
-            {
+            ForEach ($Computer in $ComputerName) {
 
                 Write-Verbose "[*] Testing specified $Computer is reachable"
-
-                If (Test-Connection -ComputerName $Computer -Quiet -ErrorAction Inquire)
-                {
+                If (Test-Connection -ComputerName $Computer -Quiet -ErrorAction Inquire) {
 
                     Write-Verbose "[*] $Computer is reachable"
-                    Try
-                    {
+                    Try {
 
-                        If ($Null -eq $Cred)
-                        {
+                        If ($Null -eq $Cred) {
 
                             $Cred = Get-Credential -Message "Administrator Credentials are required to execute commands on remote hosts" -Username ($env:USERNAME + "@" + ((Get-WmiObject Win32_ComputerSystem).Domain))
 
@@ -118,8 +111,7 @@ BEGIN
                         New-Variable -Name "Session$i" -Value (New-PsSession -ComputerName $Computer -Credential $Cred -Name $Computer -EnableNetworkAccess -Port 5986 -UseSSL)
 
                     }  # End Try
-                    Catch
-                    {
+                    Catch {
 
                         Write-Verbose "[*] Skipping certificate validation checks to create an encrypted session with the remote host."
 
@@ -136,35 +128,27 @@ BEGIN
     }  # End If
 
 }  # End BEGIN
-PROCESS
-{
+PROCESS {
 
-    If ($ComputerName)
-    {
-        For ($n = 0; $n -lt $ComputerName.Count; $n++)
-        {
+    If ($ComputerName) {
+        
+        For ($n = 0; $n -lt $ComputerName.Count; $n++) {
 
-            ForEach ($C in $ComputerName)
-            {
+            ForEach ($C in $ComputerName) {
 
                 Write-Verbose "[*] Starting connection to $C"
-
                 Invoke-Command -Session (Get-Variable -Name "Session$n").Value -ArgumentList $HotFixID -ScriptBlock {
                     param([array]$HotFixID)
 
                     Write-Output "[*] Getting list of installed patches"
-
                     $PatchList = Get-CimInstance -ClassName "Win32_QuickFixEngineering" -Namespace "root\cimv2"
 
-                    ForEach ($HotFix in $HotFixID)
-                    {
+                    ForEach ($HotFix in $HotFixID) {
 
                         $Patch = $PatchList | Where-Object { $_.HotFixID -like "$HotFix" }
-
                         Write-Output "[*] $Patch will be removed from $env:COMPUTERNAME"
 
-                        If (!($Patch))
-                        {
+                        If (!($Patch)) {
 
                             Write-Output "[!] The Windows Update KB number you defined is not installed on $env:COMPUTERNAME. Below is a table of installed patches: "
                             Remove-Variable -Name "Patch"
@@ -172,33 +156,27 @@ PROCESS
                             $PatchList
 
                         }  # End If
-                        Else
-                        {
+                        Else {
 
                             Write-Output "[*] $HotFix is installed on $env:COMPUTERNAME, continuing uninstallation"
                             $KBNumber = $Patch.HotfixId.Replace("KB", "") | Out-String
 
-                            If ($Restart.IsPresent)
-                            {
+                            If ($Restart.IsPresent) {
 
                                 Write-Output "[*] Restart switch parameter is defined. You will be prompted to restart."
-
                                 cmd /c wusa /uninstall /kb:$KBNumber /promptrestart /log
 
                             }  # End If
-                            Else
-                            {
+                            Else {
 
                                 cmd /c wusa /uninstall /kb:$KBNumber /norestart /log
 
                             }  # End Else
 
-                            While (@(Get-Process wusa -ErrorAction SilentlyContinue).Count -ne 0)
-                            {
+                            While (@(Get-Process wusa -ErrorAction SilentlyContinue).Count -ne 0) {
 
                                 Start-Sleep -Seconds 10
-
-                                Write-Host "Waiting for update removal to finish. Please wait..."
+                                Write-Output "Waiting for update removal to finish. Please wait..."
 
                             }  # End While
 
@@ -215,20 +193,15 @@ PROCESS
         }  # End For
 
     }  # End If
-    Else
-    {
+    Else {
 
         Write-Verbose "[*] Getting list of installed patches on $env:COMPUTERNAME"
-
         $PatchList = Get-CimInstance -ClassName "Win32_QuickFixEngineering" -Namespace "root\cimv2"
 
-        ForEach ($HotFix in $HotFixID)
-        {
+        ForEach ($HotFix in $HotFixID) {
 
             $Patch = $PatchList | Where-Object { $_.HotFixID -like "$HotFix" }
-
-            If (!($Patch))
-            {
+            If (!($Patch)) {
 
                 Write-Output "[!] The Windows Update KB number you defined is not installed on $env:COMPUTERNAME. Below is a table of installed patches: "
                 Remove-Variable -Name "Patch"
@@ -236,31 +209,25 @@ PROCESS
                 $PatchList
 
             }  # End If
-            Else
-            {
+            Else {
 
                 $KBNumber = $Patch.HotfixId.Replace("KB", "") | Out-String
-
-                If ($Restart.IsPresent)
-                {
+                If ($Restart.IsPresent) {
 
                     Write-Output "[*] Restart switch parameter is defined. You will be prompted to restart."
 
                     cmd /c wusa /uninstall /kb:$KBNumber /norestart /log
 
                 }  # End If
-                Else
-                {
+                Else {
 
                     cmd /c wusa /uninstall /kb:$KBNumber /norestart /log
 
                 }  # End Else
 
-                While (@(Get-Process wusa -ErrorAction SilentlyContinue).Count -ne 0)
-                {
+                While (@(Get-Process wusa -ErrorAction SilentlyContinue).Count -ne 0) {
 
                     Start-Sleep -Seconds 10
-
                     Write-Output "[*] Waiting for update removal to finish. Please wait..."
 
                 }  # End While
@@ -274,14 +241,11 @@ PROCESS
     }  # End Else
 
 }  # End PROCESS
-END
-{
+END {
 
-    If (Get-PsSession)
-    {
+    If (Get-PsSession) {
 
         Write-Verbose "[*] Closing connection to remote computers."
-
         Remove-PsSession *
 
     }  # End If
@@ -293,8 +257,8 @@ END
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUySKrmBmyCI0z1PFt5Guh7bXH
-# ddegggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUytP/T8rcN8lQ4LaK5j7nIrPR
+# rACgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -354,11 +318,11 @@ END
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FBTcz2segPP+4KAr8PTREVFwif1CMA0GCSqGSIb3DQEBAQUABIIBAMNLgi2+7Gv1
-# DgOlqwn+sYd1p6AnSEMSElS2Cu/AZl4r901rH4Hdl735PouLorJjncO27TdCsv35
-# XYtC2pzZsIYTUsfb2GXs2Zpwj0hfnmFmb5Oa157xu2A0ofNV8FmVCo78CWyZCkAE
-# 9x6XvqEhrVfTkijC6Ft4+Y/qCCFKv+UQ9o+MDiJgenSdUAQCJZmI6XYNv2bgOHfv
-# enBsBhtrL/PdEDs+hOQdWXO9sUdngd8nfHrDCtSDaF6OmIOu8ertmp9K0Bt+1dn2
-# /nyyBYsSJ75XbZU4rxBXhwo06finlSgFl5x6Q8s5OLHkxzOt1NopGxxNrecBWU2y
-# HJY0XN6eEZM=
+# FOKZ8j1T0R96/TsGIz/Y9E0txvZMMA0GCSqGSIb3DQEBAQUABIIBAJP59OLOGkzj
+# b81+oRbCqX1TT2rxj9s2KuevpHstjcz+IjsqzrLnwBbqLOUULvf7168Ak7Rqqnop
+# YlBvopsJ0+k13j0uEDsWHkW/x8/cfL/cJQV+k/Agwpv+0wUHHkRo8NxObfoiK7PT
+# obGeQpFZ85kMbupk9Pxs9EWlEYGWgmHwyiCgB269j9hfPJQ+dAASvT/fJrhxu3AF
+# 7Cmg0GqECo1S4hm+If9yAvZ0to2LfeM0tGnZIkokQHq7YuxymL53+/WhL9TFR1qR
+# Aa0/q7VRbNrvgPH+ZXc7U6ga2XJiKev1qysAVpHtxx364wO0lRaJ4pV0fy6RQfjx
+# Sw1TRYwEi1A=
 # SIG # End signature block

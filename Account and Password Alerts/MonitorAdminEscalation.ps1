@@ -32,22 +32,19 @@ $XMLProcInfo = "<QueryList>
 </QueryList>"
 
 
-If (Get-WinEvent -FilterXml $XMLConsent | Select-Object -Property * -First 1)
-{
+If (Get-WinEvent -FilterXml $XMLConsent | Select-Object -Property * -First 1) {
 
     Write-Verbose "Admin credentials have been used to escalate privileges"
 
     Write-Verbose "Verifying password was entered correctly"
-    If (Get-WinEvent -FilterXML $XMLAuthAsUser | Select-Object -Property * -First 1)
-    {
+    If (Get-WinEvent -FilterXML $XMLAuthAsUser | Select-Object -Property * -First 1) {
 
         Write-Verbose "Administrator credentials were entered successfully"
 
         Write-Verbose "Correlating Process with successful logon"
         $ProcessInfo = Get-WinEvent -FilterXml $XMLProcInfo | Select-Object -Property * -First 1
 
-        If ($ProcessInfo)
-        {
+        If ($ProcessInfo) {
 
             $Results = $ProcessInfo | ForEach-Object {
 
@@ -64,8 +61,7 @@ If (Get-WinEvent -FilterXml $XMLConsent | Select-Object -Property * -First 1)
 
             }  # End ForEach-Object
 
-            If ($Results)
-            {
+            If ($Results) {
 
                 $Admin = $Results.AdminUser
                 $Css = @"

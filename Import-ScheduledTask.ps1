@@ -48,8 +48,9 @@ Microsoft.Management.Infrastructure.CimInstance#MSFT_ScheduledTask
 
 .LINK
 https://osbornepro.com
+https://btpssecpack.osbornepro.com
 https://writeups.osbornepro.com
-https://github.com/tobor88
+https://github.com/OsbornePro
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.hackthebox.eu/profile/52286
@@ -97,21 +98,20 @@ Function Import-ScheduledTask {
 
     $Xml = Get-Content -Path $Path | Out-String
 
-    ForEach ($C in $ComputerName)
-    {
+    ForEach ($C in $ComputerName) {
 
         Write-Verbose "Creating task $TaskName on $C in the task location $TaskPath"
-
         Register-ScheduledTask -Xml $Xml -TaskName $TaskName -TaskPath $TaskPath -User $User –Force
 
     }  # End ForEach
 
 }  # End Function Import-ScheduledTask
+
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUklI9RHFgscub3dTwkj5iRaGV
-# uFmgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU3Hjtq7DlXh2zTFUFH7TQ6muf
+# qOqgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -171,11 +171,11 @@ Function Import-ScheduledTask {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FBtvD4EeQbFa/3CFr2VBFMKS51l5MA0GCSqGSIb3DQEBAQUABIIBAKTES27fQUgW
-# mjAqyk36+nQNwKn6LMSrOBzlMddylNN276QFCrWmnreMyz9vl9hvjconCDqY3/x2
-# uQEhi3eWEFBJQbNDfQF7kvLSn8tehzXHxzbrbfwNRRqhjzmD8Y3RNnwPKSmrOWXz
-# X5MKJm+JiygwKoDq6dNRKavJYK74Tf1kf7HViMxsDCmqVdU4ANDJTuyif48MXHKE
-# svcFsAzxY08NYGPch52CS+MjUvQgXhdmD3S1bRQE9bOM5wJuTVft31tY565ms+eZ
-# CJGRgR9dEzNQlcJ2BIIQGKhugxmIgzmxiqa6aRzTSbfUJwSo1Y8plSFXBfoDvreR
-# m4SNruMOMac=
+# FAcWAjp7C2hhAkCfuK/fJTX/5dfUMA0GCSqGSIb3DQEBAQUABIIBAKxCAQNaO0HT
+# drdGKcbGVmAVFjkkxchNzJH/P/TFIVgk1oBBi2kvIYyXKXZFD1zVCjQjTA1z9HkI
+# 5XfvpgUsY2vPC5Pswa3qSG4f+2ohCB7AlHERfSKMZSrKkOfSWEKIf/9jFi/LZeft
+# IKv1Dk184DonRWPWeqSnsMeQPI8d1tBBKATHcCVErdyyjcpk9s8fQdDbzWZzwuXB
+# jT7bmVUFfUIGyn4yUtmcmzlsUuw6AMju28WEXHkNgY/l7TQUmffaR872NTIg6+ri
+# IV0mut381uZ8DEGABc1lRWRCsHSB4PlgcmmaAstqU5Thj0BzT8k4A+fjMmcRmMTB
+# NzPrHkzJPJE=
 # SIG # End signature block

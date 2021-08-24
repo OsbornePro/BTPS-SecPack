@@ -49,8 +49,9 @@ None
 
 .LINK
 https://osbornepro.com
+https://btpssecpack.osbornepro.com
 https://writeups.osbornepro.com
-https://github.com/tobor88
+https://github.com/OsbornePro
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
@@ -87,16 +88,14 @@ Function Set-SecureFilePermissions {
             [String[]]$ComputerName = $env:COMPUTERNAME)  # End param
 
 
-    If ($ComputerName -eq $env:COMPUTERNAME)
-    {
+    If ($ComputerName -eq $env:COMPUTERNAME) {
 
         Write-Verbose "Modifying access rule proteciton"
 
         $Acl = Get-Acl -Path "$Path"
         $Acl.SetAccessRuleProtection($True, $False)
 
-        ForEach ($U in $Username)
-        {
+        ForEach ($U in $Username) {
 
             Write-Verbose "Adding $U permissions for $Path"
 
@@ -113,11 +112,9 @@ Function Set-SecureFilePermissions {
         $Acl | Set-Acl -Path "$Path"
 
     }  # End If
-    Else
-    {
+    Else {
 
-        ForEach ($C in $ComputerName)
-        {
+        ForEach ($C in $ComputerName) {
 
             Invoke-Command -ArgumentList $Username,$Path,$Owner -HideComputerName "$C.$env:USERDNSDOMAIN" -UseSSL -Port 5986 -ScriptBlock {
 
@@ -130,8 +127,7 @@ Function Set-SecureFilePermissions {
                 $Acl = Get-Acl -Path "$Path"
                 $Acl.SetAccessRuleProtection($True, $False)
 
-                ForEach ($U in $Username)
-                {
+                ForEach ($U in $Username) {
 
                     Write-Verbose "Adding $U permissions for $Path"
 
@@ -158,8 +154,8 @@ Function Set-SecureFilePermissions {
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUC/3Rp+k1z8avMmVAQ7cYnZz5
-# XRKgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUuz2p9FyYPFUUbSR0hAYjdu9b
+# HRGgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -219,11 +215,11 @@ Function Set-SecureFilePermissions {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FOshoOpt8YKIa69Jt1zYANEQfLOnMA0GCSqGSIb3DQEBAQUABIIBAHk+N73n1CEN
-# DugycyGlxtyeUVaSP2EulPl2xsS/WhmCehWGgfQg+2BbRIgCChR0/IS2jvRWt9yA
-# Ho8HMINFsGgEnqHpoSqJ1PbzrVYWS0CXRPi/6O1ZYmUq/oKCcM9mJTJrL8ZGkAFm
-# cdr6P7AxEA19jAZbPemARC7r32Na+QQ2UTIjkkeogEE8EdRraYyk/681lCgknArB
-# FdjsINBx3nRyQUD4qj3eOu+FDMEYD16xVnhcl6KcPFtYul4Sat7AF3uX6rcKMC2f
-# TV8DKt7U9vglatN/hEgIZEQ4Vz+MWBaykDVasrJ0H3SIiomr2yMi+vzPO3Bwt5pH
-# UkFV7ergk1o=
+# FOEc2jiA6NlLOMaZwok7pNkTxoISMA0GCSqGSIb3DQEBAQUABIIBAGGGRiuPLkQa
+# XuL3nBRBZJglrT7O3qlp+XcvylBaeHfQbPXpViKg5P4+V/jJoXrB8TNsDph8h5rm
+# uAOrIghXdW7+ZLFooPnX/klxorXYwpO2d7NVpgnc8N/rznVsJHySdJhzi19LdVb3
+# 2ZgKrZAJc7HyInvqE8LxiWmuUBEps0r88y+XfqqgN6vDoke+nF3tyarDLpaWK0oe
+# HsL1fgbq0tfnEPIIOxRj3sVOAjbBjCzD+LdKXaakTdDYH43kHFK5SPJ2hulL2qz+
+# HVTgCdW7WaJmwrO/iW5usTOtAbWavHgOCwjR57sAYXFny7Wymg0kKEU2iWs9FZCV
+# cig/1rPrKq4=
 # SIG # End signature block

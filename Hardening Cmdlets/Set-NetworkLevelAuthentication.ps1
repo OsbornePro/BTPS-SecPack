@@ -36,8 +36,9 @@ Contact: rosborne@osbornepro.com
 
 .LINK
 https://osbornepro.com
+https://btpssecpack.osbornepro.com
 https://writeups.osbornepro.com
-https://github.com/tobor88
+https://github.com/OsbornePro
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
@@ -71,41 +72,32 @@ Function Set-NetworkLevelAuthentication {
                 )]  # End Parameter
             [Switch][Bool]$Undo)  # End param
 
-BEGIN
-{
+BEGIN {
 
     $Obj = @()
-
-    If ($PSBoundParameters.Keys -eq 'Undo')
-    {
+    If ($PSBoundParameters.Keys -eq 'Undo') {
 
         $Value = 0
-
         $Setting = "Disabled"
 
     }  # End If
-    Else
-    {
+    Else {
 
         $Value = 1
-
         $Setting = "Enabled"
 
-    }
+    }  # End Else
 
-    If (!($ComputerName))
-    {
+    If (!($ComputerName)) {
 
         $ComputerName = $env:COMPUTERNAME
 
     }  # End If
 
 }  # End BEGIN
-PROCESS
-{
+PROCESS {
 
-    ForEach ($Device in $ComputerName)
-    {
+    ForEach ($Device in $ComputerName) {
 
         Write-Verbose "[*] $Setting Network Level Authentication on $Device"
         ((Get-WmiObject -Class "Win32_TSGeneralSetting" -Namespace root\cimv2\terminalservices -ComputerName $Device -Filter "TerminalName='RDP-tcp'").SetUserAuthenticationRequired($Value)) | Out-Null
@@ -119,8 +111,7 @@ PROCESS
     }  # End ForEach
 
 }  # End PROCESS
-END
-{
+END {
 
     Write-Output $Obj
 
@@ -131,8 +122,8 @@ END
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUT2LLhOKIwMDhOPX75QhMBNo/
-# Asygggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUeD5yTBzXHYaggklN/BvbqMuk
+# 16Kgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -192,11 +183,11 @@ END
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FOPjuBNqYx5SY9UBDOli5VewBXcuMA0GCSqGSIb3DQEBAQUABIIBAMTltMTK/jA7
-# 8H/Vtj+4kfbxABejKMgpDD7cWH8v0ddzrGavLFomDdjesOZbM945Tzp8t+IjrMbd
-# lq8m5i0JRZF17nHNSSCloc/LLiSypsHddZ1cYG0tCglZ0naxPhlaDyxmm4/Jcsm9
-# 4kbCEGwJb4Lo5OYmDD8L95cs2LjW9FGaI4n7U86SE0vkhT/bCMy4Jfj1gOYdo5gM
-# 6N03O+BBhNMLY8TcO5ugtObePygNPJ5o1tO3HidFTVrnBNi/ixj7unesA2xj0Oph
-# VbeCIQlCDuL7y3B8h3d6nQb8OeqWjkt2iri1O5hF03h5tAdvA81RvriifnuGz5Rg
-# 1esgyHqHItk=
+# FFbwdSxzspM1e35nEaX7eeSeMJRRMA0GCSqGSIb3DQEBAQUABIIBAKq2fuCzE4mx
+# kggD81Q6WIPLjBWSXn+lcR7WYU4B+O82RkVkx7nx8xh7i5oTvjK9gmLILVRUt4LD
+# Fzmtu7c3s99m3wibS7+8Z2Z8Y46UsF/uN9zGz6RyFGUOqrkelz9CrIP/EWmYjIXk
+# rXSOBaBpg28q4PN1pOI17ah6t8vuMCpIC/bCpWQ0W8bchEGkJzm/ZWUGxf2Ho7kP
+# 1ZOldTyCHJnjf2d8VPvWHBgLm+1QH5wfYE+QdS+t2w008A6KmcTXwmZ3+bLP8hfM
+# qCbMsl8n5D+GrGLbec1IbRpFZMcP4rKLiI16ySTstpdT6QNOV/QJMOY27bwZ/wIp
+# g/PeGk98P/o=
 # SIG # End signature block

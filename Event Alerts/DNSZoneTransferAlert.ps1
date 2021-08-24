@@ -1,7 +1,5 @@
 $Event = Get-WinEvent -FilterHashtable @{LogName='DNS Server';ID='6001'} -MaxEvents 1
-
-If ($Event)
-{
+If ($Event) {
 
     $Results = $Event | ForEach-Object {
 
@@ -17,8 +15,7 @@ If ($Event)
 
     }  # End ForEach-Object
 
-    If ($Results)
-    {
+    If ($Results) {
 
     $Css = @"
 <style>

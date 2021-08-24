@@ -67,8 +67,9 @@ None
 
 .LINK
 https://osbornepro.com
+https://btpssecpack.osbornepro.com
 https://writeups.osbornepro.com
-https://github.com/tobor88
+https://github.com/OsbornePro
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
@@ -179,8 +180,7 @@ Function Disable-WeakSSL {
     New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers\NULL' -Force | Out-Null
     New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers\NULL' -Name 'Enabled' -Value '0' -PropertyType 'DWord' -Force | Out-Null
 
-    If (($TripleDES.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent))
-    {
+    If (($TripleDES.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent)) {
 
         Write-Verbose "Disabling DES Ciphers"
 
@@ -192,8 +192,7 @@ Function Disable-WeakSSL {
     }  # End If
 
 
-    If (($RC4.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent))
-    {
+    If (($RC4.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent)) {
 
         Write-Verbose "Disabling RC4 ciphers"
 
@@ -208,8 +207,7 @@ Function Disable-WeakSSL {
 
     }  # End If
 
-    If (($AES128.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent))
-    {
+    If (($AES128.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent)) {
 
         Write-Verbose "Disabling AES 128/128"
 
@@ -223,8 +221,7 @@ Function Disable-WeakSSL {
     (Get-Item -Path 'HKLM:\').OpenSubKey('SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers', $true).CreateSubKey('AES 256/256')
     New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers\AES 256/256' -Name 'Enabled' -Value '1' -PropertyType 'DWord' -Force | Out-Null
 
-    If (($SSLv2.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent))
-    {
+    If (($SSLv2.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent)) {
 
         Write-Verbose "Disabling SSL 2.0"
 
@@ -237,8 +234,7 @@ Function Disable-WeakSSL {
 
     }  # End If
 
-    If (($SSLv3.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent))
-    {
+    If (($SSLv3.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent)) {
         Write-Verbose "Disabling SSL 3.0"
 
         New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\SSL 3.0\Server' -Force | Out-Null
@@ -250,8 +246,7 @@ Function Disable-WeakSSL {
 
     }  # End If
 
-    If (($TLSv1.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent))
-    {
+    If (($TLSv1.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent)) {
 
         Write-Verbose "Disabling TLS v1.0"
 
@@ -264,8 +259,7 @@ Function Disable-WeakSSL {
 
     } # End If
 
-    If (($TLSv11.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent))
-    {
+    If (($TLSv11.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent)) {
 
         Write-Verbose "Disabling TLS v1.1"
 
@@ -289,8 +283,7 @@ Function Disable-WeakSSL {
     New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.2\Client' -Name 'DisabledByDefault' -Value '0' -PropertyType 'DWord' -Force | Out-Null
 
 
-    If ($EnableTlsv13.IsPresent)
-    {
+    If ($EnableTlsv13.IsPresent) {
 
         Write-Verbose "Enabling TLS 1.3"
         $Q = Read-Host -Prompt "If you enable TLSv1.3 on a server and the certificate or server is not configured for using that protocol, you will be unable to reach the TLS protected resource. `nAre you sure you want to continue [y/N]"
@@ -310,8 +303,7 @@ Function Disable-WeakSSL {
     }  # End If
 
 
-    If ($DisableTlsv13.IsPresent)
-    {
+    If ($DisableTlsv13.IsPresent) {
 
         Write-Verbose "Disabling TLS 1.3"
 
@@ -329,8 +321,8 @@ Function Disable-WeakSSL {
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUR+xEsrVTPpTLekzAiYdee0kw
-# llegggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQULEXxVhsiNP+8+pY0axlPstOk
+# 8tagggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -390,11 +382,11 @@ Function Disable-WeakSSL {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FKpRP1aiqB/9llBv5/pAA6svDGtUMA0GCSqGSIb3DQEBAQUABIIBAJA68n3vsW7r
-# SFjNqbXfYKEa19ixpNiZMLycvOttxBZPIzR2I4TyB5CNGv01oPGH8q3RLV2YBliQ
-# tU3R8cpTPSzqBR8mcnO8wAzNdWPwyfUKYL1IaVQLQO1FWeHy53pTRRbahFsNEGWk
-# X0c1flD+CU3t2SD6i7RN+XXKoaPBik0MR+adxdL8HziWlSyOY3qkciU/pxSbe7Ax
-# 3lh5nqR26iNQQt/cZfVGrK3K5rzXxUuvKBWZie70NLpsmqTubwsvT56N6eED0Hgq
-# 9CRxv9DyAln76VVXJfAE2l9PLyYKlKfZCC5coyNhkbl7h5NQ919RUjnQNACfXRvG
-# f2Dzdw0mMIc=
+# FF4mQ4WV4AJtOva3dwszLnddFBCAMA0GCSqGSIb3DQEBAQUABIIBALU9lkzGOLcW
+# 88rowzVEbpERmG1CL5meihRDgY/owLbL3jC6OaMd8nV35FOP81eU8c1/OCLxYPoS
+# emefUpVhF817mHkRduS3Ollm4eWLVwc9bHV5vy83nyHf70X/2dTLb+av7Cqv9tE2
+# V5AkoJ/B48nAUXXnbwEOqdTiNiVYJpOJ9MC0sqLIaW2bJeF0yWyxgxhzk/1ZyB2k
+# J+MD3yOqkfGRI39vsoeJ9cEfPBgSe/5krhzS1HOWG5/I0nAYhhfN3EwYIaff6y1U
+# HDRbxTlC5qdTwB9ufmOKbTdO3U3Fp7O7R5XQBfNPjEV/RktDBIQ0sXdNo/I/Geqq
+# uvarioTto+o=
 # SIG # End signature block

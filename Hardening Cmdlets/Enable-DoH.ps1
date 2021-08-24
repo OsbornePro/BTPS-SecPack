@@ -29,8 +29,9 @@ Contact: rosborne@osbornepro.com
 .LINK
 https://osbornepro.com/f/dns-protections-and-applications
 https://osbornepro.com
+https://btpssecpack.osbornepro.com
 https://writeups.osbornepro.com
-https://github.com/tobor88
+https://github.com/OsbornePro
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
@@ -58,24 +59,21 @@ Function Enable-DoH {
             [Switch][Bool]$Undo
         )  # End param
 
-    If (((Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters\").EnableAutoDOH) -eq 2)
-    {
+    If (((Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters\").EnableAutoDOH) -eq 2) {
 
         Write-Output "[*] DNS over HTTPS is already configured on $env:COMPUTERNAME"
 
     }  # End If
 
 
-    If ($PSBoundParameters.Keys -eq 'Undo')
-    {
+    If ($PSBoundParameters.Keys -eq 'Undo') {
 
 
         Write-Verbose "[*] Removing registry item that enables the use of DNS over HTTPS for all Windows Applications"
         Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters" -Name EnableAutoDOH -Force
 
     }  #  End If
-    Else
-    {
+    Else {
 
         Write-Verbose "[*] Enabling DNS over HTTPS for all Windows applications"
         New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters" -Name EnableAutoDOH -PropertyType DWORD -Value 2 -Force
@@ -83,8 +81,7 @@ Function Enable-DoH {
     }  # End Else
 
 
-    If ($PSBoundParameters.Keys -eq 'Restart')
-    {
+    If ($PSBoundParameters.Keys -eq 'Restart') {
 
         Restart-Computer -Confirm
 
@@ -95,8 +92,8 @@ Function Enable-DoH {
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUqeBhmwAZ9aQqT0/3Tj42k7Vt
-# lFugggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUjC8h0kBmWBwCEO01A3YBw1xT
+# ilOgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -156,11 +153,11 @@ Function Enable-DoH {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FDbAjZRa0JOu0FnBWX/PoMh1lgfCMA0GCSqGSIb3DQEBAQUABIIBAH6CUXoqdUoN
-# hXKGnu9sLqdjp6KXys3mZpThuKhm4ciX+MEprQd2LexiVBNl1gkqrige2dFWw/AL
-# b74mdOmHB0XxmTqaNfo9Nbkp9rCquhmXPh50ljUsPrl1Nejb1LbTNQyYav6YEvy9
-# mK57yW4y+Ur9p2S9SFtf3jh9rBMfjj1tTDQKmLmNPjbmhczH7mOzlRgxS47RehJ8
-# hkjBnuFmiuU6HI7Dhvg/2qQ+KpTd1Ou4eN6Tw/9fvgFUNPmS9j0yE3g7H8Y86x33
-# vO0hX+sSILjNzRigMeC5NaOnLEVDH74h4gaIvmZJV8lw1qDMrtr4sfKuZLqzQ75e
-# v06kBN1UtxI=
+# FFbiMS4FKlXZ8IFTLs7NAjUHviHDMA0GCSqGSIb3DQEBAQUABIIBAL1ymaYmDBab
+# UWhuRa1P1J7GfkQvDhbo3W+wBXdTW6pU4QBYdCFbwPeoTp4s53HYDJwEGlPH9Kup
+# BVZAGlelJUXU6oJvKBp5pyyPdcm1cdigWwOlFCeBeJ0aDhQDvCLvFkk34nSAzRnr
+# QjW7nTqAOVYqQUiBfsfBizt4HeTihRqc71Ukwso8Ld6ed5+g0lwcrSN1fjW6Fjry
+# FyL7vzS3tZ1RBUMOBvChgu3XXl0MXHAb+bXKCD64kaai08atZC5ISwxxFq5fl0K8
+# kXutze/ql1NS7x0c7VKzSrzQYZIv+12U/t4+94ZFAGqxBBRrqX9VT7skQO9WisIC
+# lOLR566OisE=
 # SIG # End signature block

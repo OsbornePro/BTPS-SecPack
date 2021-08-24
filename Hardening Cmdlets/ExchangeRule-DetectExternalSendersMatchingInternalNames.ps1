@@ -12,16 +12,14 @@ $Rule = Get-TransportRule | Where-Object {$_.Identity -Contains $RuleName}
 
 $DisplayNames = Get-User -RecipientTypeDetails UserMailbox -ResultSize Unlimited | Where-Object {$_.UseraccountControl -notlike “*accountdisabled*”} | Select-Object -ExpandProperty Name
 
-If (!($Rule))
-{
+If (!($Rule)) {
 
     Write-Output "[*] Rule not found, creating rule"
 
     New-TransportRule -Name $RuleName -Priority 0 -FromScope "NotInOrganization" -ApplyHtmlDisclaimerLocation "Prepend" -HeaderMatchesMessageHeader From -HeaderMatchesPatterns $DisplayNames -ApplyHtmlDisclaimerText $RuleHtml
 
 } # End If
-Else
-{
+Else {
 
     Write-Output "[*] Rule found, updating rule"
 
@@ -34,8 +32,8 @@ Remove-PSSession -Session $Session
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUC5HL8QHFeKyHmKTiFwCzGkM5
-# uBOgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUocxhTdsLPr/RYFduRSYWGP8j
+# MLWgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -95,11 +93,11 @@ Remove-PSSession -Session $Session
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FHothSI6q5AVYXcKr7Drq0AK04MkMA0GCSqGSIb3DQEBAQUABIIBAD32G8R3NNrD
-# hs6xQSLjqlGfbU5v21PE+exDBANma7B542ZbbsozEuGaMsIFw7PHvaKkSB4T0cag
-# dWJxnAXIGbncBRrcjf7a+LzidhMmKy/9LExi9yJNBG1dy0gTuJR8IIo+7J4jcSyy
-# +qNoTYxfBLCtqyY0eN746A34NwdtFbEl0fS11tE3DPu4aT9dqztPqRSjlWZSq5Xs
-# GcNM1D32b/GF6Q9MH7lPkkDzf+ek/fdZghKvs69hd1JEpy9bziAXZaeETV0HgSl2
-# nG7+G+bkibu0+BD1MhhI17bpt3MueY2yIQgHtgtVqRG28jL/So0ckf+TdfJzbYII
-# tA4r6lUUeLg=
+# FMfayeeiOOTTN80mW/FmCJ3r26W1MA0GCSqGSIb3DQEBAQUABIIBACzhnoGJtxEY
+# efmpFRUX6DHh634ixly8h1Hmp6AAUKD94K7dW1DT21TTzYBvZdtuPaoJRKfqGqXR
+# gp/MH/p7qmz0gDD48Ct9aLN2fy2d5Nr0izVT8g7Q7UFdSWEIw2n++e79lDdOfL2w
+# +aExixzAPWHqXWwBUnd2omF8cWbHfT7pmZPLtsqAVsK9XDwZYhHGrKAGR+dEv9yz
+# KMa8mX88H6yxntS2Il8kWIrh1xZXiMBEe8WQbK2giO7+S+FPQlUVwzLBN/05TV8j
+# J4/X38zhNXM7cqQ1a4n7KFc1J1yL31mAkCeXo/IGSH95Z6J9F3mgElyCA6UdI8LT
+# 2rTHfog/Vso=
 # SIG # End signature block

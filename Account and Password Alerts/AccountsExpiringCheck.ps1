@@ -4,8 +4,7 @@ $Accounts = Search-ADAccount -AccountExpiring -TimeSpan "10.00:00:00" | Select-O
                                                                                                    E = { (Get-Aduser(Get-AdUser $_ -Property Manager).Manager).Name }
                                                                                                    } # End Properties
 
-If ($Accounts)
-{
+If ($Accounts) {
 
     $Css = @"
 <style>

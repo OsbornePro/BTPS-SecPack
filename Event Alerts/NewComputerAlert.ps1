@@ -1,6 +1,5 @@
-$Event = Get-WinEvent -FilterHashtable @{Logname='Security';Id=4741;StartTime=(Get-Date).AddHours("-1")} | Select-Object -First 1
-
-$Results = $Event | ForEach-Object {
+$Events = Get-WinEvent -FilterHashtable @{Logname='Security';Id=4741;StartTime=(Get-Date).AddHours("-1")} | Select-Object -First 1
+$Results = $Events | ForEach-Object {
 
             $Obj = New-Object -TypeName PSObject | Select-Object -Property EventID, UserName, DomainName, MachineName, Date, Message
             $Obj.EventID = $_.Id
@@ -14,8 +13,7 @@ $Results = $Event | ForEach-Object {
 
 }  # End ForEach-Object
 
-If ($Results)
-{
+If ($Results) {
 
     $Css = @"
 <style>

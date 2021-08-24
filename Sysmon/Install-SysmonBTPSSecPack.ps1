@@ -2,8 +2,7 @@
 $DomainObj = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
 $PrimaryDC = ($DomainObj.PdcRoleOwner).Name
 $Domain = $DomainObj.Forest.Name
-If ($PrimaryDC -ne "$env:COMPUTERNAME.$Domain")
-{
+If ($PrimaryDC -ne "$env:COMPUTERNAME.$Domain") {
 
     Throw "[x] This script is required to run on $PrimaryDC, your primary domain controller in order to push out sysmon through Group Polciy"
 
@@ -20,8 +19,7 @@ Write-Output "[*] Downloading the Sysinternals Suite tool Sysmon from Microsoft 
 
 Write-Output "[*] Unzipping the download Sysmon.zip file to your C:\Sysmon"
 Expand-Archive -Path "$env:USERPROFILE\Downloads\Sysmon.zip" -Destination "C:\Sysmon\"
-If (!(Test-Path -Path "C:\Sysmon\Sysmon.exe"))
-{
+If (!(Test-Path -Path "C:\Sysmon\Sysmon.exe")) {
 
     Throw "Failed to extract the sysmon.zip file to C:\Sysmon. Ensure you have the appropriate permissions to download to C:\"
 
@@ -38,8 +36,7 @@ Write-Output "[*] Modifying sysmon.bat to contain appropriate values for your en
 (Get-Content -Path "C:\Sysmon\sysmon.bat") -Replace "DomainControllerHostname", "$PrimaryDC" -Replace "NETLOGON", "Sysmon" | Set-Content -Path "C:\Sysmon\sysmon.bat"
 
 $Answer1 = Read-Host -Prompt "Would you like to add the Malicious IP checker to devices in your environment as well? This provides extra checks against domains and IP addresses collected by Sysmon logged network connections. [y/N]"
-If ($Answer1 -like "y*")
-{
+If ($Answer1 -like "y*") {
 
     Write-Output "[*] Downloading the Task Template for Malicious IP checker and the Script it executes"
     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/MaliciousIPChecker.xml" -OutFile "C:\Sysmon\MaliciousIPChecker.xml"
@@ -48,8 +45,7 @@ If ($Answer1 -like "y*")
 }  # End If
 
 $Answer2 = Read-Host -Prompt "[*] Would you like to download the Process Hash Validator as well? This script and task is used to perform extra analysis on process logs collected by Sysmon. [y/N]"
-If ($Answer2 -like "y*")
-{
+If ($Answer2 -like "y*") {
 
     Write-Output "[*] Downloading Process Hash Validator task and the script that gets executed"
     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/HashValidator.xml" -OutFile "C:\Sysmon\HashValidator.xml"
@@ -57,8 +53,7 @@ If ($Answer2 -like "y*")
     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/Whitelist.csv" -OutFile "C:\Sysmon\Whitelist.csv"
 
     $VTAnswer = Read-Host -Prompt "Do you have a Virus Total API Key? [y/N]"
-    If ($VTAnswer -notlike "y*")
-    {
+    If ($VTAnswer -notlike "y*") {
 
         Start-Process -FilePath "https://www.virustotal.com/gui/join-us"
         Pause
@@ -97,8 +92,8 @@ Write-Host "For images and more info on how to configure Group Policy for Malici
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUgZ3pi4OSZK1rogxERbYo5hbo
-# 9VKgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUJnMM/drfe9VIPXm7kyhiWggF
+# B5Ogggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -158,11 +153,11 @@ Write-Host "For images and more info on how to configure Group Policy for Malici
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FKa1KEDbMHFdcizUktfLYhwmEaxXMA0GCSqGSIb3DQEBAQUABIIBAASBl/m93QNL
-# wJoHhPKJ+det9LB4Tx82+0AjwrpaETLKio3jb5hdabcDZxj3kCi9RJQq4UNgyIy8
-# RwUMPTiX8nAmfzHA+Y+SRnlKWZAlLdDIAHXcTlbhw5fWUBZP+YPm97LD3DYZPPoM
-# uzbFKritGAAwz052F/pgrsTBI4VS8Kj6WhDbn100pcZolKxh8573OxzNb2Vh7PRK
-# N4ecDg5MfglkLoseOTvNgg4mwh2Sp8+rsFjhRrXH85UGsOawxu1Y4ztMYlKuR5Dd
-# 3otAanECcHDF3LL7pu4xQLpWiZltQDLRH4Rh3+3xAMRGMg1B9uE5IZYfHJdtFg7G
-# T9lqAEHxk8M=
+# FKKWwA2mXzlJnNwCk1H8JQLFi05SMA0GCSqGSIb3DQEBAQUABIIBAKUyLxsRwI3D
+# tzKPQAhdbYbaeyDAHMrtLwVdNWSzAVZ7udiSnCZMmu2ahDzUpmjl2064IqS8g8++
+# WtyihF4MHIXsEhkNNIcbpmqMRLZ+r0j14LHmjLw+Dc5vnR/ZECeuO4q1Ci1fEer/
+# iL3VXRC4sA0xsVTZHQfq18DSQGsCL0hLOlCG0FImx126DKjc3Tw729IGqZHvAKdu
+# ZNqx7UPuMDsuA6aA+bwJ57aqL7HKwtQed81h5LojUcqSfuK7YXrq4Upp+nrt7DrD
+# LSpEyG/ARKm32l29n9uCrM2Qp6KtG582ZQJ63+/MuzlS9bre09QwwAnpSuoGYEWG
+# xzPTlllYvS0=
 # SIG # End signature block

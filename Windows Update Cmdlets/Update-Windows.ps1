@@ -18,13 +18,14 @@ Contact: rosborne@osbornepro.com
 
 
 .LINK
-https://roberthsoborne.com
 https://osbornepro.com
-https://github.com/tobor88
+https://btpssecpack.osbornepro.com
+https://writeups.osbornepro.com
+https://github.com/OsbornePro
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
-https://www.youracclaim.com/users/roberthosborne/badges
+https://www.credly.com/users/roberthosborne/badges
 https://www.hackthebox.eu/profile/52286
 
 .INPUTS
@@ -45,37 +46,29 @@ Function Update-Windows {
 	$UpdateSearch = New-Object -ComObject Microsoft.Update.Searcher
 	$Session = New-Object -ComObject Microsoft.Update.Session
 
-	If ($Error)
-	{
+	If ($Error)	{
 
 		$Error.Clear()
 
 	} # End If
 
 	Write-Verbose "`n`tInitialising and Checking for Applicable Updates. Please wait ..."
-
 	$Result = $UpdateSearch.Search("IsInstalled=0 and Type='Software' and IsHidden=0")
-
-	If ($Result.Updates.Count -EQ 0)
-	{
+	If ($Result.Updates.Count -EQ 0) {
 
 		Write-Verbose "`t$env:COMPUTERNAME is currently up to date."
 
-	} # End if
-	Else
-	{
+	} # End If
+	Else {
 
 		$ReportFile = "C:\Windows\Temp\$env:COMPUTERNAME\$env:COMPUTERNAME`_Report_$FormattedDate.txt"
-
-		If (Test-Path -Path $ReportFile)
-		{
+		If (Test-Path -Path $ReportFile) {
 
 			Write-Verbose "Update attempt was run already today. Previous attempt saved as a .txt.old file. New File is located at the following location. `nLOCATION:$ReportFile"
 			Rename-Item -Path $ReportFile -NewName ("$ReportFile.old") -Force
 
 		} # End If
-		Elseif (!(Test-Path -Path "C:\Windows\Temp\$env:COMPUTERNAME"))
-		{
+		Elseif (!(Test-Path -Path "C:\Windows\Temp\$env:COMPUTERNAME")) {
 
 			Write-Verbose "Logging folder previously did not exist and is being created at the below location. `nLOCATION: C:\Windows\Temp\$env:COMPUTERNAME"
 			New-Item -Path "C:\Windows\Temp\$env:COMPUTERNAME" -ItemType Directory -Force | Out-Null
@@ -89,8 +82,7 @@ Function Update-Windows {
 
 		Write-Verbose "`t Preparing List of Applicable Updates For $env:COMPUTERNAME..." 
 
-		For ($Counter = 0; $Counter -lt $Result.Updates.Count; $Counter++)
-		{
+		For ($Counter = 0; $Counter -lt $Result.Updates.Count; $Counter++) {
 
 			$DisplayCount = $Counter + 1
 			$Update = $Result.Updates.Item($Counter)
@@ -117,8 +109,7 @@ Function Update-Windows {
 		$Downloader = $Session.CreateUpdateDownloader()
 		$UpdatesList = $Result.Updates
 
-		For ($Counter = 0; $Counter -LT $Result.Updates.Count; $Counter++)
-		{
+		For ($Counter = 0; $Counter -LT $Result.Updates.Count; $Counter++) {
 
 			$UpdateCollection.Add($UpdatesList.Item($Counter)) | Out-Null
 			$ShowThis = $UpdatesList.Item($Counter).Title
@@ -129,36 +120,27 @@ Function Update-Windows {
 			$Downloader.Updates = $UpdateCollection
 			$Track = $Downloader.Download()
 
-			If (($Track.HResult -EQ 0) -AND ($Track.ResultCode -EQ 2))
-			{
+			If (($Track.HResult -EQ 0) -AND ($Track.ResultCode -EQ 2)) {
 
 				Add-Content -Path $ReportFile -Value "`tDownload Status: SUCCESS"
-
-				If ($ShowThis -like ((Get-Variable -Name UpdateResultInfo($Counter)).Title))
-				{
+				If ($ShowThis -like ((Get-Variable -Name UpdateResultInfo($Counter)).Title)) {
 
 					Add-Member -InputObject (Get-Variable -Name UpdateResultInfo($Counter)) -NotePropertyName "DownloadStatus" -NotePropertyValue 'Successfully Downloaded'
 
 				} # End If
 
 			} # End If
-
-			Else
-			{
+			Else {
 
 				$FailError = $Error[0]
-
 				Add-Content -Path $ReportFile -Value "`tDownload Status: FAILED With Error `n`t`t $FailError"
-
-				If ($ShowThis -like ((Get-Variable -Name UpdateResultInfo($Counter)).Title))
-				{
+				If ($ShowThis -like ((Get-Variable -Name UpdateResultInfo($Counter)).Title))  {
 
 					Add-Member -InputObject (Get-Variable -Name UpdateResultInfo($Counter)) -NotePropertyName "DownloadStatus" -NotePropertyValue $FailError
 
 				} # End If
 
 				$Error.Clear()
-
 				Add-content -Path $ReportFile -Value "`r"
 
 			} # End Else
@@ -173,8 +155,7 @@ Function Update-Windows {
 
 		$Installer = New-Object -ComObject Microsoft.Update.Installer
 
-		For ($Counter = 0; $Counter -lt $UpdateCollection.Count; $Counter++)
-		{
+		For ($Counter = 0; $Counter -lt $UpdateCollection.Count; $Counter++) {
 
 			$Track = $Null
 			$DisplayCount = $Counter + 1
@@ -184,32 +165,25 @@ Function Update-Windows {
 
 			$Installer.Updates = $UpdateCollection
 
-			Try
-			{
+			Try {
 
 				$Track = $Installer.Install()
-
 				Add-Content -Path $ReportFile -Value "    - Update Installation Status: SUCCESS`n"
 
-				If ($WriteThis -like ((Get-Variable -Name UpdateResultInfo($Counter)).Title))
-				{
+				If ($WriteThis -like ((Get-Variable -Name UpdateResultInfo($Counter)).Title)) {
 
 					Add-Member -InputObject (Get-Variable -Name UpdateResultInfo($Counter)) -NotePropertyName "InstallStatus" -NotePropertyValue 'Successfully Installed'
 
 				} # End If
 
 			} # End Try
-			Catch
-			{
+			Catch {
 
 				[System.Exception]
-
 				$InstallError = $Error[0]
 
 				Add-Content -Path $ReportFile -Value "    - Update Installation Status: FAILED With Error `n`t`t$InstallError`r"
-
-				If ($WriteThis -like ((Get-Variable -Name UpdateResultInfo($Counter)).Title))
-				{
+				If ($WriteThis -like ((Get-Variable -Name UpdateResultInfo($Counter)).Title)) {
 
 					Add-Member -InputObject (Get-Variable -Name UpdateResultInfo($Counter)) -NotePropertyName "InstallStatus" -NotePropertyValue $InstallError
 
@@ -236,11 +210,12 @@ Function Update-Windows {
     } # End Else
 
 } # End Funtion Update-Windows
+
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUYwcSNyoIdrZCDefy8PRm9fm0
-# mI+gggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUweT1gpPXdRnGffD95oBb+bE/
+# adigggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -300,11 +275,11 @@ Function Update-Windows {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FJ8J0lIjOZGSJ4qKV3FV+FocDwY5MA0GCSqGSIb3DQEBAQUABIIBAFz4yDTmEHff
-# Gu3KGp5TKfW4CLlTxQRx/CIoIPPTesAU/PmQcjb1t5gIWObKVtM+unjVOEzdj6s5
-# zdWhaTFaXpl1DGikIFmHHQEiyLIgF72a5B98Ws8YTCqIu0MVAFOKyrR6fu05a5WZ
-# 2wq877eVBUxAXjMgJkUB/jmXS1OjkUphR+ExvUSHNCxvbOlESYVsCe+njVbt+Lx8
-# +u497go4+RZUowUR77N1UMJDcwJ5zxblD9OdpgN/imlqkxpFmSson8ccNYfiJBGs
-# aUH2PH8CSqHbbTo1uxy67ohRs6rdybqFIAWPdGUgD6j+5b2CWVUG54COv2QQdkwG
-# W46pYWZvuOM=
+# FO7RT7bJ1633rOfp/T+QCnUo5oPrMA0GCSqGSIb3DQEBAQUABIIBACY1BneWYa+q
+# w/0BaxnmD+/yVDUGQe/NJwBHsTsc8re70/4hnk1s4iUEVKsyoiEXYNjuuGDkzP3q
+# Xi2Ywlf5eBoqV6TCOwRVt7BergMPOsbT81JcCHi4niN05Ydjjj2uGAHAjy1X9F79
+# z67gbI2Qx+PHNXXO8xMDeKeBXs68Jzc/8zAVgL08wVnJhgFZzMY4FtzAXvI6j46g
+# W6R/vssDPRkaAC7MJe2KIc0DEcCtOxYtfnfw2TskmDo5P0ULhM4p7E/mv8kw3RCD
+# /Bva7V+WrvNX+UhliIRx7VcKtsJlxf8pJOY8pqxuMZ0CM+WeZ+ciF2jAJts6nVql
+# 8scdd3GFcQs=
 # SIG # End signature block

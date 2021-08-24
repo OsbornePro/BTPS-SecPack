@@ -47,16 +47,12 @@ td {
 </style>
 "@ # End CSS
 
-ForEach ($Users in $UserDetails)
-{
+ForEach ($Users in $UserDetails) {
 
     $ExpirationDate = $Users.ExpiryDate
-
-    If ($ExpirationDate -ge $TodaysDate)
-    {
+    If ($ExpirationDate -ge $TodaysDate) {
 
         $ExpiredPasswords += $Users
-
         $ToWhom = $Users.DisplayName
 
         $PreContent1 = "<Title>ALERT: Password Has Expired</Title>"
@@ -67,15 +63,12 @@ ForEach ($Users in $UserDetails)
         # Alerts IT by sending an email
         $From1 = $Users.Mail | Out-String
 
-        Try
-        {
+        Try {
 
             Send-MailMessage -From FromEmail -To $From1 -Subject "ACTION REQUIRED: Your Password Has Expired" -BodyAsHtml -Body $MailBody1 -SmtpServer UseSmtpServer -Priority High -UseSSL -Port 587 -Credential $Credential
 
         } # End Try
-
-        Catch
-        {
+        Catch {
 
             Send-MailMessage -From FromEmail -To $From1 -Subject "ACTION REQUIRED: Your Password Has Expired" -BodyAsHtml -Body $MailBody1 -SmtpServer UseSmtpServer -Priority High -UseSSL -Port 587 -Credential $Credential
 
@@ -85,11 +78,9 @@ ForEach ($Users in $UserDetails)
 
     } # End if
 
-    If (($TodaysDate -ge $ExpirationDate.AddDays(-15)) -and ($TodaysDate -le $ExpirationDate))
-    {
+    If (($TodaysDate -ge $ExpirationDate.AddDays(-15)) -and ($TodaysDate -le $ExpirationDate)) {
 
         $ExpiringSoon += $Users
-
         $ToWho = $Users.DisplayName
 
         $PreContent = "<Title>Password Expiring in 15 days or less</Title>"
@@ -99,15 +90,12 @@ ForEach ($Users in $UserDetails)
 
         $From = $Users.Mail | Out-String
 
-        Try
-        {
+        Try {
 
             Send-MailMessage -From FromEmail -To $From1 -Subject "ACTION REQUIRED: Your $EnvDomain Password is Expiring Soon" -BodyAsHtml -Body $MailBody -SmtpServer UseSmptServer -Priority Normal -UseSSL -Port 587 -Credential $Credential
 
         } # End Try
-
-        Catch
-        {
+        Catch {
 
             Send-MailMessage -From FromEmail -To $From1 -Subject "ACTION REUQIRED: Your $EnvDomain Password is Expiring Soon" -BodyAsHtml -Body $MailBody -SmtpServer UseSmptServer -Priority Normal -UseSSL -Port 587 -Credential $Credential
 
@@ -116,9 +104,7 @@ ForEach ($Users in $UserDetails)
         } # End Catch
 
     } # End Elseif
-
-    Else
-    {
+    Else {
 
         Write-Output "[*] No passwords expiring in the next 14 days or less."
 
@@ -127,8 +113,7 @@ ForEach ($Users in $UserDetails)
 } # End Foreach
 
 
-If ($ExpiredPasswords)
-{
+If ($ExpiredPasswords) {
 
     $MBody1 = $ExpiredPasswords | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "FYI, <br><br>The below table contains info on the users who have received a password has expired notification.<br><br><hr><br>" | Out-String
     Send-MailMessage -From FromEmail -To ToEmail -Subject "Users Whos Passwords Have Expired" -BodyAsHtml -Body $MBody1 -SmtpServer UseSmtpServer -UseSSL -Port 587 -Credential $Credential
@@ -136,8 +121,7 @@ If ($ExpiredPasswords)
 } # End if
 
 
-If ($ExpiringSoon)
-{
+If ($ExpiringSoon) {
 
     $MBody = $ExpiringSoon | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "FYI, <br><br>The below table contains info on the users who have received a password exipring notification.<br><br><hr><br>" | Out-String
     Send-MailMessage -From FromEmail -To ToEmail -Subject "Users Who Received Password Expiring Notifications" -BodyAsHtml -Body $MBody -SmtpServer UseSmptServer -UseSSL -Port 587 -Credential $Credential

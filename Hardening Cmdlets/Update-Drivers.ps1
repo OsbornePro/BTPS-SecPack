@@ -54,8 +54,9 @@ None, Microsoft.PowerShell.Commands.Internal.Format
 .LINK
 https://rzander.azurewebsites.net/script-to-install-or-update-drivers-directly-from-microsoft-catalog/
 https://osbornepro.com
+https://btpssecpack.osbornepro.com
 https://writeups.osbornepro.com
-https://github.com/tobor88
+https://github.com/OsbornePro
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
@@ -90,20 +91,17 @@ Function Update-Drivers {
             [Switch][Bool]$SkipFirmware
         )  # End param
 
-BEGIN
-{
+BEGIN {
 
     Write-Verbose "Verifying permissions"
     $IsAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
 
-    If ($IsAdmin)
-    {
+    If ($IsAdmin) {
 
         Write-Verbose "Permissions verified, continuing execution"
 
     }  # End If
-    Else
-    {
+    Else {
 
         Throw "Insufficient permissions detected. Run this cmdlet in an adminsitrative prompt."
 
@@ -128,46 +126,40 @@ BEGIN
     $Criteria = "IsInstalled=0 and Type='Driver'"
 
 }  # End BEGIN
-PROCESS
-{
+PROCESS {
 
     Write-Output "[*] Searching Driver-Updates..."
     $SearchResult = $Searcher.Search($Criteria)
     $Updates = $SearchResult.Updates
 
-    If ($Updates.Count -eq 0)
-    {
+    If ($Updates.Count -eq 0) {
 
         Write-Output "[*] All drivers are up to date"
 
     }  # End If
-    ElseIf (($Updates.Count -gt 0) -and ($SearchResult.Updates | Where-Object {$_.Filter -like $Name}))
-    {
+    ElseIf (($Updates.Count -gt 0) -and ($SearchResult.Updates | Where-Object {$_.Filter -like $Name})) {
 
         Write-Verbose "Searching for $Name in available updates"
 
     }  # End Else
-    ElseIf ($Updates.Count -gt 0)
-    {
+    ElseIf ($Updates.Count -gt 0) {
 
         $UpdateDriverList = $Updates | Select-Object -Property "Title","DriverModel","DriverVerDate","Driverclass","DriverManufacturer" | Format-Table -AutoSize -Wrap
 
     }  # End If
-    Else
-    {
+    Else {
 
         Write-Output "[*] All drivers are up to date"
 
         Write-Output "[*] Returning Microsoft Update registered sources to their original states"
         $ReferenceObj = $UpdateSvc.Services | Where-Object { $_.IsDefaultAUService -eq $False -and $_.ServiceID -eq "7971f918-a847-4430-9279-4a52d1efe18d" }
-        $ReferenceObj | ForEach-Object -Process { $UpdateSvc.RemoveService($_.ServiceID)
+        $ReferenceObj | ForEach-Object -Process { $UpdateSvc.RemoveService($_.ServiceID) }
 
         Exit 0
 
     }  # End Else
 
-    If ($ListAll.IsPresent)
-    {
+    If ($ListAll.IsPresent) {
 
         Write-Output "[*] The below table lists available driver updates"
         $UpdateDriverList
@@ -177,19 +169,16 @@ PROCESS
         $ReferenceObj | ForEach-Object -Process { $UpdateSvc.RemoveService($_.ServiceID) }
 
     }  # End If
-    Else
-    {
+    Else {
 
-        If ($PSCmdlet.ParameterSetName -eq "Install")
-        {
+        If ($PSCmdlet.ParameterSetName -eq "Install") {
 
             Write-Warning "This section is not finished. You are only able to update everything or list available updates"
             Write-Verbose "[*] Downloading $Name"
             Write-Verbose "[*] Installing $Name"
 
         }  # End If
-        Else
-        {
+        Else {
 
             Write-Output "[*] Downloading Drivers..."
             $UpdatesToDownload = New-Object -ComObject Microsoft.Update.UpdateColl
@@ -212,15 +201,12 @@ PROCESS
             $InstallationResult = $Installer.Install()
 
 
-            If ($InstallationResult.RebootRequired)
-            {
+            If ($InstallationResult.RebootRequired) {
 
                 Write-Output "[*] Reboot required to finish updating"
-
                 $Selection = Read-Host -Prompt "[!] Would you like to restart the computer now? [y|N]"
 
-                If (($Selection -like "y") -or ($Selection -like "yes"))
-                {
+                If (($Selection -like "y") -or ($Selection -like "yes")) {
 
                     Write-Output "[*] Returning Microsoft Update registered sources to their original states"
 
@@ -230,16 +216,14 @@ PROCESS
                     Restart-Computer -Force
 
                 }  # End If
-                Else
-                {
+                Else {
 
                     Write-Output "[*] To finish installing updates you still need to restart the device"
 
                 }   # End Else
 
             }  # End If
-            Else
-            {
+            Else {
 
                 Write-Output "[*] All drivers are now up to date"
 
@@ -254,8 +238,7 @@ PROCESS
     }  # End Else
 
 }  # End PROCESS
-END
-{
+END {
 
     Write-Output "[*] Returning Microsoft Update registered sources to their original states"
     $ReferenceObj = $UpdateSvc.Services | Where-Object { $_.IsDefaultAUService -eq $False -and $_.ServiceID -eq "7971f918-a847-4430-9279-4a52d1efe18d" }
@@ -268,8 +251,8 @@ END
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU6Me98HZPErfji7pDs9GyvDPf
-# sJugggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUt64vyhcT+8erZhuX7ebt6362
+# OcKgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -329,11 +312,11 @@ END
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FOkL7tdJdVMmHHeKCcu+eOIxwkSSMA0GCSqGSIb3DQEBAQUABIIBAIwx6RNY2yHv
-# A6Rf3GTM7aIQB8k9SjxmnS36lXOADcji8wIOEdi2Je84JG0MPsHJKDw85t0AJLWi
-# Dnk4f4r5CrZi2DpO88WldHWR2LZItaZeul33eB8bZythIQbApz0xrawI7bZMNhYN
-# tdJVdJp5gTzKrAN0AZE5B0M2KThdoZnqLnWX82xF9GTSMcJ4OWz0BT2R3sBbvdDy
-# 9LPDNIA9uiNH4tc8lXOU988wFKHEPdLVNsER4jIUFk3s6FbqQi+MnTEPBkkTcHQF
-# SIijUBuvr1x+C2z4/jaN+g+k415xHavOtuSvCoqyWzbKUVTRWQanWwxxP665jKtz
-# ZbbZjkYABPc=
+# FDjg2VqeaAKIdo7WfSsR1OiHSFEYMA0GCSqGSIb3DQEBAQUABIIBALfn/UR0vw4/
+# se5OQbEx9vlITTTOTFnlUVV199vnSeWjhKTvdQjcEWmbjNbRa8nJX8ScoppKsUqB
+# TZbdSAb9UFvvgMDDXpg9vnMa9mirOEVknORky7OtAh7BcAp6731+/lrSpu/AokJu
+# +9bt9MeVWi7XJNTEj9/NODi0QsfI1wLCsqpYWx4fVRiltKGCRWxXAKWyRlIuBnvK
+# cEQuSDeYv7UOjz5E/WkBDvIbyCKhAgc+TDLGOZh3OAqNLn/+plduvA1jz9L1gt3G
+# Qd0gdFwTv5277/j5+zrJSfhPMOHBlBsHzM7JdDr9TJOgYdhiCBOu6TdasayAqyRu
+# tyMsAjP+G7Q=
 # SIG # End signature block

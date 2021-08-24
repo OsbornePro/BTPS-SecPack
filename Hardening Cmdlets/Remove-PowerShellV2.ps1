@@ -36,8 +36,9 @@ None
 
 .LINK
 https://osbornepro.com
+https://btpssecpack.osbornepro.com
 https://writeups.osbornepro.com
-https://github.com/tobor88
+https://github.com/OsbornePro
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
@@ -61,14 +62,12 @@ Function Remove-PowerShellV2 {
 Switch ($PSBoundParameters.Keys) {
     'ComputerName' {
 
-        ForEach ($C in $ComputerName)
-        {
+        ForEach ($C in $ComputerName) {
 
             $SessionOption = New-PSSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck
             # This option to an attempt to accomdate any environment and should not be needed if WinRM over HTTPS is configured correctly
 
-            If ($C -notlike "*.$env:USERDNSDOMAIN")
-            {
+            If ($C -notlike "*.$env:USERDNSDOMAIN") {
 
                 $C = "$C.$env:USERDNSDOMAIN"
 
@@ -79,22 +78,19 @@ Switch ($PSBoundParameters.Keys) {
                 Write-Verbose "[*] Checking whether or not PowerShell version 2 is installed on the $env:COMPUTERNAME"
                 $State = (Get-WindowsOptionalFeature -Online -FeatureName MicrosoftWindowsPowerShellV2).State
 
-                Switch ($State)
-                {
+                Switch ($State) {
 
                     "Enabled" {
 
                         Write-Output "[!] $env:COMPUTERNAME is vulnerable to a PowerShell downgrade attack"
                         Write-Output "[*] Removing PowerShell Version 2 to remediate PowerShell Downgrade Attack vulnerability"
 
-                        Try
-                        {
+                        Try {
 
                             Disable-WindowsOptionalFeature -Online -FeatureName MicrosoftWindowsPowerShellV2Root -Remove
 
                         }  # End Try
-                        Catch
-                        {
+                        Catch {
 
                             Write-Output "[*] SAFE: PowerShell version 2 is not installed on $env:COMPUTERNAME"
 
@@ -121,22 +117,19 @@ Switch ($PSBoundParameters.Keys) {
         Write-Verbose "[*] Checking whether or not PowerShell version 2 is installed on the host"
         $State = (Get-WindowsOptionalFeature -Online -FeatureName MicrosoftWindowsPowerShellV2).State
 
-        Switch ($State)
-        {
+        Switch ($State) {
 
             "Enabled" {
 
                 Write-Output "[!] $env:COMPUTERNAME is vulnerable to a PowerShell downgrade attack"
                 Write-Output "[*] Removing PowerShell Version 2 to remediate PowerShell Downgrade Attack vulnerability"
 
-                Try
-                {
+                Try {
 
                     Disable-WindowsOptionalFeature -Online -FeatureName MicrosoftWindowsPowerShellV2Root -Remove
 
                 }  # End Try
-                Catch
-                {
+                Catch {
 
                     Write-Output "[*] SAFE: PowerShell version 2 is not installed on $env:COMPUTERNAME"
 
@@ -161,8 +154,8 @@ Switch ($PSBoundParameters.Keys) {
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUZ0/VFndr1k2HtbC5bKtt7SjZ
-# psCgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUlBd2+r7N0VXsd1lWEWU1xoFf
+# Fw2gggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -222,11 +215,11 @@ Switch ($PSBoundParameters.Keys) {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FGKD8/5+wB84aeTKG/BdDuUuNAn8MA0GCSqGSIb3DQEBAQUABIIBAA9LRwGLAnUB
-# RjEBaiegJv7zoRbkfN9FQtijfvktSAomP90cBJGogyUpQ/eXDAr/7EOTRPyQVa/t
-# lRgc3h3d5n41ZNJUe5tnJx6nuiOrP1UgpplogMF9BDp89W/CtBenkSbaLajz7LHV
-# IGjJRdSww8fkzGxD1cDumkuHrPs5VA6uNVnZxnxTLDYz3WeSMXYrVFDLE/hEwLjx
-# dHYqVnK3Ns6k6O6tHuhX8gzACiQonHFGANgS7UXcuGvLRjCsb68yj8LpDoH0TIlj
-# yUpA6KUN+AWhIQjN49RmmTf0DP0Hf3UIwyli3D4KUyAoGJgB5nqmkQHPhf4WydVY
-# fpS9TQFEC80=
+# FOMAuujjQDN8IYYf00R3AeHclFF2MA0GCSqGSIb3DQEBAQUABIIBADT+r6pXbPbj
+# QQIiTwjtaFQ/OEtl9Cm9rpRVVs+UmHmdS3QUEb/vnCfE1TwOnZf1dnkaZEVMlhMC
+# c1H/+sxS1H3Xu2FzUZlQ1SS/uZSbFl2qZtpmtMdZBS8rniVKTRZCp0caOUeAw1Fm
+# rSp4okAli6HhYU410D8bZDQV2Gr1zB3iLcaNF7dDSy5V5S2RBMblD942bwkf25BP
+# mSTqcKjdAQm5EC0wVV4JrF3+HW4DVoQO0YMozoyrdi9VP8NL3XLNyKNwRr0fkoto
+# W2uz7ccVtKYrYYSgBIFcuqHCsQbGd4usqjratEFwaXFGyn9ELTqE6q+tQAJD+wav
+# 9lFDwqzjyV4=
 # SIG # End signature block

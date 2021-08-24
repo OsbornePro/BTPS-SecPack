@@ -26,15 +26,13 @@ $SuccessfulSignIns = Get-AzureADAuditSignInLogs -Filter $Filter
 Write-Output "[*] Analyzing results"
 $Obj = @()
 $UserList = $SuccessfulSignIns | Select-Object -Property UserPrincipalName -Unique
-ForEach ($User in $UserList)
-{
+ForEach ($User in $UserList) {
 
     $UserPrincipalName = $User.UserPrincipalName
     $IpAddresses = $SuccessfulSignIns | Where-Object { $_.UserPrincipalName -eq $UserPrincipalName } | Select-Object -Property IpAddress -Unique
     
     $ReturnResults = @()
-    ForEach ($IpAddress in $IpAddresses)
-    {
+    ForEach ($IpAddress in $IpAddresses) {
 
         $ReturnResults += $SuccessfulSignIns | Where-Object { $_.UserPrincipalName -eq $UserPrincipalName -and $_.IpAddress -eq $IpAddress.IpAddress}
         $IPCount = ($ReturnResults | Where-Object { $_.IpAddress -eq $IpAddress.IpAddress }).Count

@@ -63,8 +63,8 @@ Alias: tobor
 .LINK
 https://osbornepro.com
 https://writeups.osbornepro.com
-https://btps-secpack.com
-https://github.com/tobor88
+https://btpssecpack.osbornepro.com
+https://github.com/OsbornePro
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
@@ -124,25 +124,21 @@ Function Enable-SMBSigning {
         )  # End param
 
 
-    Switch ($PSCmdlet.ParameterSetName)
-    {
+    Switch ($PSCmdlet.ParameterSetName) {
 
         'Remote' {
 
             $Bool = $False
-            If ($UseSSL.IsPresent)
-            {
+            If ($UseSSL.IsPresent) {
 
                 $Bool = $True
 
             }  # End If
 
 
-            ForEach ($Comp in $ComputerName)
-            {
+            ForEach ($Comp in $ComputerName) {
 
-                If (($Comp -notlike "*$env:USERDNSDOMAIN") -and ($UseSSL.IsPresent))
-                {
+                If (($Comp -notlike "*$env:USERDNSDOMAIN") -and ($UseSSL.IsPresent)) {
 
                     $Comp = $Comp + ".$env:USERDNSDOMAIN"
 
@@ -159,8 +155,7 @@ Function Enable-SMBSigning {
 
 
                     $Value = 1
-                    If ($Disable.IsPresent)
-                    {
+                    If ($Disable.IsPresent) {
 
                         $Value = 0
 
@@ -175,15 +170,13 @@ Function Enable-SMBSigning {
                     New-Item -Path “HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\LanmanServer\Parameters” -Name “EnableSecuritySignature” -Value $Value -Force -ErrorAction SilentlyContinue | Out-Null
 
 
-                    If ($DisableSMB1.IsPresent)
-                    {
+                    If ($DisableSMB1.IsPresent) {
 
                         Write-Output "[*] Disabling SMBv1 on $env:COMPUTERNAME"
                         Set-SmbServerConfiguration -EnableSMB1Protocol $False -Force
 
                     }  # End If
-                    ElseIf ($EnableSMB1.IsPresent)
-                    {
+                    ElseIf ($EnableSMB1.IsPresent) {
 
                         Write-Output "[*] Enabling SMBv1 on $env:COMPUTERNAME"
                         Set-SmbServerConfiguration -EnableSMB1Protocol $True -Force
@@ -191,15 +184,13 @@ Function Enable-SMBSigning {
                     }  # End If
 
 
-                    If ($DisableSMB2.IsPresent)
-                    {
+                    If ($DisableSMB2.IsPresent) {
 
                         Write-Output "[*] Disabling SMBv2 and SMBv3 on $env:COMPUTERNAME"
                         Set-SmbServerConfiguration -EnableSMB2Protocol $False -Force
 
                     }  # End If
-                    ElseIf ($EnableSMB2.IsPresent)
-                    {
+                    ElseIf ($EnableSMB2.IsPresent) {
 
                         Write-Output "[*] Enabling SMBv2 and SMBv3 on $env:COMPUTERNAME"
                         Set-SmbServerConfiguration -EnableSMB2Protocol $True -Force
@@ -215,8 +206,7 @@ Function Enable-SMBSigning {
         'Local' {
 
             $Value = 1
-            If ($Disable.IsPresent)
-            {
+            If ($Disable.IsPresent) {
 
                 $Value = 0
 
@@ -230,15 +220,13 @@ Function Enable-SMBSigning {
             New-Item -Path “HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\LanmanServer\Parameters” -Name “EnableSecuritySignature” -Value $Value -Force -ErrorAction SilentlyContinue | Out-Null
 
 
-            If ($DisableSMB1.IsPresent)
-            {
+            If ($DisableSMB1.IsPresent) {
 
                 Write-Output "[*] Disabling SMBv1 on $env:COMPUTERNAME"
                 Set-SmbServerConfiguration -EnableSMB1Protocol $False -Force
 
             }  # End If
-            ElseIf ($EnableSMB1.IsPresent)
-            {
+            ElseIf ($EnableSMB1.IsPresent) {
 
                 Write-Output "[*] Enabling SMBv1 on $env:COMPUTERNAME"
                 Set-SmbServerConfiguration -EnableSMB1Protocol $True -Force
@@ -246,15 +234,13 @@ Function Enable-SMBSigning {
             }  # End If
 
 
-            If ($DisableSMB2.IsPresent)
-            {
+            If ($DisableSMB2.IsPresent) {
 
                 Write-Output "[*] Disabling SMBv2 and SMBv3 on $env:COMPUTERNAME"
                 Set-SmbServerConfiguration -EnableSMB2Protocol $False -Force
 
             }  # End If
-            ElseIf ($EnableSMB2.IsPresent)
-            {
+            ElseIf ($EnableSMB2.IsPresent) {
 
                 Write-Output "[*] Enabling SMBv2 and SMBv3 on $env:COMPUTERNAME"
                 Set-SmbServerConfiguration -EnableSMB2Protocol $True -Force
@@ -267,12 +253,11 @@ Function Enable-SMBSigning {
 
 }  # End Function Enable-SMBSigning
 
-
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUs3V3+rhvfXZT4GjEtRy2qkFE
-# qRGgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUFwuSRePqh7Hx1iPwNDDE0f0y
+# IdKgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -332,11 +317,11 @@ Function Enable-SMBSigning {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FAv/G1zPxw6NA3mBTLgfkEPMlD2kMA0GCSqGSIb3DQEBAQUABIIBAAHES+tPgIoa
-# n/5KB2XrLUNvoCgFXplGIE9rN4XPJkGkWYFKktGTbpo0UfSu0MYgDDHBd1hPkfGt
-# bzSeOuNFAZrh9ciuBKyHOCXp5fJ9ZAzbSWPcqjcqXGr6TP/aW5L98j8ktzZ8YPrn
-# 4BttlSpfKOz2iJx7pZsTh2YEJ/i8DlRI8cpCLc37nT3Dym91vDln8GkgWpghkoGR
-# kpVeGPG9zSSMR9L1JT3wOQgLqaANtb/94DhE1hc4skZa2qd6URIblUPvKWe+EHLc
-# /ONGP9DUs9G6SXLohfMWVUgpgfL3KWZOcFwLSTOuC10KvIdqPbFYVL7tU2tmHgmW
-# H6bppkfbg4U=
+# FLU4n0KgVRgE3j2We5i8pWwMhF4BMA0GCSqGSIb3DQEBAQUABIIBABx1DUrIRY/2
+# MxvFqBPu4J7DQabZ8C6q/qVGqq1lhrMtwqPiidS9EA/ZY5aRL/RYAnr8gKNOGKbK
+# XXOGj5iOqYJ+NFEVlVaWxjt2FKRa9XGIfSZQ8fByir9N8SV87yhPul0iOvISj27o
+# xEhIat8vz0mK1BQBiBpnvFd4qLrfpyjO2H+roTPvQPJQCdeW9VSOvOMUcVNTOO9O
+# /W3Br/pBdNVEuHcZ3A3xmKHOPa3LIACd5qFx7hUN3E3xefsD15n3DKjwa7bMhKis
+# Lq1LHGVDjlE2PSCMh2i6vsUDw4QqIFcYkhpSLtCUTrI35qa80rfRkWJoIeXcpo2h
+# 5flaiVDdsZI=
 # SIG # End signature block

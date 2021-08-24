@@ -29,14 +29,12 @@
         # MAC-Vendor list path
 ##########################################################################################################################
         $CSV_MACVendorList_Path = "C:\Users\Public\Documents\PSGetHelp\MAC.Vendor.List.csv"
-        If([System.IO.File]::Exists($CSV_MACVendorList_Path))
-        {
+        If([System.IO.File]::Exists($CSV_MACVendorList_Path)) {
 
             $MAC_VendorList = Import-Csv -Path $CSV_MACVendorList_Path | Select-Object -Property "Assignment", "Organization Name"
             #### The above values may change depending on your csv file. Just replaec Assignment and Organization Name with whatever the headers are in your
         }  # End If
-        Else
-        {
+        Else {
 
             Throw [System.IO.FileNotFoundException] "No CSV-File to assign vendor with MAC-Address found!"
 
@@ -45,18 +43,14 @@
     }  # End BEGIN
     PROCESS {
 
-        ForEach ($MACAddress2 in $MACAddress)
-        {
+        ForEach ($MACAddress2 in $MACAddress) {
 
             $Vendor = [String]::Empty
             # Split it, so we can search the vendor (XX-XX-XX-XX-XX-XX to XX-XX-XX)
             $MAC_VendorSearch = $MACAddress2.Replace("-","").Replace(":","").Substring(0,6)
-            ForEach ($ListEntry in $MAC_VendorList)
+            ForEach ($ListEntry in $MAC_VendorList) {
 
-            {
-
-                If ($ListEntry.Assignment -eq $MAC_VendorSearch)
-                {
+                If ($ListEntry.Assignment -eq $MAC_VendorSearch) {
 
                     $Vendor = $ListEntry."Organization Name"
                     [pscustomobject] @{
@@ -71,18 +65,14 @@
         }  # End ForEach
 
     }  # End PROCESS
-    END {
-
-    }  # End END
 
 }  # End Function Get-MacVendor
-
 
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUOn5DNKbW2FqRu46VSNHDFToP
-# 4Gugggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUQ4wT5NQ89jEFofCPznN2Ski0
+# M8qgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -142,11 +132,11 @@
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FGT7wdYbtFi3cq5NNrS0cvbud+cKMA0GCSqGSIb3DQEBAQUABIIBACylBn3GOI6+
-# EdS4w8ZhtIQAxJygdVrgLVZSBLYOfDia8ITxP18ewS8eCacYzCt8XxlF6XUxLhjy
-# 42ICLoQpeYphi6qwH24aV5ZMtYs4cLsuqpMv+/qMNLeoF3FNhfJOfyM8cusaJWyL
-# vnHaukHc4/UdqUXVHt9JOmKj0F5hgOva7JjkxpQ8Ey/9AMSNkc+XEI7ecJzDZNhO
-# qe2aZGNZwo0cMNjTafLYLi6S4UuTNlLstKMiuaJoEb/kOe0om2ebfFTzw0skz7Af
-# QRYi/3xDsW+Rn2usP1h+tnBj2AZYygXiPslPoG2UY+o0pPWDBVI5zK9svghWdQyC
-# Y8tBtkBA0lo=
+# FLuRgd9j6g/LCkDEwOqrNEVWLJnnMA0GCSqGSIb3DQEBAQUABIIBACEvARwyLBQc
+# 876XjBziVA5C98nSKUFKWTB5xIjxOzdCBuQdWp1df9+q/1gHqCexW+0GzJ+Ko1dZ
+# NS+p4prBbgWain2Pu6LV3h1dOEatUo2u084Nj77MieYs3BJ7myH3VYs/442iItTD
+# 6mEpJIS06lJ6IHWayx5WyYBI0E9L1dFiDxnv5E0FSlxhMlioIHqr4k554aUj9lRL
+# 6WG8FvdVqeF8wk/+iUq+wmxFDHVUOk7FpWcN45KnjxDqAdcfRAri9PQLK1eO1w+6
+# TCC2bRq2Ijqi5kCm7HKhoP/XO+1qYfO7dSAUJpNhVYAbXigEm1BlKpZjwtmri44X
+# pyTO0dIWQbc=
 # SIG # End signature block

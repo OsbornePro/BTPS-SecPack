@@ -12,8 +12,7 @@ $XML = @'
 
 $Events = Get-WinEvent -FilterXml $XML | Select-Object -Property ID,LevelDisplayName,LogName,MachineName,Message,ProviderName,RecordID,TaskDisplayName,TimeCreated -ErrorVariable $NoEventsError
 
-If ($NoEventsError)
-{
+If ($NoEventsError) {
 
     Throw "[*] No new events to be imported"
 
@@ -26,20 +25,16 @@ $DT = New-Object -TypeName System.Data.DataTable
 
 Write-Output "[*] Building the datatable"
 $Columns = $Events | Select-Object -First 1 | Get-Member -MemberType NoteProperty | Select-Object -Expand Name
-ForEach ($Column in $Columns)
-{
+ForEach ($Column in $Columns) {
 
     $Null = $DT.Columns.Add($Column)
 
 }  # End ForEach
 
-ForEach ($Event in $Events)
-{
+ForEach ($Event in $Events) {
 
     $Row = $DT.NewRow()
-
-    ForEach ($Column in $Columns)
-    {
+    ForEach ($Column in $Columns) {
 
         $Row.Item($Column) = $Event.$Column
 
@@ -56,8 +51,8 @@ $BulkCopy.WriteToServer($DT)
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU7aBL9VQyw2ZXhEJFy2Qj5d+i
-# eTqgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUvzuecBKnEe/2zu8WN/NIipjF
+# 1SWgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -117,11 +112,11 @@ $BulkCopy.WriteToServer($DT)
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FNNNjqzb0r9PLbSMGdrasGPNc07/MA0GCSqGSIb3DQEBAQUABIIBAGCEqjPOHI5u
-# dpMHZneY8EmN4U37C0OuXFu78IshJ5F35ynSnSAc0Dx2VV+RzRC7QEDuxgdayVdT
-# BWeIT2YWwDzkK1GHPNrZZmxmxNTVW+GJ56RLCXWKaWrmAoME37T29GC1qN757dci
-# N0qgBepJSzz8QAXR4EIAbwg3v2JGyUH8J1d6BZ0ur6E4+Dv73/SvHDJFJy6S9IaT
-# drSWP4kcx7MjWeMMPwaybgEav7Hpr2xrdnW9YYK7mEh7IX32ZtqXCzaaGz5BqrI0
-# NoXlb0QkPjYxdFazLmmt/vYbbm0fMRSOJk3cMZopkcvp0mZzMQqxy3OOp49cSUV+
-# IczYTK8x6Dw=
+# FG97oUT/Ckzg5UUmqTtxa1B8keUvMA0GCSqGSIb3DQEBAQUABIIBAFZM6eCz1rcY
+# hNXv2/TeRQKy2t8QjWsgkmU+/KyMKEbDsl9J+nDaBgllP2/5o8bYVQBObLMqlLSx
+# i8wsRtkBWRl2/y2zJ+9W45vuj0uevdU7VOUJivBIAp49U9rRVOUtnxFKeSTP2AEy
+# hrti5tCInrOMNK719ISj5m+t3UvXU6hDLb1jpKvr/iVbhlA8jOZudlg8BRUBirEX
+# Z8kXf8yi5bOnSHM/ZuetOn9WFwBsaJgmkgd1OIro9X7+ncvPAfYkPDBNdD15EtVu
+# j3sKjlqe2CEOVsfLYWBTo/HZ//ycX1IQ+Hkx8jceVHKug7+HQSJA2P9zUBD31IU8
+# scm23pzR6zY=
 # SIG # End signature block

@@ -17,8 +17,7 @@ $PreviouslyOpenPorts = "34"
 $CurrentlyOpenPorts = Get-NetTCPConnection -State Listen | Group-Object -Property LocalPort -NoElement 
 
 Write-Verbose "Comparing current open port count to previously open port count"
-If ($PreviouslyOpenPorts -lt $CurrentlyOpenPorts.Count)
-{
+If ($PreviouslyOpenPorts -lt $CurrentlyOpenPorts.Count) {
 
     $Body = "If you have received this email it is because a new port was opened $nev:COMPUTERNAME. If this was due to a user configuration or new application you may disregard. Otherwise verify that a Bind Shell connection has not been established to this device."
     Send-MailMessage -From FromEmail -To ToEmail -Body $Body -Subject "AD Event: New Listen Port Opened on $env:COMPUTERNAME" -SmtpServer UseSmtpServer -Priority Normal -Credential $Credential -UseSSL -Port 587
@@ -29,13 +28,10 @@ If ($PreviouslyOpenPorts -lt $CurrentlyOpenPorts.Count)
 Write-Verbose "Logging established connections"
 
 $EstablishedConnections = Get-NetTCPConnection -State Established | Sort-Object -Property RemoteAddress -Unique | Select-Object -Property LocalPort,RemoteAddress,RemotePort,State,AppliedSetting,OwningProcess,CreationTime
-If (!(Test-Path -Path 'C:\Users\Public\Documents\ConnectionHistory.csv')) 
-{
+If (!(Test-Path -Path 'C:\Users\Public\Documents\ConnectionHistory.csv')) {
 
     $EstablishedConnections | Export-Csv -Path 'C:\Users\Public\Documents\ConnectionHistory.csv' -Delimiter ',' -NoTypeInformation
-      
-    $DnsResults = ForEach ($Established in $EstablishedConnections.RemoteAddress) 
-    {       
+    $DnsResults = ForEach ($Established in $EstablishedConnections.RemoteAddress) {       
     
         Resolve-DnsName -Name $Established -Server $PDC -ErrorAction SilentlyContinue | Select-Object -Property Name,Type,NameHost
 
@@ -44,16 +40,13 @@ If (!(Test-Path -Path 'C:\Users\Public\Documents\ConnectionHistory.csv'))
     $DnsResults | Export-Csv -Path 'C:\Users\Public\Documents\ConnectionDNSHistory.csv' -Delimiter ',' -Append -NoTypeInformation
 
 }# End If
-Else 
-{
+Else {
 
     $NewConnections = Compare-Object -ReferenceObject (Import-Csv 'C:\Users\Public\Documents\ConnectionHistory.csv') -DifferenceObject $EstablishedConnections -Property RemoteAddress | Where-Object { $_.SideIndicator -like '=>'} | Select-Object -ExpandProperty RemoteAddress 
 
-    ForEach ($NewConnection in $NewConnections) 
-    {
+    ForEach ($NewConnection in $NewConnections) {
     
         $EstablishedConnections | Where-Object -Property RemoteAddress -like $NewConnection | Export-Csv -Path 'C:\Users\Public\Documents\ConnectionHistory.csv' -Append
-        
         Resolve-DnsName -Name $NewConnection -ErrorAction SilentlyContinue | Select-Object -Property Name,Type,NameHost | Export-Csv -Path 'C:\Users\Public\Documents\ConnectionDNSHistory.csv' -Append -NoTypeInformation -Delimiter ','
 
     } # End ForEach
@@ -63,8 +56,8 @@ Else
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUlw1BgL1LihIcmLocBZWp5e1t
-# dlugggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUuC5+byWfkvD/QmwruIOSy/VO
+# F8Cgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -124,11 +117,11 @@ Else
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FEJ+p47yNzXbDYuuoHygOgeX6u6NMA0GCSqGSIb3DQEBAQUABIIBAGu1uTrEZq1d
-# wrGiuq9jdzaFOc9W8x1SgDFbodYkb9qreVt6jf4Bul2vyQ3sBXWSK1oK+6Gz4d0h
-# aqeWdPPAyqe0vR1xCwaJDIYLOeDIzPslycReQzwGkYac0D6pyisuWXaBQRKFMGGp
-# M9BpWXjh5aLU9T01v6VRjeM8v/EhSR/42u0lh+dycoQnlOhSmLceBs6xn4NjtV6R
-# VCVl/5tosZKuNxJGq1XUt600OSS82T4ky9icvyyqnedOsH+fs81Hn+ITldFHIC8q
-# PATbMAS8xmFlqVkkNarWGJ7hwBil9oz1k0sxgrjx9wdZSYbLS5tvX+e7lLQVDRyI
-# LnyZbIZwtP8=
+# FC6fCG5RZwjUsTg62vwhH3XDcsqqMA0GCSqGSIb3DQEBAQUABIIBADh5QbY21CSM
+# zEF4fxVS3aCGmf6FPPCVj6c3cZ2oPssHLhuGGAGjwXS1xyjNJalftLWLs76D4ykc
+# ollbtW3CUPjtTopLGDekEz5mfy0eusGUfwFhoYh5nqrSuaWUqd3fFGtcto8y0AU2
+# AYqqqS4/CXSazpuhXG+qiQqTGlIXh3vwOnfna0bq1uVcD/eMGE7R3wnTTC1Pl3Xv
+# zNBKfFPEmFw134D4jRefzzSbE/jEE11jV/9NUIte1rpNcGsnMw/aFpHdb2H5I9uF
+# Pz4t+s3tMtNgcEzUuMzWdBTGCYGkZEFP+PKDZU+BSVRujw+cAlMgcNwQScxRpxmn
+# MWYrKxSXiVs=
 # SIG # End signature block

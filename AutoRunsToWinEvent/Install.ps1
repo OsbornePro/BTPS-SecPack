@@ -1,7 +1,6 @@
 Write-Verbose "Create Program Files directories for Autoruns"
 $AutoRunsDir = "C:\Program Files\AutorunsToWinEventLog"
-If (!(Test-Path -Path $AutoRunsDir)) 
-{
+If (!(Test-Path -Path $AutoRunsDir)) {
 
   New-Item -Path $AutoRunsDir -ItemType Directory -Force
 
@@ -9,8 +8,7 @@ If (!(Test-Path -Path $AutoRunsDir))
 
 Write-Verbose "Download Autorunsc64.exe if it doesn't exist"
 $AutorunsPath = "c:\Program Files\AutorunsToWinEventLog\Autorunsc64.exe"
-If (!(Test-Path -Path $AutoRunsPath)) 
-{
+If (!(Test-Path -Path $AutoRunsPath)) {
 
   [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
   Invoke-WebRequest -Uri "https://live.sysinternals.com/autorunsc64.exe" -OutFile "$AutoRunsPath"
@@ -33,8 +31,8 @@ Set-ScheduledTask -TaskName "AutorunsToWinEventLog" -Settings $Settings
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUfMtoksVP25ZfolK65ormyd9t
-# cAegggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU0cU0Szdl3W+y2d4yTaLtqOXx
+# OvSgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -94,11 +92,11 @@ Set-ScheduledTask -TaskName "AutorunsToWinEventLog" -Settings $Settings
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FJjmAiT2kOA5Ap6sSpx+lhu3KuWgMA0GCSqGSIb3DQEBAQUABIIBAEQrxd2jtbbL
-# 0LIf2V0nF5VU9Xfev15S9OLFw3q6kK0LogzLVVtcYcPmKa/RsdO1d4j0igZDlm0R
-# rKXnlvSTME5rReg8No2gFkzMBrNRSAM+FCknv1sER5ulCz50AXFixV1uTlWTa/OT
-# BKNj/9qJDN2YEIr9IYpsS7NNJ24iHpp7y21axqYNX8iUKd4K5yVff6b7m+ZhN1RU
-# WejwCIkHuRcZhO2qxeqV1kVgY7LzmAUFqid1cRANptdl1Q7jJwe/uCpaFUKeVtYs
-# jNXW3OHrT9m5/qxaNOFrrJjs0FL1+krm5F1cg95UecGyrfCTdIiFANcVOFOTClm8
-# A2DfW24IOoQ=
+# FHVHKL6SbrO+85GXiyYj1YReKM2UMA0GCSqGSIb3DQEBAQUABIIBAKCpJx2rgwMg
+# ojMK9NUl4midyNhaW/nCtevDiSl9Eq5s5nAI4+IFzEL6NheX8dPTeXtMGKjDhwp2
+# M1w9l4TZziqhuYkZMeKcNTQFDsPddD22ENLekjeXF45cpvpvn7qMXc7I16z5baks
+# tozSriAKjvQg0YlNYTJ2LpZvCQYSBR6BMKgBuwoHhI5yzVeqtSHQgvDYYPBQ2NcR
+# tK00RiuFriMbWRCzILmgI2Y45S1c9VhcBBwBsNrnGMG1BdWRZk451BML5ludlXh8
+# tBSeZEH2mTjZS33LvQ1jUg2MUrxH6UxKf+fY26HaCsdyRnHIJNVR0haMwUpG65KH
+# 4ra3ZL2QHDk=
 # SIG # End signature block

@@ -19,53 +19,45 @@
 #    7.) Produce Audit Log for the admin to review.
 
 $Upn = Read-Host "What is the user's Email Address/UserPrincipalName Example: first.last@$env:USERDNSDOMAIN"
+If ($Null -eq $Upn) {
 
-If ($Null -eq $Upn)
-{
-
-    Write-Host "User UPN/email address was not defined was not defined. Ending script" -ForegroundColor Red
-    Break
+    Throw "User UPN/email address was not defined was not defined. Ending script"
 
 } # End If
-Else
-{
+Else {
 
     $SamAccountName = $Upn -Split "@"
     $TranscriptPath = "C:\Users\Public\Desktop\" + $SamAccountName[0] + "_RemediationTranscript_" + (Get-Date).ToString('MM-dd-yyyy') + ".txt"
 
     Start-Transcript -Path $TranscriptPath
-    Write-Host "$Upn's account will have remediation actions applied to it.`nAn audit report will be saved to $TranscriptPath" -ForegroundColor Cyan
+    Write-Output "$Upn's account will have remediation actions applied to it.`nAn audit report will be saved to $TranscriptPath"
 
     Import-Module MSOnline
     Write-Verbose "Connecting to Exchange Online Remote Powershell Service"
     $ExoSession = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential (Get-Credential -Message "Enter Global Admin Creds") -Authentication Basic -AllowRedirection
 
-    If ($Null -ne $ExoSession)
-    {
+    If ($Null -ne $ExoSession) {
 
         Import-PSSession -Session $ExoSession
 
     } # End If
-    Else
-    {
+    Else {
 
-        Write-Host "  No EXO service set up for this account" -ForegroundColor Red
+        Output "[x] No EXO service set up for this account"
 
     } # End Else
 
     Write-Host "Connecting to EOP Powershell Service" -ForegroundColor Cyan
     $EopSession = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://ps.compliance.protection.outlook.com/powershell-liveid/ -Credential $AdminCredential -Authentication Basic -AllowRedirection
 
-    If ($Null -ne $EopSession)
-    {
+    If ($Null -ne $EopSession) {
 
         Import-PSSession -Session $EopSession -AllowClobber
 
     } # End If
-    Else
-    {
+    Else {
 
-        Write-Host "  No EOP service set up for this account" -ForegroundColor Red
+        Write-Output "[x] No EOP service set up for this account"
 
     } # End Else
 
@@ -73,24 +65,6 @@ Else
     [Reflection.Assembly]::LoadWithPartialName("System.Web")
 
 # BELOW THIS LINE CREATES THE FUNCTIONS------------------------------------------------------------------------
-Function Get-RandomHexNumber{
-    param(
-        [Int]$Length = 20,
-        [String]$Chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-    )  # End param
-        $Bytes = New-Object -TypeName "System.Byte[]" -ArgumentList $Length
-        $Rnd = New-Object -TypeName System.Security.Cryptography.RNGCryptoServiceProvider
-        $Rnd.GetBytes($Bytes)
-        $Result = ""
-        1..$Length | ForEach {
-            $Result += $Chars[ $Bytes[$_] % $Chars.Length ]
-        }  # End ForEach
-        $Result
-}
-
-$Password = Get-RandomHexNumber -Length 30
-
-
 
 Function Reset-Password($Upn) {
 
@@ -122,8 +96,7 @@ Function Remove-MailboxDelegates($Upn) {
     $MailboxDelegates = Get-MailboxPermission -Identity $Upn | Where-Object {($_.IsInherited -ne "True") -and ($_.User -notlike "*SELF*")}
 
     Get-MailboxPermission -Identity $Upn | Where-Object {($_.IsInherited -ne "True") -and ($_.User -notlike "*SELF*")}
-    ForEach ($Delegate in $MailboxDelegates)
-    {
+    ForEach ($Delegate in $MailboxDelegates) {
 
         Remove-MailboxPermission -Identity $Upn -User $Delegate.User -AccessRights $Delegate.AccessRights -InheritanceType All -Confirm:$False
 
@@ -193,8 +166,8 @@ Function Get-AuditLog ($Upn) {
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUx2ZopiuZEKPSXh5TC6jDCPAz
-# mjygggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUb4bXGRjwbFyvF1NJ3wTXd3Uz
+# 3N+gggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -254,11 +227,11 @@ Function Get-AuditLog ($Upn) {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FAqU6376u+0txmaXjh2SAMxyiomAMA0GCSqGSIb3DQEBAQUABIIBAHj3bBGICfQA
-# HaryeWHm56hNMTnljHZ72zIi5kdXo01wQYzT+P8IvvMfdYq3q928qV0ir0IvaT9c
-# NmnP2640Na/9KgsX68XxzaRcj5jXQo8bNFRH22vZmD90liY3OsgNOpgh12hxqmh0
-# lhJu3mmKgv0xLPpH37oD5NMKoVfsXROxuv2RWZ543mYoXL4ZMaLb9QhkgIzGuRB5
-# dNmj8vrwJL1+Z78zhE79RtsLLm+Ep0PGkAkzk7OUVjz8mfFFpzxpPB6KDiFs3czv
-# qKzzc9B1OoPUw7yj2lq/6qqprMvqNt8fRAZjX7NrUc91pUYXvkChJBKt+oIrUr+c
-# E6BfEF4IG0A=
+# FPGFCjn7Evq9R47r2Y0qyvSlgLUaMA0GCSqGSIb3DQEBAQUABIIBADhqGfJioVa/
+# kMrFfi2KibhE728ftFQJVq3dZ8H+iX+62lgr1ZbpLzZvKHB0AvuvGNQmKKwJuPx9
+# iJpiQWOLigaGN6hgP498C0RqHEBAOUinKwYqXo1XU5FSgPtjnPbuSYpysxXrFVUD
+# FTHLPl/fwALY/DkCEC1tCOdf/GBHzaZ4is0oIiz7Xpj8LE6gDnbBEOVcx28kAdoC
+# i4O6MnmAEnIGPDrmTDQoDDuXrZ/BV65g0W0I5PrxyEE5AzOG/KzVfspclyiwHz4w
+# P2I5/ri1deAYEAMp6YAcjFXJbaK3irMgatiFKqiwAnqu01hV3BqF2LSMYgADYx0q
+# 7WB5D9HBiU8=
 # SIG # End signature block

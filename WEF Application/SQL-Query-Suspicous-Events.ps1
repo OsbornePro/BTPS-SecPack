@@ -48,8 +48,7 @@ Function Find-NewlyCreatedLocalAccounts {
                 HelpMessage="Enter a MSSQL Query to execute")]  # End Parameter
             [String]$SqlCommand)  # End param
 
-BEGIN
-{
+BEGIN {
 
     Write-Verbose "Creating connection to SQL database and SQL command"
 
@@ -61,8 +60,7 @@ BEGIN
     $Dataset = New-Object -TypeName System.Data.DataSet
 
 }  # End BEGIN
-PROCESS
-{
+PROCESS {
 
     Write-Verbose "Executing SQL Command: $SqlCommand"
 
@@ -70,8 +68,7 @@ PROCESS
     $Connection.Close()
 
 }  # End PROCESS
-END
-{
+END {
 
     $Dataset.Tables[0].Rows
 
@@ -80,18 +77,14 @@ END
 }  # End Function Find-NewlyCreatedLocalAccounts
 
 
-ForEach ($Sql in $Sqls)
-{
+ForEach ($Sql in $Sqls) {
 
     $SqlCommand = "DECLARE @CurHour DATETIME, @PrevHour DATETIME; SET @CurHour = DATEADD(hour, DATEDIFF(hour,'20110101',CURRENT_TIMESTAMP),'20110101'); SET @PrevHour = DATEADD(hour,-1, @CurHour); SELECT MachineName,TimeCreated,Id,Message FROM dbo.GeneralEvents WHERE TimeCreated >= @PrevHour and TimeCreated < @CurHour AND $Sql ORDER BY TimeCreated DESC"
 
     $Results = Find-NewlyCreatedLocalAccounts -ConnectionString $ConnectionString -SqlCommand $SqlCommand -Verbose
+    If ($Results) {
 
-    If ($Results)
-    {
-
-        Switch ($Sql)
-        {
+        Switch ($Sql) {
 
             $ClearedEventLog {$Significance = 'Event Log Cleared'}
             $PasswordChange {$Significance = 'Password Change Attempt'}
@@ -110,7 +103,6 @@ ForEach ($Sql in $Sqls)
         }  # End Switch
 
         $Results | Add-Member -NotePropertyName "Significance" -NotePropertyValue "$Significance"
-
         $FinalResults += $Results | Select-Object -Property TimeCreated,MachineName,Significance,Message,ID
 
         Remove-Variable Results,Significance
@@ -119,8 +111,7 @@ ForEach ($Sql in $Sqls)
 
 }  # End ForEach
 
-If ($FinalResults)
-{
+If ($FinalResults) {
 
     $Css = @"
 <style>

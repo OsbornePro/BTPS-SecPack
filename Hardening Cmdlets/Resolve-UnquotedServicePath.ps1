@@ -15,8 +15,9 @@ Alias: tobor
 
 .LINK
 https://osbornepro.com
+https://btpssecpack.osbornepro.com
 https://writeups.osbornepro.com
-https://github.com/tobor88
+https://github.com/OsbornePro
 https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
 https://www.linkedin.com/in/roberthosborne/
@@ -32,15 +33,15 @@ None This cmdlet does not accept any piped values
 None
 
 #>
-Function Fix-UnquotedServicePath {
+Function Resolve-UnquotedServicePath {
     [CmdletBinding()]
         param(
             [Parameter(
                 Mandatory=$False,
                 Position=0,
-                HelpMessage="Enter the registry path you wish to exclude from having the services unqupted path corrected. Seperate multiple values with a comma.")]
+                HelpMessage="Enter the registry path you wish to exclude from having the services unqupted path corrected. Seperate multiple values with a comma.")]  # End Paramter
             [String[]]$BlackList = $Null
-        )
+        )  # End param
 
 
     $RegistryLocations = "HKLM:\System\CurrentControlSet\Services","HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall","HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
@@ -48,60 +49,45 @@ Function Fix-UnquotedServicePath {
     $DiscKeys = Get-ChildItem -Recurse -Directory $RegistryLocations -Exclude $BlackList -ErrorAction SilentlyContinue | Select-Object -ExpandProperty "Name" | ForEach-Object { ($_.ToString().Split('\') | Select-Object -Skip 1) -join '\' }
     $Registry = [Microsoft.Win32.RegistryKey]::OpenBaseKey('LocalMachine', 'Default')
 
-    ForEach ($RegKey in $DiscKeys)
-    {
+    ForEach ($RegKey in $DiscKeys) {
 
-        Try
-        {
+        Try {
 
             $ParentKey = $Registry.OpenSubKey($RegKey, $True)
 
         }  # End Try
-        Catch
-        {
+        Catch {
 
             Write-Output "[x] Unable to open $RegKey"
 
         }  # End Catch
 
-        If ($ParentKey.ValueCount -gt 0)
-        {
+        If ($ParentKey.ValueCount -gt 0) {
 
             $MatchedValues = $ParentKey.GetValueNames() | Where-Object { $_ -eq "ImagePath" -or $_ -eq "UninstallString" }
-
-            ForEach ($Match in $MatchedValues)
-            {
+            ForEach ($Match in $MatchedValues) {
 
                 $ValueRegEx = '(^(?!\u0022).*\s.*\.[Ee][Xx][Ee](?<!\u0022))(.*$)'
-
                 $Value = $ParentKey.GetValue($Match)
-
-                If ($Value -match $ValueRegEx)
-                {
+                If ($Value -match $ValueRegEx) {
 
                     $RegType = $ParentKey.GetValueKind($Match)
 
-                    If ($RegType -eq "ExpandString")
-                    {
+                    If ($RegType -eq "ExpandString") {
 
                         $ValueRegEx = '(^(?!\u0022).*\.[Ee][Xx][Ee](?<!\u0022))(.*$)'
-
                         $Value = $ParentKey.GetValue($Match, $Null, [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
-
                         $Value -match $ValueRegEx
 
                     }  # End If
 
                     $Correction = "$([char]34)$($Matches[1])$([char]34)$($Matches[2])"
-
-                    Try
-                    {
+                    Try {
 
                         $ParentKey.SetValue("$Match", "$Correction", [Microsoft.Win32.RegistryValueKind]::$RegType)
 
                     }  # End Try
-                    Catch
-                    {
+                    Catch {
 
                         Write-Output "[x] Unable to write to $ParentKey"
 
@@ -114,22 +100,28 @@ Function Fix-UnquotedServicePath {
                                                                 "Correction" = $Correction
                                                                 "ParentKey" = "HKEY_LOCAL_MACHINE\$RegKey"
                     })) | Out-Null
-                }
-            }
-        }
+
+                }  # End If
+
+            }  # End ForEach
+
+        }  # End If
+
         $ParentKey.Close()
-    }
+
+    }  # End ForEach
+
     $Registry.Close()
 
     $Values | Select-Object -Property "ParentKey","Value","Correction","Name","Type"
 
-}  # End Function Fix-UnquotedServicePath
+}  # End Function Resolve-UnquotedServicePath
 
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUX9/Cbjzr5QVCUBXunyPdNA2x
-# pKKgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUfPF3D7b+/khop8yMCPMr6IqH
+# Lf+gggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -189,11 +181,11 @@ Function Fix-UnquotedServicePath {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FIxhmxxVFZZV7MgOibEBD9bN/+I4MA0GCSqGSIb3DQEBAQUABIIBAFFIDx2ZtjNp
-# shaVS8pg7LU2gusnIW/oUYKQF/y1Cp13BEryn7nBO5VFt3IzkA59I7gDwE69Dw8p
-# L3PH7CHByii4ajOU6YwiI+JINMu49ZRyupJaLYPCwGnH/toh+MDBsu7GmtixXw3G
-# 4DETkuTFDKUw6vgsQIeOpkNEt1pXgXbnFgI51wvx4z7gwhhHtCdyJyIWnNEBtnPp
-# UDLaoXkuaFJeM6HVa1MXVjyNbGbrZ+sK448yMiCTdniz4QbQyYwTokPfTG/NQjmi
-# PPnm3lPf4KajT3VR1LvX9LnuyrMiJaOa33wixT99u4V3Tm+KYSzOcXm+acUhIl67
-# NhEoseebRPM=
+# FMR4XxJ0apXN2AMjuX4gXTYi8ciRMA0GCSqGSIb3DQEBAQUABIIBAMiApu4J5Llr
+# NYC49Fl0Hx1huycBPerNmTDxKFFWQHBeIpU9mWGu94L+bsK/aCvDpO6IQlSSVNra
+# /sKE2OHe9AGmrB/lAhqvhO5N2CyqHROLyY614R1tabRLUa1Sl4lWFflOUbwregw8
+# 2EMnDCwlaVQw7rOaluB/xvHsgTz1SBtsle5mfO3vdWtbpqEmmgSSK8h8dER1S3W8
+# e2R+cFKuMK/40d0cwnJd55rmnnSmt7C/6ag4HKCu3XBHtpB65wLguu7WzTzRpL5K
+# H1IdPpDbmj4E0Mr+NFmuTZZnMgyb5Phl112f3IN+/I5IyeY3w2KZ+DziLPqOTJE1
+# srR9FjghCuY=
 # SIG # End signature block

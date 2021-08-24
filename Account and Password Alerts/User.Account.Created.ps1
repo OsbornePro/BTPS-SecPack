@@ -15,8 +15,7 @@ $Results = $Event | ForEach-Object {
 
 }  # End ForEach-Object
 
-If ($Results)
-{
+If ($Results) {
 
     $Css = @"
 <style>

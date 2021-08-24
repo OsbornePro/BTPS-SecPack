@@ -7,8 +7,7 @@
 # 1 - Sysinternals Autoruns results
 # 2 - Local Group Principals
 $LogfileExists = Get-Eventlog -List | Where-Object {$_.logdisplayname -eq "Autoruns"}
-If (!($LogfileExists))
-{
+If (!($LogfileExists)) {
 
   New-EventLog -LogName "Autoruns" -Source "AutorunsToWinEventLog"
   Limit-EventLog -LogName "Autoruns" -OverflowAction OverWriteAsNeeded -MaximumSize 512KB
@@ -35,8 +34,7 @@ $Proc = Start-Process -FilePath "c:\Program Files\AutorunsToWinEventLog\Autoruns
 $Proc.WaitForExit()
 $AutoRunsArray = Import-Csv -Path $AutoRunsCsv
 
-Foreach ($Item in $AutoRunsArray)
-{
+Foreach ($Item in $AutoRunsArray) {
 
   $Item = Write-Output $Item  | Out-String -Width 1000
   Write-EventLog -LogName "Autoruns" -Source "AutorunsToWinEventLog" -EntryType Information -EventId 1 -Message $Item
@@ -47,7 +45,7 @@ Foreach ($Item in $AutoRunsArray)
 # Requires PowerShell 5.1 due to usage of Get-NetLocalGroup and Get-LocalGroupMember
 
 # Get the FQDN of the current computer's domain. Todo: update this method to support foreign security principals in local groups.
-$ComputerName = (Get-WmiObject win32_computersystem).DNSHostName + "." + (Get-WmiObject -class win32_computersystem).Domain
+$ComputerName = (Get-CimInstance -ClassName Win32_ComputerSystem).DNSHostName + "." + (Get-CimInstance -ClassName Win32_ComputerSystem).Domain
 $DomainFQDN = $ComputerName.Split(".")[1..($ComputerName.Split(".").length-1)] -Join "."
 
 $LocalGroups = Get-LocalGroup | Where-Object {$_.SID -Match "S-1-5-32-555" -Or $_.SID -Match "S-1-5-32-544" -Or $_.SID -Match "S-1-5-32-562"}
@@ -55,7 +53,6 @@ $LocalGroups = Get-LocalGroup | Where-Object {$_.SID -Match "S-1-5-32-555" -Or $
 $LocalGroups | ForEach-Object {
 
     $GroupName = $_
-
     Get-LocalGroupMember -Name $GroupName | Where-Object { $_.PrincipalSource -Match "ActiveDirectory" } | ForEach-Object {
 
         $PrincipalName = $_.Name.Split("\")[1] + "@" + $DomainFQDN
@@ -83,8 +80,8 @@ $AutoRunsArray | Export-Csv -Path $AutorunsCsv -Delimiter ',' -NoTypeInformation
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUJFlfLoHu0lnM09B6PLql6VRO
-# Jpqgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUFtJGJ8i8HJHp6N7Wr2FEKvOm
+# vVegggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -144,11 +141,11 @@ $AutoRunsArray | Export-Csv -Path $AutorunsCsv -Delimiter ',' -NoTypeInformation
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FIO/Hbv07HmQmTX1mOo8jC2celVYMA0GCSqGSIb3DQEBAQUABIIBAAfHgS2TlLaS
-# MPMWOXWragGQv7NNmEPMM4PcnLu3AIzckMDzT2DSlWdoNTbkj0uvQAEKHiT8n+lh
-# Amm8HFbVZ8iEsz8+wt1B2BRfP5xXSOF4zuEryZQQAT8Hl+krERxZ6c0TTT52e0yY
-# hxLyMd19b5AAzRnAEK/TqK586k4l5WlZrkEyBdjWmbyrsQnLaZdsPSVGR6n3kyAS
-# 9tIdKqJO8NzKUncNRHl3ZAztbS2wQzNqiP9WJKkLRL/diWltZP/KuFrWNHmN2L8M
-# VYHAlSWPIVVz19RLlPrB5WLW2vXEMDUYb7FxqmpkaaMeApaYu9aYC+xDl95odN2+
-# 4YkyJKMeE5A=
+# FG73e1AOdUew6tap2zUhuLy7cyBHMA0GCSqGSIb3DQEBAQUABIIBAEnmxDe16CEx
+# zW5Iwv0vp7pjgIH9JAs1m5nLiRSbSuMJK8BPQUtBMZnk6SkauRMo4b15H+fOkThD
+# MVMBOaqe5Inw0uys6iPZbjXPhp0JCBhyDrxJfHz0q813wBZZMsZUGNP7ZRh0o6r+
+# nKTMF1qjNSP4TAj4v6YbNoS1CsNalqJJ/e5xx5/6RnDoxDIVdgFf6gnx26o8Pfqm
+# pZ5lWN5pYJfJCGiVu1k4D6oOY/lS+2QHwzvRbpaNAxgisc8v9gTalX1FzIGRpS5A
+# a+BWFg5CUig8VMWfu1si4GpqGvKT3g64/uFFA0BuADedQpHCG45qMpVOAxb4X7y0
+# oMM/0l2lJ9A=
 # SIG # End signature block

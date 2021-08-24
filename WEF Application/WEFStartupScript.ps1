@@ -9,8 +9,7 @@ Add-LocalGroupMember -Group "Event Log Readers" -Member "NETWORK SERVICE" -Error
 
 Write-Verbose "Ensuring WinRM service is available for WEF communication"
 $EventInfo = Get-WinEvent -LogName 'Microsoft-Windows-Forwarding/Operational' -MaxEvents 1
-If ($EventInfo.LevelDisplayName -ne "Information")
-{
+If ($EventInfo.LevelDisplayName -ne "Information") {
 
     cmd /c 'sc config WinRM type= own'
 
@@ -19,8 +18,8 @@ If ($EventInfo.LevelDisplayName -ne "Information")
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUzeWszE/lQzwI9SwFqOOYC7gX
-# Awqgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU6RpcY8rpocd0J84JRQekUEAZ
+# TOWgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -80,11 +79,11 @@ If ($EventInfo.LevelDisplayName -ne "Information")
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FA1cYkFylFyV8uOCcDKF6TP46scUMA0GCSqGSIb3DQEBAQUABIIBAE4erO6CTxnF
-# 45fwIoOTMAdggv0YQjbWPBy+OK0QQegi1SmVRKJ5L3ayeBp0eKA41mNNEMrbWkHb
-# rhPMPIEMlfVA8hsUtFIzA7jFA/vG2AHpRRgIJ0p176+pX9E5zf3xaIVbMkxQ/NLX
-# 7SMbNpFJXvHkvNI9zCYg1aQQup3tb977+cX6PfM7Jr3TIQmaxfTHYSJXwpAUtK0F
-# zRzuxl6azNHlSIsAmDZl5/pSL5eaok82EELSKVWVD6UpR1FFnT6f7V9bXF45vAZj
-# 7amWfKu+4oB/9NGhpX/l1YeVFE1PBB5A4U+x7waq9O2ArtpCwq7s9pz7otmUnMlb
-# 7VNKLIftgaE=
+# FPpqIIB5Z+2pcpbrxPrZyn6v4jAMMA0GCSqGSIb3DQEBAQUABIIBAB+45Jvfji6v
+# 1VHMaR3waizbv4p2S97XiXAJaygLJVQO6XzlxkOHYHQYW2RCUYmUnJckRl0cXYhc
+# DX5tT+b+Bvu1+C7Ml5J+scoNvL2qAPAqPOE0xTnnpay3rJdSrzCDNTt60LOIBheM
+# VygrQXP4IAUXUPYkzjydr4cdyh9PiJD2FRL2w9Jg6Ca1seLBVTjeuTFo1cFsv4KO
+# Y6wdxWQLCD4pEQW+uQJa6PCDi6qCfe+it3YGUMpPV6xvvq4tEo+/GSxHCD3x1IBL
+# 9NBF2ddvqNpYLatKWy+VuOLMS3jf19nw06cRXs+JBt1LJ2yiyg6f/YPDmtC8/lQb
+# 8fM9BcGfcFI=
 # SIG # End signature block

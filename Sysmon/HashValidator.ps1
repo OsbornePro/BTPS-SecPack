@@ -11,16 +11,14 @@ $WhitelistPath = "$env:USERPROFILE\Downloads\BTPS-SecPack-Master\Sysmon\Whitelis
 #
 # This command grabs the file name and MD5 hash and places the values into a CSV file
 # Get-Content .\Whitelist.txt | ForEach-Object { $Md5Hash = Get-FileHash -Path $_ -Algorithm MD5 | Select-Object -ExpandProperty Hash; $FileName = $_.Split('\')[-1]; $Object = New-Object -TypeName PSObject -Property @{FileName=$FileName; MD5=$Md5Hash}; $Object | Select-Object -Property FileName,MD5 | Export-Csv -Path .\Whitelist.csv -Append }
-If (!(Test-Path -Path $WhitelistPath))
-{
+If (!(Test-Path -Path $WhitelistPath)) {
 
     Throw "Please define the location of Whitelist.csv on line 5 of this script. A starting template has been included in the BTPS SecPack Sysmon directory"
 
 }  # End If
 
 
-If ($Null -eq $VirusTotalApiKey)
-{
+If ($Null -eq $VirusTotalApiKey) {
 
     Throw "GET A VIRUS TOTAL API KEY FROM https://www.virustotal.com/gui/join-us and place it in this script as the $VirusTotalApiKey variable on line 15"
 
@@ -30,8 +28,7 @@ If ($Null -eq $VirusTotalApiKey)
 $FinalResults = @()
 $LogName = "Hash Validations"
 $LogfileExists = Get-WinEvent -ListLog "Hash Validations" -ErrorAction SilentlyContinue
-If (!($LogfileExists))
-{
+If (!($LogfileExists)) {
 
     New-EventLog -LogName $LogName -Source $LogName
     Limit-EventLog -LogName $LogName -OverflowAction OverWriteAsNeeded -MaximumSize 64KB
@@ -54,16 +51,13 @@ Function Search-VirusTotal {
     $VTReport = Invoke-RestMethod -Method 'POST' -Uri 'https://www.virustotal.com/vtapi/v2/file/report' -Body $Body
     $AVScanFound = @()
 
-    If ($VTReport.positives -gt 0)
-    {
+    If ($VTReport.positives -gt 0) {
 
-        ForEach($Scan in ($VTReport.scans | Get-Member -Type NoteProperty))
-        {
+        ForEach($Scan in ($VTReport.scans | Get-Member -Type NoteProperty)) {
 
-            If ($Scan.Definition -Match "detected=(?<detected>.*?); version=(?<version>.*?); result=(?<result>.*?); update=(?<update>.*?})")
-            {
-                If ($Matches.Detected -Eq "True")
-                {
+            If ($Scan.Definition -Match "detected=(?<detected>.*?); version=(?<version>.*?); result=(?<result>.*?); update=(?<update>.*?})") {
+
+                If ($Matches.Detected -Eq "True") {
 
                     $AVScanFound += "{0}({1}) - {2}" -f $Scan.Name, $Matches.Version, $Matches.Result
 
@@ -117,15 +111,13 @@ $Obj = $Events | ForEach-Object {
             $ImpHash = $Hash | ForEach-Object { $_ -Replace "(?i)(?:.*?=)", "" }
             $Md5Hash = $Hash | ForEach-Object { $_.Trim() -Replace "[^,]*$", "" -Replace 'MD5=','' -Replace ',','' }
 
-            If ($Whitelist.MD5 -NotContains $Md5Hash)
-            {
+            If ($Whitelist.MD5 -NotContains $Md5Hash) {
 
                 $VTResult = Get-VirusTotalReport -VTApiKey $VirusTotalApiKey -Hash $Md5Hash
                 # The Free Virus Total API allows only 1 call every 15 seconds which is why we have Start-Sleep here
                 Start-Sleep -Seconds 15
 
-                If ($VTResult.VTReport[0] -gt 0)
-                {
+                If ($VTResult.VTReport[0] -gt 0) {
 
                     $Obj = New-Object -TypeName PSObject | Select-Object -Property VTInfoLink, MD5, SHA1, SHA256, IMPHASH, ProcessPath, MachineName, EventCreation, MoreInfo
                         $Obj.VTInfoLink = $VTResult.VTLink
@@ -161,8 +153,8 @@ $Obj = $Events | ForEach-Object {
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUUcLWksjQDGGHLfIj+7X9qvv4
-# QbCgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUv0UCnKBnAIO+sGxaSKORoLlX
+# CFKgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -222,11 +214,11 @@ $Obj = $Events | ForEach-Object {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FJGsgvSPLY/mY4WwryUo+XAb+1WzMA0GCSqGSIb3DQEBAQUABIIBAAWNKg8kf596
-# YEMWsWuoNOs5HDZxTNLRDAAB90XOcera5n4Bl/3Z7mx6aMPwiQTW1yT3QzkisYlj
-# kYIQ6eg+hbYFwjCzAaE+TxpDsi5nuYmpciPdfJKVwuNYrtWvvhJUV7+o+6IzAsjv
-# 9JWu1+u5ngTQou3SwuEO/g/AQcMmL87T8kk9wCxTQ8zmO0YWQPGSmTCUpxDB/fKX
-# 30VQH7tTGswmj/jfylrpKhRw5ZV1xaP7DEI3T/MAbCD+jHEhzTKp249fFXDmbMAC
-# 8OGxRV41u75NI8U2nFN1NjInmTFgKp976nWD0NBiDnUJIoaWGIpuRSSastu19k2W
-# 1Wy6NfK/1Lo=
+# FPmbm62qxjjheJIXxNmWHW39OPFKMA0GCSqGSIb3DQEBAQUABIIBAERctUZBaxdq
+# C83hhCbwm0wL6kwnK/xHXCypX9K9obvnQ/d9gX/UDKlr0+u9E425XoSwNZxqDOAX
+# hoflxtECsxIN774GXslhImwVMvTzjedX+ZD79yyji3PWXnttWymzy/BKc7bgVbmK
+# 7v3jZoDtSMpiasTgJU5L2JywfpPOTd7Dy3NFRBGtvLTWim9GGtMotARF130p2BYZ
+# kLPBHssplELX0przVpX88Csa/DeSew/jzssaU3sxQ4E69g7TSXPFtOYzm7t6Sbw1
+# 7Ly2WZaqZH5ImCDHseiE7tXpEhquMdqRHbluR7PuWc7qkUrCITaFKASqYRnRbeDY
+# j8iW1Pr/H6w=
 # SIG # End signature block
