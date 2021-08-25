@@ -36,7 +36,7 @@ td {
     $PreContent = "<Title>Expiring Users (Next 10 Days)</Title>"
     $NoteLine = "$(Get-Date -Format 'MM/dd/yyyy HH:mm:ss')"
     $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
-    $Body = $Accounts | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent | Out-String
+    $Body = $Accounts | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "The below table displays accounts that are expiring soon."  | Out-String
 
     Send-MailMessage -From FromEmail -To ToEmail -Subject "AD Event: Accounts Expiring" -BodyAsHtml -Body $Body -SmtpServer UseSmtpServer -Credential $Credential -UseSSL -Port 587
 
