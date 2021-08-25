@@ -94,40 +94,63 @@ Function Find-InsecureLDAPBinds {
 }  # End Function Find-InsecureLDAPBinds
 
 $Results = Find-InsecureLDAPBinds -ComputerName localhost -Hours 24 -Verbose
+$ArrayTable = New-Object -TypeName 'System.Collections.Generic.List[System.Object]'
 
 If ($Results) {
 
-    $Css = @"
-<style>
-table {
-    font-family: verdana,arial,sans-serif;
-        font-size:11px;
-        color:#333333;
-        border-width: 1px;
-        border-color: #666666;
-        border-collapse: collapse;
-}
-th {
-        border-width: 1px;
-        padding: 8px;
-        border-style: solid;
-        border-color: #666666;
-        background-color: #dedede;
-}
-td {
-        border-width: 1px;
-        padding: 8px;
-        border-style: solid;
-        border-color: #666666;
-        background-color: #ffffff;
-}
-</style>
-"@ # End CSS
-    $PreContent = "<Title>NOTIFICATION: Insecure LDAP Binds Performed</Title>"
-    $NoteLine = "This Message was Sent on $(Get-Date -Format 'MM/dd/yyyy HH:mm:ss')"
-    $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
-    $MailBody = $Results | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "<br>The below table contains information on connections to LDAP over the last 24 hours that did not use SSL.<br><br><hr><br><br>" | Out-String
+    $Results | ForEach-Object {
 
-   Send-MailMessage -From FromEmail -To ToEmail -Subject "AD Event: Insecure LDAP Binds Performed" -BodyAsHtml -Body "$MailBody" -SmtpServer UseSmtpServer -Credential $Credential -UseSSL -Port 587
+        $Section = @{
+          activityTitle = "Insecure LDAP Bind"
+          activitySubtitle = "$($Message)"
+          activityText  = "$($Message) from IP address $($_.IPAddress) by $($_.User)"
+          activityImage = ""
+	      facts		  = @(
+                @{
+                        name = "IP Address: "
+                        value = $_.IPAddress
+                    }
+                @{
+                        name = "User: "
+                        value = $_.User
+                    },
+                @{
+                        name = "Port: "
+                        value = $_.Port
+                    },
+                @{
+                        name = "Bind Type: "
+                        value = $_.BindType
+                    },
+                @{
+                        name = "Message"
+                        value = "Insecure LDAP Bind Performed"
+                    }
+            )  # End Facts
+
+	    }  # End Section
+
+	    $ArrayTable.Add($Section)
+
+    }  # End ForEach-Object
+
+    $Body = ConvertTo-Json -Depth 8 @{
+	    title = "Insecure LDAP Bind"
+	    text  = "There were $($ArrayTable.Count) Insecure LDAP Binds performed"
+	    sections = $ArrayTable
+        potentialAction =   @(
+                        @{
+                            '@context'  = 'http://schema.org'
+                            '@type' = 'ViewAction'
+                            name = 'Elasticsearch for Correlation Events'
+                            target = @("SIEM TOOL LINK")
+                        }
+                    )  # End Potential Actions
+    }  # End Body
+
+    $WebhookUrl = 'WEBHOOK_URL_REPLACE'
+
+    # Post the JSON Array Object to the Webhook Connector URI
+    Invoke-RestMethod -Uri $WebhookUrl -Method Post -Body $Body -ContentType 'application/json'
 
 }  # End If
