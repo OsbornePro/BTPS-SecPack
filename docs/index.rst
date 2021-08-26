@@ -24,7 +24,13 @@ The `Installer.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/Insta
 
 **FEATURES COMING SOON**
 
-* **Microsoft Teams Alerts instead of Email Alerts** I will work on setting up a new way to send alerts using a Post to Microsoft Teams Channel. I plan on allowing you to use this in conjunction with or instead of Email Alerts. If there are other ways out there to receive alerts you would like offered feel free to reach out by emailing info@osbornepro.com to let me know your preference.
+* **Microsoft Teams Alerts instead of Email Alerts** I have so far updated the alert scripts excluding "Watch-PortScan.ps1" which I have some more tuning I want to perform too. The rest of the alert scripts will use Microsoft Teams to perform notifications instead of email alerts. These alert scripts are available inside of the [Microsoft-Teams](https://github.com/OsbornePro/BTPS-SecPack/blob/microsoft-teams) branch. I have not incorporated this into the Installer.ps1 script yet but will in the near future. Below is an image to show what that will look like.
+
+.. image:: img/TeamsPostAlert.png
+   :scale: 100
+   :alt: Teams Notification
+
+
 * **ELK SIEM Tool:** I am going to set up a configuration for the ELK SIEM tool. This tool is free for certain uses and offers a purchase if desired. It will include `Elasticsearch <https://www.elastic.co/elasticsearch/>`_, `Kibana <https://www.elastic.co/kibana>`_, and `Winlogbeat <https://www.elastic.co/beats/winlogbeat>`_. The configuration is going to use the Windows Event Forwarding (WEF) configuration. The purpose of this is to prevent the need to install agents on the devices in your environment. The free version does not offer LDAP authentication unfortunately. The configuration will use TLS certificates to encrypt communications on the local host and listen for outside connections if you decide to install other stack programs such as `APM-Server <https://www.elastic.co/apm>`_, `Heartbeat <https://www.elastic.co/beats/heartbeat>`_, or `Metricbeat <https://www.elastic.co/beats/metricbeat>`_. `Winlogbeat <https://www.elastic.co/beats/winlogbeat>`_ logs will be modified to include `GeoIP data <https://www.elastic.co/blog/geoip-in-the-elastic-stack>`_ tags that can be used for mapping IP addresses. Default passwords will of course also be changed. I will also create a Docker file that can be used to prevent the need for too much manual set up. When available it can be obtained from the Official OsbornePro LLC docker site: https://hub.docker.com/orgs/osbornepro
 * I am **NO** longer planning on integrating the `Virus Total API <https://support.virustotal.com/hc/en-us/articles/115002100149-API>`_ for MD5 hash comparisons. This does not provide enough cost per value however, I included a script to do this in case it is valuable to your situation. The script is located here: https://github.com/OsbornePro/BTPS-SecPack/blob/master/Sysmon/HashValidator.ps1
 
