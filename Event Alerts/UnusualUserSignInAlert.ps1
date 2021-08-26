@@ -203,37 +203,59 @@ ForEach ($Assignment in $UserList) {
 
 } # End ForEach
 
-# Build Email to send final results to inform admins
-$Css = @"
-<style>
-table {
-    font-family: verdana,arial,sans-serif;
-        font-size:11px;
-        color:#333333;
-        border-width: 1px;
-        border-color: #666666;
-        border-collapse: collapse;
-}
-th {
-        border-width: 1px;
-        padding: 8px;
-        border-style: solid;
-        border-color: #666666;
-        background-color: #dedede;
-}
-td {
-        border-width: 1px;
-        padding: 8px;
-        border-style: solid;
-        border-color: #666666;
-        background-color: #ffffff;
-}
-</style>
-"@ # End CSS
 
-$PreContent = "<Title>NOTIFICATION: Unusual Sign In: $env:COMPUTERNAME</Title>"
-$NoteLine = "This Message was Sent on $(Get-Date -Format 'MM/dd/yyyy HH:mm:ss')"
-$PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
-$MailBody = $FinalResult | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "<br>The below table contains information on users who have signed into devices they are not assigned in the last 24 hours<br><br><hr><br><br>" | Out-String
+If ($FinalResult) {
 
-Send-MailMessage -From FromEmail -To ToEmail -Subject "Unusual Login Occurred" -BodyAsHtml -Body "$MailBody" -SmtpServer UseSmtpServer -Credential $Credential -UseSsl -Port 587
+    $ArrayTable = New-Object -TypeName 'System.Collections.Generic.List[System.Object]'
+    $FinalResult | ForEach-Object {
+
+        $Section = @{
+          activityTitle = "Unusual Sign In"
+          activitySubtitle = "List of users who have signed into devices they are not assigned"
+          activityText  = "List of users who have signed into devices they are not assigned"
+          activityImage = ""
+	      facts		  = @(
+                @{
+                        name = "User: "
+                        value = $_.User
+                    }
+                @{
+                        name = "Hostnames: "
+                        value = $_.Hostnames
+                    },
+                @{
+                        name = "IPv4 Locations: "
+                        value = $_.IPv4Locations
+                    },
+                @{
+                        name = "Message: "
+                        value = "Not assigned this device"
+                    }
+            )  # End Facts
+
+	    }  # End Section
+
+	    $ArrayTable.Add($Section)
+
+    }  # End ForEach-Object
+
+    $Body = ConvertTo-Json -Depth 8 @{
+	    title = "Unusual Sign In"
+	    text  = "There are $($ArrayTable.Count) unusual sign in notifications"
+	    sections = $ArrayTable
+        potentialAction =   @(
+                        @{
+                            '@context'  = 'http://schema.org'
+                            '@type' = 'ViewAction'
+                            name = 'SIEM for Correlation Events'
+                            target = @("SIEM TOOL LINK")
+                        }
+                    )  # End Potential Actions
+    }  # End Body
+
+    $WebhookUrl = 'WEBHOOK_URL_REPLACE'
+    
+    # Post the JSON Array Object to the Webhook Connector URI
+    Invoke-RestMethod -Uri $WebhookUrl -Method Post -Body $Body -ContentType 'application/json'
+
+}  # End If
