@@ -1,65 +1,42 @@
 <#
-.NAME
-	Find-InsecureLDAPBinds.ps1
-
-
 .SYNOPSIS
-	Exports a CSV from the specified domain controller containing 
-    all Unsgined and Clear-text LDAP binds made to the DC by
-    extracting Event 2889 from the "Directory Services" event log.
-    This extract can be used to identifiy applications and hosts
-    performing weak and insecure LDAP binds.
+Exports a CSV from the specified domain controller containing 
+all Unsgined and Clear-text LDAP binds made to the DC by
+extracting Event 2889 from the "Directory Services" event log.
+This extract can be used to identifiy applications and hosts
+performing weak and insecure LDAP binds.
                 
-    The events extracted by the script are only generated when
-    LDAP diagnostics are enabled as per below. 
-    https://technet.microsoft.com/en-us/library/dd941829(v=ws.10).aspx
-      
-          
-.SYNTAX          
-	Find-InsecureLDAPBinds.ps1 [-ComputerName <DomainController>] [-Hours <Hours>]
+The events extracted by the script are only generated when
+LDAP diagnostics are enabled as per below. 
+https://technet.microsoft.com/en-us/library/dd941829(v=ws.10).aspx
        
 
-.PARAMETERS
-    -ComputerName <String[]>
-        Specifies one or more computers. The default is the local computer.
+.PARAMETER ComputerName
+Specifies one or more computers. The default is the local computer.
+Type the NETBIOS name, an IP address, or a fully qualified domain name of a remote computer. To specify the local computer, type the computer name, a dot (.), or localhost.
+This parameter does not rely on Windows PowerShell remoting. You can use the ComputerName parameter even if your computer is not configured to run remote commands.
         
-        Type the NETBIOS name, an IP address, or a fully qualified domain name of a remote computer. To specify the local computer, type the computer name, a dot (.), or localhost.
         
-        This parameter does not rely on Windows PowerShell remoting. You can use the ComputerName parameter even if your computer is not configured to run remote commands.
-        
-        Required?                    false
-        Position?                    0
-        Default value                localhost
-        Accept pipeline input?       True (ByPropertyName, ByValue)
-        Accept wildcard characters?  false
-        
-    -Hours <Int32>
-        This parameter defines the number of hours to check for insecure LDAP Binds in the Event Log
-        
-        Required?                    false
-        Position?                    1
-        Default value                24
-        Accept pipeline input?       false
-        Accept wildcard characters?  false
+.PARAMETER Hours
+This parameter defines the number of hours to check for insecure LDAP Binds in the Event Log
 
 
 .DESCRIPTION 
-	Execute the script against the DomainController which has had
-    the diagnostic logging enabled. By default, the script will 
-    return the past 24 hours worth of events. You can increase or 
-    decrease this value as desired
+Execute the script against the DomainController which has had
+the diagnostic logging enabled. By default, the script will 
+return the past 24 hours worth of events. You can increase or 
+decrease this value as desired
 
 
 .INPUTS
-    System.String
-        You can pipe computer names to this cmdlet..
-        
-        In Windows PowerShell 2.0, the ComputerName parameter takes input from the pipeline only by property name. In Windows PowerShell 3.0, the ComputerName parameter takes input from the pipeline by value.
+System.String
+You can pipe computer names to this cmdlet..
+In Windows PowerShell 2.0, the ComputerName parameter takes input from the pipeline only by property name. In Windows PowerShell 3.0, the ComputerName parameter takes input from the pipeline by value.
     
     
 .OUTPUTS
-    System.String
-        The CSV list is sent to the file designated in the Path parameter.
+System.String
+The CSV list is sent to the file designated in the Path parameter.
 #> 
 Function Find-InsecureLDAPBinds {
     [CmdletBinding()]
