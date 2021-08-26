@@ -52,12 +52,6 @@ If ($Events) {
                         @{
                             '@context'  = 'http://schema.org'
                             '@type' = 'ViewAction'
-                            name = 'Elasticsearch for Correlation Events'
-                            target = @("https://selenium.usav.org:5601/")
-                        },
-                        @{
-                            '@context'  = 'http://schema.org'
-                            '@type' = 'ViewAction'
                             name = 'Splunk for Correlation Events'
                             target = @("SIEM TOOL LINK")
                         }
