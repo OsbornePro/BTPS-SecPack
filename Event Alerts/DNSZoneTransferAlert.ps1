@@ -1,7 +1,8 @@
-$Event = Get-WinEvent -FilterHashtable @{LogName='DNS Server';ID='6001'} -MaxEvents 1
-If ($Event) {
+$Events = Get-WinEvent -FilterHashtable @{LogName='DNS Server';ID='6001'} -MaxEvents 1
 
-    $Results = $Event | ForEach-Object {
+If ($Events) {
+    
+    $Results = $Events | ForEach-Object {
 
             $Obj = New-Object -TypeName PSObject | Select-Object -Property EventID, Domain, InitiatedBy, DC, Date, Message
             $Obj.EventID = $_.Id
@@ -10,47 +11,43 @@ If ($Event) {
             $Obj.DC = $_.MachineName
             $Obj.Date = $_.TimeCreated
             $Obj.Message = "DNS Zone Transfer has occured"
-
+            
             $Obj
 
     }  # End ForEach-Object
 
-    If ($Results) {
+}  # End If
 
-    $Css = @"
-<style>
-table {
-    font-family: verdana,arial,sans-serif;
-        font-size:11px;
-        color:#333333;
-        border-width: 1px;
-        border-color: #666666;
-        border-collapse: collapse;
-}
-th {
-        border-width: 1px;
-        padding: 8px;
-        border-style: solid;
-        border-color: #666666;
-        background-color: #dedede;
-}
-td {
-        border-width: 1px;
-        padding: 8px;
-        border-style: solid;
-        border-color: #666666;
-        background-color: #ffffff;
-}
-</style>
-"@ # End CSS
+# TEAMS POST
+If ($Results) {
 
-        $PreContent = "<Title>DNS Zone Transfer</Title>"
-        $NoteLine = "This Message was Sent on $(Get-Date -Format 'MM/dd/yyyy HH:mm:ss')"
-        $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
-        $MailBody = $Results | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "<br>A DNS Zone transfer has occured. Details are below.<br><br><hr><br><br>" | Out-String
+    $Domain = $Obj.Domain
+    $EventID = $Obj.EventID
+    $InitiatedBy = $Obj.InitiatedBy
+    $DC = $Obj.DC
+    $Date = $Obj.Date.ToLongDateString()
+    $Message = $Obj.Message
+    $WebhookUrl = 'WEBHOOK_URL_REPLACE'
+    $Body = ConvertTo-Json -Depth 8 @{
+        title = "DNS Zone Transfer Alert"
+        text = "
+        DC        = $DC 
+        Initiator = $InitiatedBy 
+        Domain    = $Domain
+        Time      = $Date
+        Message   = $Message"
+        summary = 'DNS zone Transfer Alert'
+        potentialAction =   @(
+                                @{
+                                    '@context'  = 'http://schema.org'
+                                    '@type' = 'ViewAction'
+                                    name = 'Elasticsearch for Correlation Events'
+                                    target = @("SIEM TOOL LINK")
+                                }
+                            ) 
+    }  # End Body
 
-        Send-MailMessage -From FromEmail -To ToEmail -Subject "AD Event: DNS Zone Transfer Occured" -BodyAsHtml -Body "$MailBody" -SmtpServer UseSmtpServer -UseSsl -Port 587 -Credential $Credential
+    # Post the JSON Array Object to the Webhook Connector URI
+    Invoke-RestMethod -Uri $WebhookUrl -Method Post -Body $Body -ContentType 'application/json'
 
-    }  # End If
-
-}  # End Else
+}  # End If
