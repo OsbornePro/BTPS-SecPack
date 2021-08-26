@@ -22,7 +22,7 @@ If ($Events) {
                     },
                 @{
                         name = "Device: "
-                        value = $_.Properties[6].Value
+                        value = $_.Properties[13].Value
                     },
                 @{
                         name = "DC: "
