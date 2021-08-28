@@ -257,7 +257,6 @@ You can now use the above URL in the B.T.P.S Security Package scripts I provide.
 
 
 .. code-block:: 
-
 $WebHook = Read-Host -Prompt "Paster your Webhook URL here: "
 $SIEM = Read-Host -Prompt "If you have a SIEM in your environment enter the link here: "
 $BTPSHome = Read-Host -Prompt "Where did you save the BTPS Security Pacakge git repo? EXAMPLE: C:\Users\Administrator\Downloads\BTPS-SecPack-microsoft-teams"
