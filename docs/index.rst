@@ -319,7 +319,7 @@ https://github.com/OsbornePro/Documents/raw/main/Installer.ps1%20Demo.pdf
 
 Using the Canary Files
 ======================
-I have included some fake executables in the BTPS Security Package. These executables do not do anything other than print the help message info from the actualy executables. This was done to make them look legitimate if an attacker attempts to execute them. By making these fake executables `Canary Files<https://www.canarytokens.org/generate>`_ we can receive email alerts whenever an attacker executes them.
+I have included some fake executables in the BTPS Security Package. These executables do not do anything other than print the help message info from the actualy executables. This was done to make them look legitimate if an attacker attempts to execute them. By making these fake executables `Canary Files <https://www.canarytokens.org/generate>`_ we can receive email alerts whenever an attacker executes them.
 
 How To Set Up Your Canary Tokens
 --------------------------------
@@ -354,10 +354,10 @@ Use PowerShell to create a fake custom save location for Microsoft Edge Temp fil
 
 Below is a list of the executables I have included to try and bait an attacker into using.
 
-* accesscheck.exe Used for viewing permissions on files and discovering unquoted service paths
-* nc.exe and nc64.exe Used to execute bind and reverse shells or for transferring files
-* procdump.exe Used for dumping process memory which may contain clear text passwords or other info
-* PsExec.exe Used for executing commands on remote devices using SMB
+* ``accesscheck.exe`` Used for viewing permissions on files and discovering unquoted service paths
+* ``nc.exe`` and ``nc64.exe`` Used to execute bind and reverse shells or for transferring files
+* ``procdump.exe`` Used for dumping process memory which may contain clear text passwords or other info
+* ``PsExec.exe`` Used for executing commands on remote devices using SMB
 
 If any of the above executables are run they will display the actualy executable's help message. This is done to make it seem like they are legitimate. Maybe we can trick an attacker into thinking their command line is bad or someone messed up the executables compilation. When they do this we will receive an email alert thanks to the canary token.
 
