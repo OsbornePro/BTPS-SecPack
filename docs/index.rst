@@ -236,17 +236,17 @@ If you wish to use Microsoft Teams for sending alerts instead of using email you
 You can create a webhook using the following steps (if you are an admin)
 
 #. Open the Microsoft Teams application
-#. In the left hand pane click "**Teams **"
-#. Click the more options icon represented by 3 dots "**...**" next to one of the desired Teams Channels. Example Channel Name: General
-#. Clicking those 3 dots will display a dropdown menu. Click "**Connectors**"
-#. Click the "**Add**" button next to "**Incoming Webhook**"
-#. Click "**Add**" on the Incoming Webhook pop up screen
+#. In the left hand pane click **Teams**
+#. Click the more options icon represented by 3 dots **...** next to one of the desired Teams Channels. Example Channel Name: General
+#. Clicking those 3 dots will display a dropdown menu. Click **Connectors**
+#. Click the **Add** button next to **Incoming Webhook**
+#. Click **Add** on the Incoming Webhook pop up screen
 #. On the Incoming Webhook screen perform the following actions 
-    #. Define a name for your webhook. In the below image this value is "*PowerShell-TeamsMessagePost*" 
-    #. Click "**Create**" 
-    #. Optionally you can also use "**Upload Image**" to select an image for the Incoming Webhook. In the below image I left the default icon which is the light blue triangle on white background. 
-    #. Click "**Create**"
-#. The Incoming Webhook URL is created. Copy the URL and click "**Done**"
+    #. Define a name for your webhook. In the below image this value is *PowerShell-TeamsMessagePost*
+    #. Click **Create**
+    #. Optionally you can also use **Upload Image** to select an image for the Incoming Webhook. In the below image I left the default icon which is the light blue triangle on white background. 
+    #. Click **Create**
+#. The Incoming Webhook URL is created. Copy the URL and click **Done**
 
 You can now use the above URL in the B.T.P.S Security Package scripts I provide. You can quickly update the value in the scripts by executing the below commands
 
