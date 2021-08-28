@@ -257,7 +257,7 @@ You can now use the above URL in the B.T.P.S Security Package scripts I provide.
 
 
 .. code-block::
-    
+
     $WebHook = Read-Host -Prompt "Paster your Webhook URL here: "
     $SIEM = Read-Host -Prompt "If you have a SIEM in your environment enter the link here: "
     $BTPSHome = Read-Host -Prompt "Where did you save the BTPS Security Pacakge git repo? EXAMPLE: C:\Users\Administrator\Downloads\BTPS-SecPack-microsoft-teams"
@@ -315,6 +315,51 @@ Download PDF Instructions for Installer.ps1
 Below link contains images and walks you through the Installer.ps1 setup steps and process. I recommend checking this out if you are executing the installer script to make sure there are no misunderstandings during it's execution.
 
 https://github.com/OsbornePro/Documents/raw/main/Installer.ps1%20Demo.pdf
+
+
+Using the Canary Files
+======================
+I have included some fake executables in the BTPS Security Package. These executables do not do anything other than print the help message info from the actualy executables. This was done to make them look legitimate if an attacker attempts to execute them. By making these fake executables `Canary Files<https://www.canarytokens.org/generate>`_ we can receive email alerts whenever an attacker executes them.
+
+How To Set Up Your Canary Tokens
+--------------------------------
+
+#. Simply go to https://www.canarytokens.org/generate
+#. Select **"Custom exe / binary"** from the dropdown menu
+#. Enter the email address to send an alert notification too
+#. Set a Reminder to let you know what host you are placing this file on, the name of the fake executable file. This way your alerts will tell you where and what was executed
+#. Click **"Generate Canary Token"** to download your new decoy executable file
+#. Save the file on a device. I suggest creating a new executable for each device you plan on placing this executable file on. This is to ensure you know where the file was executed from. *This is a free tool**
+
+**Q.** Where should I save the Canary File? 
+
+**A.** Anywhere that makes sense to you. I have included a couple example file locations below with a note on why that location might be good.
+
+* ``C:\Temp`` Common directory for storing files an admin may want to delete later but never did
+* ``C:\Windows\Temp``` Common directory for storing files an admin may want to delete later but never did
+* ``C:\Windows\System32``` In your Path variable to make files easier to execute
+* ``C:\Users\Public\Downloads``` Common place for downloaded exectuables
+* ``C:\Users\Administrator\Downloads``` Common place for downloaded exectuables
+* ``C:\Windows\System32\spool\drivers\color``` Commonly used by attackers to save files under the System32 directory tree
+
+Use PowerShell to create a fake custom save location for Microsoft Edge Temp files. When you click "Open" in Microsoft Edge this is where those temporaryly saved file locations are placed
+
+.. codeblock::
+
+    $Guid = [guid]::NewGuid()
+    New-Item -Path "$env:USERPROFILE\AppData\Local\Temp\MicrosoftEdgeDownloads" -Name $Guid -ItemType File -Force
+
+
+**List of Included Fake Executables**
+
+Below is a list of the executables I have included to try and bait an attacker into using.
+
+* accesscheck.exe Used for viewing permissions on files and discovering unquoted service paths
+* nc.exe and nc64.exe Used to execute bind and reverse shells or for transferring files
+* procdump.exe Used for dumping process memory which may contain clear text passwords or other info
+* PsExec.exe Used for executing commands on remote devices using SMB
+
+If any of the above executables are run they will display the actualy executable's help message. This is done to make it seem like they are legitimate. Maybe we can trick an attacker into thinking their command line is bad or someone messed up the executables compilation. When they do this we will receive an email alert thanks to the canary token.
 
 
 Configure WinRM over HTTPS
