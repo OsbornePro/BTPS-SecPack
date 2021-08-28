@@ -249,13 +249,14 @@ You can create a webhook using the following steps (if you are an admin)
 #. The Incoming Webhook URL is created. Copy the URL and click "**Done**"
 
 You can now use the above URL in the B.T.P.S Security Package scripts I provide. You can quickly update the value in the scripts by executing the below commands
+
 .. image:: img/TeamsPostAlert.png
    :scale: 100
    :alt: Teams Notification
 
-.. code-block::powershell
-    :linenos:
-$WebHook = Read-Host -Prompt "Paster your Webhook URL here: "
+
+
+``$WebHook = Read-Host -Prompt "Paster your Webhook URL here: "
 $SIEM = Read-Host -Prompt "If you have a SIEM in your environment enter the link here: "
 $BTPSHome = Read-Host -Prompt "Where did you save the BTPS Security Pacakge git repo? EXAMPLE: C:\Users\Administrator\Downloads\BTPS-SecPack-microsoft-teams"
 $Files = (Get-ChildItem -Path $BTPSHome -Include "AttemptedPasswordChange.ps1","AttemptedPasswordReset.ps1","Failed.Username.and.Password.ps1","User.Account.Created.ps1 ","User.Account.Locked.ps1","User.Account.Unlocked.ps1","DNSZoneTransferAlert.ps1","NewComputerAlert.ps1","Query-InsecureLDAPBinds.ps1","UnusualUserSignInAlert.ps1","Watch-PortScan.ps1 " -Recurse -ErrorAction SilentlyContinue -Force).FullName
@@ -265,7 +266,7 @@ ForEach ($File in $Files) {
     ((Get-Content -Path $File -Raw) -Replace "SIEM TOOL LINK","$SIEM") | Set-Content -Path $File -Force
 
 }  # End ForEach
-
+``
 
 Using the Installer.ps1 File to Get Started
 ===========================================
