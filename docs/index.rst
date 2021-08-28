@@ -24,13 +24,6 @@ The `Installer.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/Insta
 
 **FEATURES COMING SOON**
 
-* **Microsoft Teams Alerts instead of Email Alerts** I have so far updated the alert scripts excluding "Watch-PortScan.ps1" which I have some more tuning I want to perform too. The rest of the alert scripts will use Microsoft Teams to perform notifications instead of email alerts. These alert scripts are available inside of the [Microsoft-Teams](https://github.com/OsbornePro/BTPS-SecPack/blob/microsoft-teams) branch. I have not incorporated this into the Installer.ps1 script yet but will in the near future. Below is an image to show what that will look like.
-
-.. image:: img/TeamsPostAlert.png
-   :scale: 100
-   :alt: Teams Notification
-
-
 * **ELK SIEM Tool:** I am going to set up a configuration for the ELK SIEM tool. This tool is free for certain uses and offers a purchase if desired. It will include `Elasticsearch <https://www.elastic.co/elasticsearch/>`_, `Kibana <https://www.elastic.co/kibana>`_, and `Winlogbeat <https://www.elastic.co/beats/winlogbeat>`_. The configuration is going to use the Windows Event Forwarding (WEF) configuration. The purpose of this is to prevent the need to install agents on the devices in your environment. The free version does not offer LDAP authentication unfortunately. The configuration will use TLS certificates to encrypt communications on the local host and listen for outside connections if you decide to install other stack programs such as `APM-Server <https://www.elastic.co/apm>`_, `Heartbeat <https://www.elastic.co/beats/heartbeat>`_, or `Metricbeat <https://www.elastic.co/beats/metricbeat>`_. `Winlogbeat <https://www.elastic.co/beats/winlogbeat>`_ logs will be modified to include `GeoIP data <https://www.elastic.co/blog/geoip-in-the-elastic-stack>`_ tags that can be used for mapping IP addresses. Default passwords will of course also be changed. I will also create a Docker file that can be used to prevent the need for too much manual set up. When available it can be obtained from the Official OsbornePro LLC docker site: https://hub.docker.com/orgs/osbornepro
 * I am **NO** longer planning on integrating the `Virus Total API <https://support.virustotal.com/hc/en-us/articles/115002100149-API>`_ for MD5 hash comparisons. This does not provide enough cost per value however, I included a script to do this in case it is valuable to your situation. The script is located here: https://github.com/OsbornePro/BTPS-SecPack/blob/master/Sysmon/HashValidator.ps1
 
@@ -231,6 +224,44 @@ This alert informs administrators when a user account has been manually unlocked
 .. image:: img/UserAccountUnlocked.png
     :scale: 100
     :alt: User Account Unlocked
+
+
+Using the "microsoft-teams" branch repository
+=============================================
+If you wish to use Microsoft Teams for sending alerts instead of using email you will want to load the `microsoft-teams <https://github.com/OsbornePro/BTPS-SecPack/tree/microsoft-teams>`_ branch for this repository which has the Teams alert modifications. It will take me a little while to implement this as a configuration option in the install script. Using Microsoft Teams for alert posts does not remove the need for certain email notifications in this repository. Email will still be used for some of the actions. These Teams Posts are able to be completed after you first create a webhook. So-called webhooks offer the possibility to send alerts or other notifications to a Microsoft Teams channel.
+- `Microsoft Documentation to Create a Webhook <https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook>`_
+- `Microsoft Documentation on Using Webhooks <https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using?tabs=cURL>`_
+You can create a webhook using the following steps (if you are an admin)
+1. Open the Microsoft Teams application
+2. In the left hand pane click "**Teams **"
+3. Click the more options icon represented by 3 dots "**...**" next to one of the desired Teams Channels. Example Channel Name: General
+4. Clicking those 3 dots will display a dropdown menu. Click "**Connectors**"
+5. Click the "**Add**" button next to "**Incoming Webhook**"
+6. Click "**Add**" on the Incoming Webhook pop up screen
+7. On the Incoming Webhook screen perform the following actions 
+    a. Define a name for your webhook. In the below image this value is "*PowerShell-TeamsMessagePost*" 
+    b. Click "**Create**" 
+    c. Optionally you can also use "**Upload Image**" to select an image for the Incoming Webhook. In the below image I left the default icon which is the light blue triangle on white background. 
+    d. Click "**Create**"
+8. The Incoming Webhook URL is created. Copy the URL and click "**Done**"
+
+You can now use the above URL in the B.T.P.S Security Package scripts I provide. You can quickly update the value in the scripts by executing the below commands
+.. image:: img/TeamsPostAlert.png
+   :scale: 100
+   :alt: Teams Notification
+
+.. code-block::powershell
+    :linenos:
+$WebHook = Read-Host -Prompt "Paster your Webhook URL here: "
+$SIEM = Read-Host -Prompt "If you have a SIEM in your environment enter the link here: "
+$BTPSHome = Read-Host -Prompt "Where did you save the BTPS Security Pacakge git repo? EXAMPLE: C:\Users\Administrator\Downloads\BTPS-SecPack-microsoft-teams"
+$Files = (Get-ChildItem -Path $BTPSHome -Include "AttemptedPasswordChange.ps1","AttemptedPasswordReset.ps1","Failed.Username.and.Password.ps1","User.Account.Created.ps1 ","User.Account.Locked.ps1","User.Account.Unlocked.ps1","DNSZoneTransferAlert.ps1","NewComputerAlert.ps1","Query-InsecureLDAPBinds.ps1","UnusualUserSignInAlert.ps1","Watch-PortScan.ps1 " -Recurse -ErrorAction SilentlyContinue -Force).FullName
+ForEach ($File in $Files) {
+
+    ((Get-Content -Path $File -Raw) -Replace "WEBHOOK_URL_REPLACE","$WebHook") | Set-Content -Path $File -Force
+    ((Get-Content -Path $File -Raw) -Replace "SIEM TOOL LINK","$SIEM") | Set-Content -Path $File -Force
+
+}  # End ForEach
 
 
 Using the Installer.ps1 File to Get Started
