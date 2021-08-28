@@ -347,7 +347,7 @@ Use PowerShell to create a fake custom save location for Microsoft Edge Temp fil
 .. code-block:: powershell
 
     $Guid = [guid]::NewGuid()
-    New-Item -Path "$env:USERPROFILE\AppData\Local\Temp\MicrosoftEdgeDownloads" -Name $Guid -ItemType File -Force
+    New-Item -Path "$env:USERPROFILE\AppData\Local\Temp\MicrosoftEdgeDownloads" -Name $Guid -ItemType Directory -Force
 
 
 **List of Included Fake Executables**
