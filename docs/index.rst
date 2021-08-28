@@ -229,21 +229,24 @@ This alert informs administrators when a user account has been manually unlocked
 Using the "microsoft-teams" branch repository
 =============================================
 If you wish to use Microsoft Teams for sending alerts instead of using email you will want to load the `microsoft-teams <https://github.com/OsbornePro/BTPS-SecPack/tree/microsoft-teams>`_ branch for this repository which has the Teams alert modifications. It will take me a little while to implement this as a configuration option in the install script. Using Microsoft Teams for alert posts does not remove the need for certain email notifications in this repository. Email will still be used for some of the actions. These Teams Posts are able to be completed after you first create a webhook. So-called webhooks offer the possibility to send alerts or other notifications to a Microsoft Teams channel.
-- `Microsoft Documentation to Create a Webhook <https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook>`_
-- `Microsoft Documentation on Using Webhooks <https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using?tabs=cURL>`_
+
+* `Microsoft Documentation to Create a Webhook <https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook>`_
+* `Microsoft Documentation on Using Webhooks <https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using?tabs=cURL>`_
+
 You can create a webhook using the following steps (if you are an admin)
-1. Open the Microsoft Teams application
-2. In the left hand pane click "**Teams **"
-3. Click the more options icon represented by 3 dots "**...**" next to one of the desired Teams Channels. Example Channel Name: General
-4. Clicking those 3 dots will display a dropdown menu. Click "**Connectors**"
-5. Click the "**Add**" button next to "**Incoming Webhook**"
-6. Click "**Add**" on the Incoming Webhook pop up screen
-7. On the Incoming Webhook screen perform the following actions 
-    a. Define a name for your webhook. In the below image this value is "*PowerShell-TeamsMessagePost*" 
-    b. Click "**Create**" 
-    c. Optionally you can also use "**Upload Image**" to select an image for the Incoming Webhook. In the below image I left the default icon which is the light blue triangle on white background. 
-    d. Click "**Create**"
-8. The Incoming Webhook URL is created. Copy the URL and click "**Done**"
+
+#. Open the Microsoft Teams application
+#. In the left hand pane click "**Teams **"
+#. Click the more options icon represented by 3 dots "**...**" next to one of the desired Teams Channels. Example Channel Name: General
+#. Clicking those 3 dots will display a dropdown menu. Click "**Connectors**"
+#. Click the "**Add**" button next to "**Incoming Webhook**"
+#. Click "**Add**" on the Incoming Webhook pop up screen
+#. On the Incoming Webhook screen perform the following actions 
+    #. Define a name for your webhook. In the below image this value is "*PowerShell-TeamsMessagePost*" 
+    #. Click "**Create**" 
+    #. Optionally you can also use "**Upload Image**" to select an image for the Incoming Webhook. In the below image I left the default icon which is the light blue triangle on white background. 
+    #. Click "**Create**"
+#. The Incoming Webhook URL is created. Copy the URL and click "**Done**"
 
 You can now use the above URL in the B.T.P.S Security Package scripts I provide. You can quickly update the value in the scripts by executing the below commands
 .. image:: img/TeamsPostAlert.png
