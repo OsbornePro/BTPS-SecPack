@@ -94,8 +94,21 @@ Function Find-InsecureLDAPBinds {
 }  # End Function Find-InsecureLDAPBinds
 
 $Results = Find-InsecureLDAPBinds -ComputerName localhost -Hours 24 -Verbose
+$Final = $Results | ForEach-Object {
 
-If ($Results) {
+            $Obj = New-Object -TypeName PSObject | Select-Object -Property "Hostname","IPAddress","Port","User","BindType"
+            $Obj.Hostname = $(Resolve-DnsName -Name $_.IPAddress -Server $env:COMPUTERNAME | Select-Object -ExpandProperty Name -First 1 | Out-String)
+            $Obj.IPAddress = $_.IPAddress
+            $Obj.Port = $_.Port
+            $Obj.User = $_.User
+            $Obj.BindType = $_.BindType
+            $Obj.Message = "Insceure LDAP Bind Performed"
+
+            $Obj
+
+}  # End ForEach-Object
+    
+If ($Final) {
 
     $Css = @"
 <style>
@@ -126,7 +139,7 @@ td {
     $PreContent = "<Title>NOTIFICATION: Insecure LDAP Binds Performed</Title>"
     $NoteLine = "This Message was Sent on $(Get-Date -Format 'MM/dd/yyyy HH:mm:ss')"
     $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
-    $MailBody = $Results | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "<br>The below table contains information on connections to LDAP over the last 24 hours that did not use SSL.<br><br><hr><br><br>" | Out-String
+    $MailBody = $Final | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "<br>The below table contains information on connections to LDAP over the last 24 hours that did not use SSL.<br><br><hr><br><br>" | Out-String
 
    Send-MailMessage -From FromEmail -To ToEmail -Subject "AD Event: Insecure LDAP Binds Performed" -BodyAsHtml -Body "$MailBody" -SmtpServer UseSmtpServer -Credential $Credential -UseSSL -Port 587
 
