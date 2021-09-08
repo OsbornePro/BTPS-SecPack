@@ -12,8 +12,7 @@ Add-LocalGroupMember -Group "Event Log Readers" -Member "NETWORK SERVICE" -Error
 
 Write-Verbose "Ensuring WinRM service is available for WEF communication"
 $EventInfo = Get-WinEvent -LogName 'Microsoft-Windows-Forwarding/Operational' -MaxEvents 1
-If ($EventInfo.LevelDisplayName -ne "Information")
-{
+If ($EventInfo.LevelDisplayName -ne "Information") {
 
     cmd /c 'sc config WinRM type= own'
 
@@ -75,6 +74,11 @@ New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders
 <br>
 Verify that both the server and client are able to successfully check revocation status on all certificates. Use of the certutil command can assist in troubleshooting any errors.<br>
 <br>
+#### Intermediate Certificate Authority
+If the client certificate was issued by an Intermediate certification authority and the collector is running Windows 2012 or later you will have to configure the following registry key with a DWORD value of 2:
+```
+New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\Schannel" -Name "ClientAuthTrustMode" -Value 2
+```
 
 ### Setup the listener on the Event collector
 Set the certificate authentication with the following command:
@@ -176,7 +180,72 @@ netsh http add urlacl url=https://+:5986/wsman/ sddl=D:(A;;GX;;;S-1-5-80-5692565
 When the script gets triggered it performs a search on all collected targeted events for the last 1 hour and 5 minutes only. You can change this in the task and SQL Query script. The results will not always mean compromise but they will definitely help to discover them when they happen.
 (Microsoft says the max limit of machines to collect events from is 2,000 to 4,000).
 __REFERNCE:__ [https://support.microsoft.com/en-gb/help/4494356/best-practice-eventlog-forwarding-performance](https://support.microsoft.com/en-gb/help/4494356/best-practice-eventlog-forwarding-performance)
+    
+    
+### TROUBLESHOOTING NOTE
+I have run into issues before where all the above is set correctly but on the clients I receive 
+```
+The forwarder is having a problem communicating with subscription manager at address https://server.doamin.com:5986/wsman/SubscriptionManager/WEC.  Error code is 2150858882 and Error Message is <f:WSManFault xmlns:f="http://schemas.microsoft.com/wbem/wsman/1/wsmanfault" Code="2150858882" Machine="client.domain.com"><f:Message>The WS-Management service cannot find the certificate that was requested. </f:Message></f:WSManFault>.    
+```
 
+If you run into this execute the below command on your Windows Event Forwarding Source Collection Server.
+__REFERENCE:__ https://docs.microsoft.com/en-us/windows/win32/wec/setting-up-a-source-initiated-subscription
+
+```powershell
+winrm get winrm/config/service
+
+# RESULTS BELOW -----------------------------------------------------------------------
+    Service
+    RootSDDL = O:NSG:BAD:P(A;;GA;;;BA)(A;;GR;;;IU)S:P(AU;FA;GA;;;WD)(AU;SA;GXGW;;;WD)
+    MaxConcurrentOperations = 4294967295
+    MaxConcurrentOperationsPerUser = 1500
+    EnumerationTimeoutms = 240000
+    MaxConnections = 300
+    MaxPacketRetrievalTimeSeconds = 120
+    AllowUnencrypted = false [Source="GPO"]
+    Auth
+        Basic = true [Source="GPO"]
+        Kerberos = true [Source="GPO"]
+        Negotiate = true
+        Certificate = true
+        CredSSP = true [Source="GPO"]
+        CbtHardeningLevel = Relaxed
+    DefaultPorts
+        HTTP = 5985
+        HTTPS = 5986
+    IPv4Filter = * [Source="GPO"]
+    IPv6Filter = * [Source="GPO"]
+    EnableCompatibilityHttpListener = false [Source="GPO"]
+    EnableCompatibilityHttpsListener = true [Source="GPO"]
+    CertificateThumbprint = e4 8b ab a0 f3 77 69 12  59 9b 25 39 eb e6 92 a505 e6 81 43 # <-- Check this value is your root ca 
+    AllowRemoteAccess = true [Source="GPO"]
+```
+
+If that above value is not your Root CA thumbprint then execute the below commands
+```powershell
+net user /add WEFAdmin <Password>
+Add-LocalGroupMember -Group Administrators -Member WEFAdmin
+cmd
+winrm create winrm/config/service/certmapping?Issuer=<Thumbprint of the issuing CA certificate>+Subject=*+URI=* @{UserName="WEFAdmin";Password="<password>"} -remote:localhost
+```
+    
+From a client test the listener and the certificate mapping with the following command:
+```powershell
+cmd
+winrm g winrm/config -r:https://<Event Collector FQDN>:5986 -a:certificate -certificate:"<Thumbprint of the client authentication certificate>"
+```
+This should return the WinRM configuration of the Event collector. Do not move past this step if the configuration is not displayed.
+
+What happens at this step?
+
+- The client connects to the Event Collector and sends the specified certificate
+- The Event Collector looks for the issuing CA and checks if the is a matching certificate mapping
+- The Event Collector validates the client certificate chain and revocations status
+- If the above steps succeeds the authentication is completed.
+__NOTE:__ You might get an Access denied error complaining about the authentication method, which could be misleading. To troubleshoot, check the CAPI log on the Event Collector.
+
+List the configured certmapping entries with the command: winrm enum winrm/config/service/certmapping
+    
 ### REFERENCE LINKS
 - https://blog.netnerds.net/2013/03/importing-windows-forwarded-events-into-sql-server-using-powershell/
 - https://docs.microsoft.com/en-us/archive/blogs/jepayne/monitoring-what-matters-windows-event-forwarding-for-everyone-even-if-you-already-have-a-siem
