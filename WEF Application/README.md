@@ -45,22 +45,31 @@ If ($EventInfo.LevelDisplayName -ne "Information") {
   ```
 - Group Policy setting "__Computer Configuration__ > __Policies__ > __Adminsitrative Templates__ > __Windows Components__ > __Event Forwarding__ > __Configure Target Subscription Manager__" needs to be set to 
   - __WinRM__ (Port 5985): NOTE: The refresh interval is not required. I have it set to the default value (15 minutes) in the configs below
-  ```
-  Server=http://wef.domain.com:5985/wsman/SubscriptionManager/WEC,Refresh=900 
-  ```
-  __OR__
+```
+# WINRM EXAMPLE
+Server=http://wef.domain.com:5985/wsman/SubscriptionManager/WEC,Refresh=900 
+```
+   __OR__
   - __WinRM over HTTPS__ (Port 5986): In my environment I added 3 entries for this. One without a CA certificate, one with spaces after every 2 numbers, and one without spaces in the root CA's certificate thumbprint
-  ```
-  # Examples
-  Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900,IssuerCA=ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
-  Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900,IssuerCA=ffffffffffffffffffffffffffffffffffffffff 
-  Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900 
-  ```
+```
+# WINRM HTTPS EXAMPLES
+Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900,IssuerCA=ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900,IssuerCA=ffffffffffffffffffffffffffffffffffffffff 
+Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900 
+```
   - Group Policy Setting "__Computer Configuration__ > __Policies__ > __Adminsitrative Templates__ > __Windows Components__ > __Event Log Service__ > __Security__ > __Change Log Access__" needs to be set to the value of the property "__ChannelAccess__" after issuing the command ```wevtutil gl security```
   - Group Policy Setting "__Computer Configuration__ > __Policies__ > __Adminsitrative Templates__ > __Windows Components__ > __Event Log Service__ > __Security__ > __Change Log Access (Legacy)__" needs to be set to the value of the property "__ChannelAccess__" after issuing the command ```wevtutil gl security```
 <br>
 
 ### Certificates requirements
+You may need to enable certificate authentication on the client computers. This can be done with the below command
+```powershell
+$Enabled = (winrm get winrm/config/service |select-string -pattern "Certificate = " | Out-String).Trim()
+If ($Enabled -like "*false") {
+    Set-Item -Path WSMan:\localhost\Service\Auth\Certificate -Value $True 
+}
+```
+
 A server authentication certificate has to be installed on the Event Collector computer in the Personal store of the Local machine. The subject of this certificate has to match the FQDN of the collector. <br>
 <br>
 A client authentication certificate has to be installed on the Event Source computers in the Personal store of the Local machine. The subject of this certificate has to match the FQDN of the computer. <br>
