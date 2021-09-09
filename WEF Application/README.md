@@ -198,36 +198,15 @@ The forwarder is having a problem communicating with subscription manager at add
 ```
 
 If you run into this execute the below command on your Windows Event Forwarding Source Collection Server.
-__REFERENCE:__ https://docs.microsoft.com/en-us/windows/win32/wec/setting-up-a-source-initiated-subscription
 
 ```powershell
-winrm get winrm/config/service
-
-# RESULTS BELOW -----------------------------------------------------------------------
-    Service
-    RootSDDL = O:NSG:BAD:P(A;;GA;;;BA)(A;;GR;;;IU)S:P(AU;FA;GA;;;WD)(AU;SA;GXGW;;;WD)
-    MaxConcurrentOperations = 4294967295
-    MaxConcurrentOperationsPerUser = 1500
-    EnumerationTimeoutms = 240000
-    MaxConnections = 300
-    MaxPacketRetrievalTimeSeconds = 120
-    AllowUnencrypted = false [Source="GPO"]
-    Auth
-        Basic = true [Source="GPO"]
-        Kerberos = true [Source="GPO"]
-        Negotiate = true
-        Certificate = true
-        CredSSP = true [Source="GPO"]
-        CbtHardeningLevel = Relaxed
-    DefaultPorts
-        HTTP = 5985
-        HTTPS = 5986
-    IPv4Filter = * [Source="GPO"]
-    IPv6Filter = * [Source="GPO"]
-    EnableCompatibilityHttpListener = false [Source="GPO"]
-    EnableCompatibilityHttpsListener = true [Source="GPO"]
-    CertificateThumbprint = e4 8b ab a0 f3 77 69 12  59 9b 25 39 eb e6 92 a505 e6 81 43 # <-- Check this value is your root ca 
-    AllowRemoteAccess = true [Source="GPO"]
+netsh http show sslcert
+$Thumbprint = Read-Host -Prompt "What is your WinRM Certificate Thumbprint"
+$AppID = (netsh http show sslcert) | Select-String -Pattern "0.0.0.0:443" -Context 1,3 | Select-Object -First 1 | Out-String | ForEach-Object { $_.Split(" ")[74] }
+$AppID = $AppID.Trim()
+netsh http delete sslcert ipport=0.0.0.0:443
+netsh http add sslcert ipport=0.0.0.0:443 certhash=$Thumbprint appid=`"$AppID`"
+Restart-Service winrm,wecsvc
 ```
 
 If that above value is not your Root CA thumbprint then execute the below commands
