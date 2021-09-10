@@ -17,6 +17,12 @@ If ($EventInfo.LevelDisplayName -ne "Information") {
     cmd /c 'sc config WinRM type= own'
 
 }  # End If
+
+Write-Verbose "Enabling Certificate Authenticated WEC connections"
+$Enabled = (winrm get winrm/config/service |select-string -pattern "Certificate = " | Out-String).Trim()
+If ($Enabled -like "*false") {
+    Set-Item -Path WSMan:\localhost\Service\Auth\Certificate -Value $True 
+}
 ```
 
 ## File List
