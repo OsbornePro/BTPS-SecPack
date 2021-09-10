@@ -403,46 +403,10 @@ The certificate thumbprint value that you are going to need in **"Group Policy S
 * If you are using a Windows Server Certificate Authority, the **"WebServer"** certificate template can be used to request the certificate needed.
 
 
-Group Policy Windows Event Forwarding (WEF) Settings
-----------------------------------------------------
-
-**GROUP POLICY SETTING 1**
-
-The Group Policy setting **"Computer Configuration > Policies > Administrative Templates > Windows Components > Event Forwarding > Configure Target Subscription Manager"** needs to be set to **WinRM over HTTPS (Port 5986)**: In my environment I added 2 entries for this to cover all basis. One has the CA certificate thumbprint with with spaces after every 2 numbers, and the other entry is without spaces. The example values are below.
-
-1. **Example Entry 1**
-
-``Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900,IssuerCA=ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff``
-
-2. **Example Entry 2**
-
-``Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900,IssuerCA=ffffffffffffffffffffffffffffffffffffffff``
-**NOTE:** The default Refresh rate value is 900 seconds or 15 minutes. This does not need to be defined. I included it to be thorough.
-
-3. **Kerberos Example Entry 3**
-
-Using the below value without a certificate defined will allow/use Kerberos for authentication which is fine to use
-``Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900``
-
-
-
-**GROUP POLICY SETTING 2**
-
-The Group Policy Setting **"Computer Configuration > Policies > Administrative Templates > Windows Components > Event Log Service > Security > Change Log Access"** needs to be set to the value of the property **"ChannelAccess"** after issuing the below command:
-
-``wevtutil gl security``
-
-
-
-Group Policy Setting **"Computer Configuration > Policies > Administrative Templates > Windows Components > Event Log Service > Security > Change Log Access (Legacy)"** needs to be set to the value of the property **"ChannelAccess"** after issuing the below command:
-
-``wevtutil gl security``
-
-
 Group Policy WinRM Settings
 ---------------------------
 
-**GROUP POLICY SETTING 3**
+**GROUP POLICY SETTING 1**
 
 In your group policy settings go to **"Computer Configuration > Preferences > Control Panel Settings > Services"**.
 
@@ -461,7 +425,7 @@ Then click **OK** to save.
 
 
 
-**GROUP POLICY SETTING 4**
+**GROUP POLICY SETTING 2**
 
 Next, still on the same policy object, is the list of IP addresses that are allowed to do remote management access  on the target computer.
 
@@ -480,7 +444,7 @@ Click **OK** to save.
 
 
 
-**GROUP POLICY SETTING 5**
+**GROUP POLICY SETTING 3**
 
 Edit the settings — Opening Firewall ports
 
@@ -517,7 +481,7 @@ This is done by adding firewall default firewall rule **"Windows Remote Manageme
 
 
 
-**GROUP POLICY SETTING 6**
+**GROUP POLICY SETTING 4**
 
 Under **Administrative Templates > Network > Network Connections > Windows Defender Firewall > Domain Profile**
 
@@ -536,7 +500,7 @@ For example you may have used a Wildcard ``*`` or defined an all encompassing su
 
 
 
-**GROUP POLICY SETTING 7**
+**GROUP POLICY SETTING 5**
 
 Under **Administrative Templates > System > Credentials Delegation > Allow delegating fresh credentials** and set the values to ``WSMAN/*.yourdomain.com``.
 
@@ -555,7 +519,7 @@ This is to prevent `CVE-2018-0886 <https://nvd.nist.gov/vuln/detail/CVE-2018-088
 
 
 
-**GROUP POLICY SETTING 8**
+**GROUP POLICY SETTING 6**
 
 Under **Administrative Templates > Windows Components/Windows Remote Management (WinRM)/WinRM Client** set the below settings.
 
@@ -571,7 +535,7 @@ Under **Administrative Templates > Windows Components/Windows Remote Management 
 
 
 
-**GROUP POLICY SETTING 9**
+**GROUP POLICY SETTING 7**
 
 Under **Administrative Templates > Windows Components/Windows Remote Management (WinRM)/WinRM Service** set the below settings
 
@@ -589,7 +553,7 @@ Under **Administrative Templates > Windows Components/Windows Remote Management 
 
 
 
-**GROUP POLICY SETTING 10**
+**GROUP POLICY SETTING 8**
 Create a Registry Setting that gets pushed out through Group Policy containing the below value
 
 **SETTING:**
@@ -601,6 +565,165 @@ Create a Registry Setting that gets pushed out through Group Policy containing t
 
 **CONCLUSION**
 WinRM over HTTPS is now configured for your environment. Great work! When you now use PowerShell commands such as ``Invoke-Command`` or ``New-PSSession`` you will need to specify the ``-UseSSL`` parameter in order to use WinRM over HTTPS. Port 5985 will not accept connections in an ideal setup.
+
+
+
+Configure Windows Event Forwarding
+==================================
+
+Set the below Group Policy settings to configure Windows Event Forwarding with HTTPS using Certificate authentication
+
+**GROUP POLICY SETTING 1**
+
+The Group Policy setting **"Computer Configuration > Policies > Administrative Templates > Windows Components > Event Forwarding > Configure Target Subscription Manager"** needs to be set to **WinRM over HTTPS (Port 5986)**: In my environment I added 2 entries for this to cover all basis. One has the CA certificate thumbprint with with spaces after every 2 numbers, and the other entry is without spaces. The example values are below.
+
+1. **Example Entry 1**
+
+``Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900,IssuerCA=ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff``
+
+2. **Example Entry 2**
+
+``Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900,IssuerCA=ffffffffffffffffffffffffffffffffffffffff``
+**NOTE:** The default Refresh rate value is 900 seconds or 15 minutes. This does not need to be defined. I included it to be thorough.
+
+3. **Kerberos Example Entry 3 (OPTIONAL IF YOU HAVE ARE HAVING TROUBLE WITH CERTIFICATES AND WANT TO TRY AND GET IT TOO WORK)** 
+
+Using the below value without a certificate defined will allow/use Kerberos for authentication which is fine to use
+``Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900``
+
+
+
+**GROUP POLICY SETTING 2**
+
+The Group Policy Setting **"Computer Configuration > Policies > Administrative Templates > Windows Components > Event Log Service > Security > Change Log Access"** needs to be set to the value of the property **"ChannelAccess"** after issuing the below command:
+
+``wevtutil gl security``
+
+The below command can be used to obtain the value you need to copy
+
+```(wevtutil gl security | Select-String -Pattern "channelAccess").ToString().Trim().Replace("channelAccess: ","")```
+
+
+
+Group Policy Setting **"Computer Configuration > Policies > Administrative Templates > Windows Components > Event Log Service > Security > Change Log Access (Legacy)"** needs to be set to the value of the property **"ChannelAccess"** after issuing the below command:
+
+``wevtutil gl security``
+
+The below command can be used to obtain the value you need to copy
+
+```(wevtutil gl security | Select-String -Pattern "channelAccess").ToString().Trim().Replace("channelAccess: ","")```
+
+
+Configure Source Initiated WEC Server
+-------------------------------------
+
+We now need to enable the Windows Event Collector service on the server we are forwarding events too. This can be done by opening up "Event Viewer" and clicking "Subscriptions" and then click "Yes" when the prompt appears. 
+
+OR
+
+You can issue the below command
+
+.. codeblock:: powershell
+
+   Write-Output "[*] Giving NETWORK SERVICE permissions to the Security log for WEF"
+   $NetworkService = (wevtutil gl security | Select-String -Pattern "channelAccess").ToString().Trim().Replace("channelAccess: ","")
+   cmd /c "wevtutil sl Security /ca:$NetworkService"
+   Write-Output "[*] Add NETWORK SERVICE to event log readers group for WEF"
+   Add-LocalGroupMember -Group "Event Log Readers" -Member "NETWORK SERVICE"
+   Write-Output "[*] Starting WEC service and telling it to start up automatically"
+   Set-Service -Name Wecsvc -StartupType Automatic; Start-Service -Name Wecsvc
+   Write-Output "[*] Enabling the use of Certificates for authenticated connections"
+   cmd /c 'winrm set winrm/config/service/auth @{Certificate="true"}'
+   Enable-PSRemoting -Force
+   $Thumbprint = Read-Host -Prompt "Enter the WinRM Certificate Thumbprint assiged to $env:COMPUTERNAME"
+   $Hostname = Resolve-DnsName -Name $env:COMPUTERNAME -Type A | Select-Object -First 1 -ExpandProperty Name
+   New-WSManInstance -ResourceUri WinRM/Config/Listener -SelectorSet @{Address = "*"; Transport = "HTTPS"} -ValueSet @{Hostname = $Hostname; CertificateThumbprint = $Thumbprint }
+   Restart-Service -Name winrm,wecsvc
+
+
+**NEXT** We can then configure the "Domain Computers" and "Domain Controllers" source collection using my prebuilt XML file with the below commands. 
+
+**IMPORTANT** Depending on how you followed my instructions you may need to delete the Query Id's for Autoruns, MaliciousIPs, and Hash Validation for the below commands to work natively.
+
+.. code-block:: powershell
+
+   Write-Output "[*] Downloading Configuration files"
+   $XMLCompContents = Invoke-WebRequest -Uri "https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/WEF%20Application/DomainComputers.xml" -OutFile $env:USERPROFILE\Downloads\DomainComputers.xml
+   $XMLDCContents = Invoke-WebRequest -Uri "https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/WEF%20Application/DomainControllers.xml" -OutFile $env:USERPROFILE\Downloads\DomainControllers.xml
+   Write-Output "[*] Creating source collection from downloaded config files"
+   wecutil cs $env:USERPROFILE\Downloads\DomainComputers.xml
+   wecutil cs $env:USERPROFILE\Downloads\DomainControllers.xml
+
+ 
+Common Issues to Troubleshoot
+-----------------------------
+
+If your source event collector is not receiving any events yet you will need to do the following things
+
+1. Create a Start up script to put on your client devices that contains the below code
+
+.. code-block:: powershell
+
+   Write-Verbose "Giving NETWORK SERVICE permissions to the Security log for WEF"
+   cmd /c 'wevtutil sl Security /ca:O:BAG:SYD:(A;;0xf0007;;;SY)(A;;0x7;;;BA)(A;;0x1;;;BO)(A;;0x1;;;SO)(A;;0x1;;;S-1-5-32-573)(A;;0x1;;;S-1-5-20)'
+   Write-Verbose "Add NETWORK SERVICE to event log readers group for WEF"
+   Add-LocalGroupMember -Group "Event Log Readers" -Member "NETWORK SERVICE" -ErrorAction SilentlyContinue | Out-Null
+   Write-Verbose "Ensuring WinRM service is available for WEF communication"
+   $EventInfo = Get-WinEvent -LogName 'Microsoft-Windows-Forwarding/Operational' -MaxEvents 1
+   If ($EventInfo.LevelDisplayName -ne "Information") {
+       cmd /c 'sc config WinRM type= own'
+   }  # End If
+   Write-Output "[*] Enabling Certificate Authenticated WEC connections"
+   $Enabled = (winrm get winrm/config/service |select-string -pattern "Certificate = " | Out-String).Trim()
+   If ($Enabled -like "*false") {
+       Set-Item -Path WSMan:\localhost\Service\Auth\Certificate -Value $True 
+   }
+   Write-Output "[*] "
+   
+
+2. If you have an Intermediate Certificate Authority that assigns certificates you will need to set this registry value on your WEC Server
+
+``New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\Schannel" -Name "ClientAuthTrustMode" -Value 2 -Force``
+
+**Useful Commands for Troubleshooting**
+
+Execute the below command on a client to test communication and verify certificate being used
+
+``cmd /c 'winrm g winrm/config -r:https://<Event Collector FQDN>:5986 -a:certificate -certificate:"<Thumbprint of the client authentication certificate>"'``
+
+3. If you come accross the below message in your event logs it means there was an issue in validating the certificate on port 443 (*Not 5986*).
+
+The forwarder is having a problem communicating with subscription manager at address https://server.doamin.com:5986/wsman/SubscriptionManager/WEC.  
+
+Error code is 2150858882 and Error Message is <f:WSManFault xmlns:f="http://schemas.microsoft.com/wbem/wsman/1/wsmanfault" Code="2150858882" Machine="client.domain.com"><f:Message>The WS-Management service cannot find the certificate that was requested. </f:Message></f:WSManFault>. 
+
+**OR**
+
+The forwarder is having a problem communicating with subscription manager at address https://server.doamin.com:5986/wsman/SubscriptionManager/WEC.  Error code is 2150858882 and Error Message is .
+
+
+You can solve this with the below commands
+
+.. codeblock:: powershell
+   
+   Write-Output "[*] Incorrect certificate on 0.0.0.0:443. We need to replace that value with the thumbprint on 0.0.0.0:5986."
+   netsh http show sslcert
+   $Thumbprint = Read-Host -Prompt "Enter your WinRM Certificate Thumbprint at 0.0.0.0:5986"
+   $AppID = (netsh http show sslcert) | Select-String -Pattern "0.0.0.0:443" -Context 1,3 | Select-Object -First 1 | Out-String | ForEach-Object { $_.Split(" ")[74] }
+   $AppID = $AppID.Trim()
+   cmd /c netsh http delete sslcert ipport=0.0.0.0:443
+   cmd /c netsh http add sslcert ipport=0.0.0.0:443 certhash=$Thumbprint appid=`"$AppID`"
+   Restart-Service winrm,wecsvc
+
+
+Another possible solution is going to be the WinRM service is not available. You can correct that by doing
+
+.. codeblock:: powershell
+
+   $EventInfo = Get-WinEvent -LogName 'Microsoft-Windows-Forwarding/Operational' -MaxEvents 1
+   If ($EventInfo.LevelDisplayName -ne "Information") {
+       cmd /c 'sc config WinRM type= own'
+   }  # End If
 
 
 Windows Event Forwarding (WEF) Application
