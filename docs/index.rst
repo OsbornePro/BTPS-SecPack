@@ -619,7 +619,7 @@ Configure Source Initiated WEC Server
 
 We now need to enable the Windows Event Collector service on the server we are forwarding events too. This can be done by opening up "Event Viewer" and clicking "Subscriptions" and then click "Yes" when the prompt appears. 
 
-OR
+I would suggest using the below commands instead as there is more involved that does not get set up automatically when using HTTPS
 
 You can issue the below command
 
@@ -640,9 +640,14 @@ You can issue the below command
    New-WSManInstance -ResourceUri WinRM/Config/Listener -SelectorSet @{Address = "*"; Transport = "HTTPS"} -ValueSet @{Hostname = $Hostname; CertificateThumbprint = $Thumbprint }
    Restart-Service -Name winrm,wecsvc
    netsh http delete urlacl url=http://+:5985/wsman/ 
-   netsh http add urlacl url=http://+:5985/wsman/ sddl=D:(A;;GX;;;S-1-5-80-569256582-2953403351-2909559716-1301513147-412116970)(A;;GX;;;S-1-5-80-4059739203-877974739-1245631912-527174227-2996563517)
+   cmd /c 'netsh http add urlacl url=http://+:5985/wsman/ sddl=D:(A;;GX;;;S-1-5-80-569256582-2953403351-2909559716-1301513147-412116970)(A;;GX;;;S-1-5-80-4059739203-877974739-1245631912-527174227-2996563517)'
    netsh http delete urlacl url=https://+:5986/wsman/
-   netsh http add urlacl url=https://+:5986/wsman/ sddl=D:(A;;GX;;;S-1-5-80-569256582-2953403351-2909559716-1301513147-412116970)(A;;GX;;;S-1-5-80-4059739203-877974739-1245631912-527174227-2996563517)
+   cmd /c 'netsh http add urlacl url=https://+:5986/wsman/ sddl=D:(A;;GX;;;S-1-5-80-569256582-2953403351-2909559716-1301513147-412116970)(A;;GX;;;S-1-5-80-4059739203-877974739-1245631912-527174227-2996563517)'
+   net user /add WEFAdmin gemKFueq4bn4nASHwUtfh3Pycv2kZu8dKK6v
+   Add-LocalGroupMember -Group Administrators -Member WEFAdmin
+   $CAThumbprint = Read-Host -Prompt "Enter the thumbprint of your Root CA"
+   winrm create winrm/config/service/certmapping?Issuer=$CAThumbprint+Subject=``*+URI=``* @{UserName="WEFAdmin";Password="gemKFueq4bn4nASHwUtfh3Pycv2kZu8dKK6v"} -remote:localhost
+
 
 
 **NEXT** We can then configure the "Domain Computers" and "Domain Controllers" source collection using my prebuilt XML file with the below commands. 
