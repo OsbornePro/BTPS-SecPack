@@ -639,6 +639,10 @@ You can issue the below command
    $Hostname = Resolve-DnsName -Name $env:COMPUTERNAME -Type A | Select-Object -First 1 -ExpandProperty Name
    New-WSManInstance -ResourceUri WinRM/Config/Listener -SelectorSet @{Address = "*"; Transport = "HTTPS"} -ValueSet @{Hostname = $Hostname; CertificateThumbprint = $Thumbprint }
    Restart-Service -Name winrm,wecsvc
+   netsh http delete urlacl url=http://+:5985/wsman/ 
+   netsh http add urlacl url=http://+:5985/wsman/ sddl=D:(A;;GX;;;S-1-5-80-569256582-2953403351-2909559716-1301513147-412116970)(A;;GX;;;S-1-5-80-4059739203-877974739-1245631912-527174227-2996563517)
+   netsh http delete urlacl url=https://+:5986/wsman/
+   netsh http add urlacl url=https://+:5986/wsman/ sddl=D:(A;;GX;;;S-1-5-80-569256582-2953403351-2909559716-1301513147-412116970)(A;;GX;;;S-1-5-80-4059739203-877974739-1245631912-527174227-2996563517)
 
 
 **NEXT** We can then configure the "Domain Computers" and "Domain Controllers" source collection using my prebuilt XML file with the below commands. 
