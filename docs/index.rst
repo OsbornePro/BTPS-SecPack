@@ -646,7 +646,7 @@ You can issue the below command
    net user /add WEFAdmin gemKFueq4bn4nASHwUtfh3Pycv2kZu8dKK6v
    Add-LocalGroupMember -Group Administrators -Member WEFAdmin
    $CAThumbprint = Read-Host -Prompt "Enter the thumbprint of your Root CA"
-   winrm create winrm/config/service/certmapping?Issuer=$CAThumbprint+Subject=``*+URI=``* @{UserName="WEFAdmin";Password="gemKFueq4bn4nASHwUtfh3Pycv2kZu8dKK6v"} -remote:localhost
+   cmd /c winrm create winrm/config/service/certmapping?Issuer=$CAThumbprint+Subject=*+URI=* @{UserName="WEFAdmin";Password="gemKFueq4bn4nASHwUtfh3Pycv2kZu8dKK6v"} -remote:localhost
 
 
 
