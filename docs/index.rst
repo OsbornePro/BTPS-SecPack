@@ -643,10 +643,13 @@ You can issue the below command
    cmd /c 'netsh http add urlacl url=http://+:5985/wsman/ sddl=D:(A;;GX;;;S-1-5-80-569256582-2953403351-2909559716-1301513147-412116970)(A;;GX;;;S-1-5-80-4059739203-877974739-1245631912-527174227-2996563517)'
    netsh http delete urlacl url=https://+:5986/wsman/
    cmd /c 'netsh http add urlacl url=https://+:5986/wsman/ sddl=D:(A;;GX;;;S-1-5-80-569256582-2953403351-2909559716-1301513147-412116970)(A;;GX;;;S-1-5-80-4059739203-877974739-1245631912-527174227-2996563517)'
+   cmd /c 'netsh http add urlacl url=https://+:443/wsman/ sddl=D:(A;;GX;;;S-1-5-80-569256582-2953403351-2909559716-1301513147-412116970)(A;;GX;;;S-1-5-80-4059739203-877974739-1245631912-527174227-2996563517)'
    net user /add WEFAdmin gemKFueq4bn4nASHwUtfh3Pycv2kZu8dKK6v
    Add-LocalGroupMember -Group Administrators -Member WEFAdmin
    $CAThumbprint = Read-Host -Prompt "Enter the thumbprint of your Root CA"
    cmd /c winrm create winrm/config/service/certmapping?Issuer=$CAThumbprint+Subject=*+URI=* @{UserName="WEFAdmin";Password="gemKFueq4bn4nASHwUtfh3Pycv2kZu8dKK6v"} -remote:localhost
+   # EXAMPLE OF ABOVE COMMAND ENUMERATED
+   # winrm create winrm/config/service/certmapping?Issuer=15c9df608e454371022622588616ca818e658bd4+Subject=*+URI=* @{UserName="WEFAdmin";Password="gemKFueq4bn4nASHwUtfh3Pycv2kZu8dKK6v"} -remote:localhost 
 
 
 
