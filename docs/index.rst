@@ -657,6 +657,7 @@ You can issue the below command
 
 **IMPORTANT** Depending on how you followed my instructions you may need to delete the Query Id's for Autoruns, MaliciousIPs, and Hash Validation for the below commands to work natively.
 
+
 .. code-block:: powershell
 
    Write-Output "[*] Downloading Configuration files"
@@ -673,6 +674,7 @@ Common Issues to Troubleshoot
 If your source event collector is not receiving any events yet you will need to do the following things
 
 1. Create a Start up script to put on your client devices that contains the below code
+
 
 .. code-block:: powershell
 
@@ -722,6 +724,7 @@ The forwarder is having a problem communicating with subscription manager at add
 
 You can solve this with the below commands
 
+
 .. codeblock:: powershell
    
    Write-Output "[*] Incorrect certificate on 0.0.0.0:443. We need to replace that value with the thumbprint on 0.0.0.0:5986."
@@ -735,6 +738,7 @@ You can solve this with the below commands
 
 
 Another possible solution is going to be the WinRM service is not available. You can correct that by doing
+
 
 .. codeblock:: powershell
 
