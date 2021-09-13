@@ -725,16 +725,14 @@ The forwarder is having a problem communicating with subscription manager at add
 You can solve this with the below PowerShell commands
 
 
-.. codeblock:: powershell
-   
-   Write-Output "[*] Incorrect certificate on 0.0.0.0:443. We need to replace that value with the thumbprint on 0.0.0.0:5986."
-   netsh http show sslcert
-   $Thumbprint = Read-Host -Prompt "Enter your WinRM Certificate Thumbprint at 0.0.0.0:5986"
-   $AppID = (netsh http show sslcert) | Select-String -Pattern "0.0.0.0:443" -Context 1,3 | Select-Object -First 1 | Out-String | ForEach-Object { $_.Split(" ")[74] }
-   $AppID = $AppID.Trim()
-   cmd /c netsh http delete sslcert ipport=0.0.0.0:443
-   cmd /c netsh http add sslcert ipport=0.0.0.0:443 certhash=$Thumbprint appid=`"$AppID`"
-   Restart-Service -Name winrm,wecsvc
+``Write-Output "[*] Incorrect certificate on 0.0.0.0:443. We need to replace that value with the thumbprint on 0.0.0.0:5986."``
+``netsh http show sslcert``
+``$Thumbprint = Read-Host -Prompt "Enter your WinRM Certificate Thumbprint at 0.0.0.0:5986"``
+``$AppID = (netsh http show sslcert) | Select-String -Pattern "0.0.0.0:443" -Context 1,3 | Select-Object -First 1 | Out-String | ForEach-Object { $_.Split(" ")[74] }``
+``$AppID = $AppID.Trim()``
+``cmd /c netsh http delete sslcert ipport=0.0.0.0:443``
+``cmd /c netsh http add sslcert ipport=0.0.0.0:443 certhash=$Thumbprint appid=`"$AppID`"``
+``Restart-Service -Name winrm,wecsvc``
 
 
 Another possible solution is going to be the WinRM service is not available. You can correct that by doing
