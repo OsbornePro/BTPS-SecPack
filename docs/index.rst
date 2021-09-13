@@ -650,7 +650,7 @@ You can issue the below command
    cmd /c winrm create winrm/config/service/certmapping?Issuer=$CAThumbprint+Subject=*+URI=* @{UserName="WEFAdmin";Password="gemKFueq4bn4nASHwUtfh3Pycv2kZu8dKK6v"} -remote:localhost
    # EXAMPLE OF ABOVE COMMAND ENUMERATED
    # winrm create winrm/config/service/certmapping?Issuer=15c9df608e454371022622588616ca818e658bd4+Subject=*+URI=* @{UserName="WEFAdmin";Password="gemKFueq4bn4nASHwUtfh3Pycv2kZu8dKK6v"} -remote:localhost 
-
+   
 
 
 **NEXT** We can then configure the "Domain Computers" and "Domain Controllers" source collection using my prebuilt XML file with the below commands. 
