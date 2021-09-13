@@ -802,7 +802,7 @@ This WEF Application is used to view and list log files that are a high likeliho
 +------------+------------------------------------------------------------+
 | 19, 20     | Windows Update Errors                                      |
 +------------+------------------------------------------------------------+
-| 24 25      | Windows Update Errors                                      |
+| 24, 25      | Windows Update Errors                                      |
 +------------+------------------------------------------------------------+
 | 31         | Windows Update Errors                                      |
 +------------+------------------------------------------------------------+
@@ -842,7 +842,7 @@ This WEF Application is used to view and list log files that are a high likeliho
 +------------+------------------------------------------------------------+
 | 4723       | An attempt was made to change an accounts password         |
 +------------+------------------------------------------------------------+
-| *          | Office365 Logs                                             |
+| Many          | Office365 Logs                                             |
 +------------+------------------------------------------------------------+
 
 
