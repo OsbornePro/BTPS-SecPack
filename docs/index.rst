@@ -705,6 +705,8 @@ If your source event collector is not receiving any events yet you will need to 
 
 ``winrm enum winrm/config/listener``
 
+``winrm get winrm/config/service/certmapper``
+
 Execute the below command on a client to test communication and verify certificate being used
 
 ``cmd /c 'winrm g winrm/config -r:https://<Event Collector FQDN>:5986 -a:certificate -certificate:"<Thumbprint of the client authentication certificate>"'``
