@@ -717,17 +717,19 @@ If your source event collector is not receiving any events yet you will need to 
 
 2. If you have an Intermediate Certificate Authority that assigns certificates you will need to set this registry value on your WEC Server
 
-``New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\Schannel" -Name "ClientAuthTrustMode" -Value 2 -Force``
+.. code-block:: powershell
+
+   New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\Schannel" -Name "ClientAuthTrustMode" -Value 2 -Force
 
 **Useful Commands for Troubleshooting**
 
-``winrm get winrm/config``
+.. code-block:: powershell
 
-``winrm get winrm/config/service``
+   winrm get winrm/config
+   winrm get winrm/config/service
+   winrm enum winrm/config/listener
+   winrm get winrm/config/service/certmapper
 
-``winrm enum winrm/config/listener``
-
-``winrm get winrm/config/service/certmapper``
 
 Execute the below command on a client to test communication and verify certificate being used
 
