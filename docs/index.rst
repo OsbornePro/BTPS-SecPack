@@ -623,52 +623,28 @@ I would suggest using the below commands instead as there is more involved that 
 
 You can issue the below commands
 
-.. codeblock:: powershell
+.. code-block:: powershell
 
    Write-Output "[*] Giving NETWORK SERVICE permissions to the Security log for WEF"
    $NetworkService = (wevtutil gl security | Select-String -Pattern "channelAccess").ToString().Trim().Replace("channelAccess: ","")
    cmd /c "wevtutil sl Security /ca:$NetworkService"
-
-
-.. codeblock:: powershell
-
    Write-Output "[*] Add NETWORK SERVICE to event log readers group for WEF"
    Add-LocalGroupMember -Group "Event Log Readers" -Member "NETWORK SERVICE"
-
-
-.. codeblock:: powershell
-
    Write-Output "[*] Starting WEC service and telling it to start up automatically"
    Set-Service -Name Wecsvc -StartupType Automatic; Start-Service -Name Wecsvc
-
-
-.. codeblock:: powershell
-
    Write-Output "[*] Enabling the use of Certificates for authenticated connections"
    cmd /c 'winrm set winrm/config/service/auth @{Certificate="true"}'
    Enable-PSRemoting -Force
    $Thumbprint = Read-Host -Prompt "Enter the WinRM Certificate Thumbprint assiged to $env:COMPUTERNAME"
    $Hostname = Resolve-DnsName -Name $env:COMPUTERNAME -Type A | Select-Object -First 1 -ExpandProperty Name
    New-WSManInstance -ResourceUri WinRM/Config/Listener -SelectorSet @{Address = "*"; Transport = "HTTPS"} -ValueSet @{Hostname = $Hostname; CertificateThumbprint = $Thumbprint }
-
-
-.. codeblock:: powershell
-
    netsh http delete urlacl url=http://+:5985/wsman/ 
    cmd /c 'netsh http add urlacl url=http://+:5985/wsman/ sddl=D:(A;;GX;;;S-1-5-80-569256582-2953403351-2909559716-1301513147-412116970)(A;;GX;;;S-1-5-80-4059739203-877974739-1245631912-527174227-2996563517)'
    netsh http delete urlacl url=https://+:5986/wsman/
    cmd /c 'netsh http add urlacl url=https://+:5986/wsman/ sddl=D:(A;;GX;;;S-1-5-80-569256582-2953403351-2909559716-1301513147-412116970)(A;;GX;;;S-1-5-80-4059739203-877974739-1245631912-527174227-2996563517)'
    cmd /c 'netsh http add urlacl url=https://+:443/wsman/ sddl=D:(A;;GX;;;S-1-5-80-569256582-2953403351-2909559716-1301513147-412116970)(A;;GX;;;S-1-5-80-4059739203-877974739-1245631912-527174227-2996563517)'
-
-
-.. codeblock:: powershell
-
    net user /add WEFAdmin gemKFueq4bn4nASHwUtfh3Pycv2kZu8dKK6v
    Add-LocalGroupMember -Group Administrators -Member WEFAdmin
-
-
-.. codeblock:: powershell
-
    $CAThumbprint = Read-Host -Prompt "Enter the thumbprint of your Root CA"
    cmd /c winrm create winrm/config/service/certmapping?Issuer=$CAThumbprint+Subject=*+URI=* @{UserName="WEFAdmin";Password="gemKFueq4bn4nASHwUtfh3Pycv2kZu8dKK6v"} -remote:localhost
    # EXAMPLE OF ABOVE COMMAND ENUMERATED
