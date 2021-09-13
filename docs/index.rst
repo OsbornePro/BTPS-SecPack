@@ -301,13 +301,29 @@ Some Endpoint Detection and Response (EDR) and Next Generation Anti-Virus provid
 
 As an FYI there are multiple ways to download files from the PowerShell session. If ``Invoke-WebRequest`` is blocked or does not work for you, one of the below commands may be able to work instead. Each command does the same thing in a different way and each command is one line.
 
-* ``(New-Object Net.WebClient).DownloadFile('https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/Installer.ps1', "$env:USERPROFILE\Downloads\Installer.ps1")``
+* NET Method
 
-* ``Start-BitsTransfer "https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/Installer.ps1" -Destinations "$env:USERPROFILE\Downloads\Installer.ps1"``
+.. code-block:: powershell
 
-* ``certutil.exe -urlcache -split -f https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/Installer.ps1 "$env:USERPROFILE\Downloads\Installer.ps1"``
+   (New-Object Net.WebClient).DownloadFile('https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/Installer.ps1', "$env:USERPROFILE\Downloads\Installer.ps1")
 
-* ``bitsadmin /transfer debjob /download /priority normal https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/Installer.ps1" "$env:USERPROFILE\Downloads\Installer.ps1"``
+* Bits Transfer Method
+
+.. code-block:: powershell
+
+   Start-BitsTransfer "https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/Installer.ps1" -Destinations "$env:USERPROFILE\Downloads\Installer.ps1"
+
+* Certutiul Method
+
+.. code-block:: powershell
+
+   certutil.exe -urlcache -split -f https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/Installer.ps1 "$env:USERPROFILE\Downloads\Installer.ps1"
+
+* Bitsadmin Method
+
+.. code-block:: powershell
+
+   bitsadmin /transfer debjob /download /priority normal https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/Installer.ps1" "$env:USERPROFILE\Downloads\Installer.ps1"
 
 
 Download PDF Instructions for Installer.ps1
@@ -380,7 +396,10 @@ Setup WinRM over HTTPS may require the need to know a few commands. I have inclu
 ``winrm create winrm/config/listener?Address=*+Transport=HTTPS # Creates a WinRM listener on 5986 using any available certificate``
 
 The below command defines a certificate to use on port 5986. Certificate Template needed is a Web Server certificate from Windows PKI
-``New-WSManInstance -ResourceUri WinRM/Config/Listener -SelectorSet @{Address = "*"; Transport = "HTTPS"} -ValueSet @{Hostname = FqdnRequiredHere.domain.com; CertificateThumbprint = $Thumbprint }``
+
+.. code-block:: powershell
+
+   New-WSManInstance -ResourceUri WinRM/Config/Listener -SelectorSet @{Address = "*"; Transport = "HTTPS"} -ValueSet @{Hostname = FqdnRequiredHere.domain.com; CertificateThumbprint = $Thumbprint }
 
 
 **SERVER CERTIFICATE INFO:**
@@ -396,7 +415,10 @@ The certificate thumbprint value that you are going to need in **"Group Policy S
 **CLIENT CERTIFICATE INFO:**
 
 * In the above tree, **"Assigned Device Certificate"** is where the below command would be used
-``New-WSManInstance -ResourceUri WinRM/Config/Listener -SelectorSet @{Address = "*"; Transport = "HTTPS"} -ValueSet @{Hostname = FqdnRequiredHere.domain.com; CertificateThumbprint = $Thumbprint }``
+
+.. code-block:: powershell
+
+   New-WSManInstance -ResourceUri WinRM/Config/Listener -SelectorSet @{Address = "*"; Transport = "HTTPS"} -ValueSet @{Hostname = FqdnRequiredHere.domain.com; CertificateThumbprint = $Thumbprint }
 
 * Notice the **"Hostname"** value includes the domain you are in. This needs to also be true for the **"Common Name"** value when the client device requests the WinRM certificate. This means your CN value is required to be devicename.domainname.com. If you do not include the domain name in the Common Name value your WinRM over HTTPS communication will not work. Subject Alternative Name's (SAN) will not work either. I have tried adding more than one Common Name values to a certificate and this communication still failed.
 
@@ -709,7 +731,10 @@ If your source event collector is not receiving any events yet you will need to 
 
 Execute the below command on a client to test communication and verify certificate being used
 
-``cmd /c 'winrm g winrm/config -r:https://<Event Collector FQDN>:5986 -a:certificate -certificate:"<Thumbprint of the client authentication certificate>"'``
+.. code-block:: powershell
+
+   cmd /c 'winrm g winrm/config -r:https://<Event Collector FQDN>:5986 -a:certificate -certificate:"<Thumbprint of the client authentication certificate>"'``
+
 
 3. If you come accross the below message in your event logs it means there was an issue in validating the certificate on port 443 (*Not 5986*).
 
@@ -902,8 +927,10 @@ Now that WinRM over HTTPS is configured and the Group Policy Settings have been 
 
 In order to use the `DomainComputers.xml <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/DomainComputers.xml>`_ and `DomainControllers.xml <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/DomainControllers.xml>`_ config files in Windows Event Forwarding the below commands must be issued in an Administrator Command Prompt. Place the files DomainComputers.xml and DomainControllers.xml in the directory C:\Users\Public\Documents. Then open a Command Prompt or PowerShell window as an Administrator. This can be done with the key combo Windows Key + X, A
 
-``wecutil cs C:\Users\Public\Documents\DomainComputers.xml``
-``wecutil cs C:\Users\Public\Documents\DomainControllers.xml``
+.. code-block:: powershell
+
+   wecutil cs C:\Users\Public\Documents\DomainComputers.xml
+   wecutil cs C:\Users\Public\Documents\DomainControllers.xml
 
 
 **Step 2**
@@ -943,7 +970,9 @@ Create the Scheduled Task to Import Events into SQL Database
 
 Below is the PowerShell Command to use code signing certificates to sign a script.
 
-``Set-AuthenticodeSignature C:\Users\Public\Documents\Import-EventsHourly.ps1 @(Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert)[0]``
+.. code-block:: powershell
+
+   Set-AuthenticodeSignature C:\Users\Public\Documents\Import-EventsHourly.ps1 @(Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert)[0]
 
 
 **Step 4**
@@ -954,7 +983,10 @@ Add `SQL-Query-Suspicious-Events.ps1 <https://github.com/OsbornePro/BTPS-SecPack
 
 Below is the PowerShell Command to use code signing certificate to sign a script
 
-``Set-AuthenticodeSignature C:\Users\Public\Documents\Import-EventsHourly.ps1 @(Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert)[0]``
+.. code-block:: powershell
+
+   Set-AuthenticodeSignature C:\Users\Public\Documents\Import-EventsHourly.ps1 @(Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert)[0]``
+
 
 * Open Task Scheduler (``taskschd.msc``) and import the task from `TaskForSQLQueryEventsMonitor.xml <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/TaskForSQLQueryEventsMonitor.xml>`_ that runs once a day. This is done to execute `SQL-Query-Suspicious-Events.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/SQL-Query-Suspicous-Events.ps1>`_. This is the script that alerts you when a suspicious event has been discovered.
 * Edit the file `SQL-Query-Suspicious-Events.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/WEF%20Application/SQL-Query-Suspicous-Events.ps1>`_ so the  email variables are set to match your environment. Some of the SQL queries will also need to be modified in order to add accounts that commonly receive special permissions such as accounts that are used for LDAP binds or domain controllers system accounts **(Example: DC01$)**. Or don't use any special filtering. Whatever floats your boat. The SQL queries only return events from the  last hour. This is significantly faster than filtering the Windows Event  log through XML which also will eventually delete logs to make room for  newer logs.
@@ -977,10 +1009,12 @@ Once run, the script returns event information on the below possible indications
 
 To ensure the correct permissions are set on the Windows Event Log  Source Collector issue the below commands (*on the Windows Event  Forwarding Collection Server*). Open an Administrator PowerShell or Command Prompt session **(Windows Key + X, A)**. Then execute the below commands:
 
-``netsh http delete urlacl url=http://+:5985/wsman/``
-``netsh http add urlacl url=http://+:5985/wsman/ sddl=D:(A;;GX;;;S-1-5-80-569256582-2953403351-2909559716-1301513147-412116970)(A;;GX;;;S-1-5-80-4059739203-877974739-1245631912-527174227-2996563517)``
-``netsh http delete urlacl url=https://+:5986/wsman/``
-``netsh http add urlacl url=https://+:5986/wsman/ sddl=D:(A;;GX;;;S-1-5-80-569256582-2953403351-2909559716-1301513147-412116970)(A;;GX;;;S-1-5-80-4059739203-877974739-1245631912-527174227-2996563517)``
+.. code-block:: powershell
+
+   netsh http delete urlacl url=http://+:5985/wsman/
+   netsh http add urlacl url=http://+:5985/wsman/ sddl=D:(A;;GX;;;S-1-5-80-569256582-2953403351-2909559716-1301513147-412116970)(A;;GX;;;S-1-5-80-4059739203-877974739-1245631912-527174227-2996563517)
+   netsh http delete urlacl url=https://+:5986/wsman/
+   netsh http add urlacl url=https://+:5986/wsman/ sddl=D:(A;;GX;;;S-1-5-80-569256582-2953403351-2909559716-1301513147-412116970)(A;;GX;;;S-1-5-80-4059739203-877974739-1245631912-527174227-2996563517)
 
 
 **So What Now?**
