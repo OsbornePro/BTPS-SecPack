@@ -693,7 +693,7 @@ If your source event collector is not receiving any events yet you will need to 
        Set-Item -Path WSMan:\localhost\Service\Auth\Certificate -Value $True 
    }
    Write-Output "[*] "
-   
+
 
 2. If you have an Intermediate Certificate Authority that assigns certificates you will need to set this registry value on your WEC Server
 
@@ -722,7 +722,7 @@ Error code is 2150858882 and Error Message is <f:WSManFault xmlns:f="http://sche
 The forwarder is having a problem communicating with subscription manager at address https://server.doamin.com:5986/wsman/SubscriptionManager/WEC.  Error code is 2150858882 and Error Message is .
 
 
-You can solve this with the below commands
+You can solve this with the below PowerShell commands
 
 
 .. codeblock:: powershell
@@ -734,18 +734,13 @@ You can solve this with the below commands
    $AppID = $AppID.Trim()
    cmd /c netsh http delete sslcert ipport=0.0.0.0:443
    cmd /c netsh http add sslcert ipport=0.0.0.0:443 certhash=$Thumbprint appid=`"$AppID`"
-   Restart-Service winrm,wecsvc
+   Restart-Service -Name winrm,wecsvc
 
 
 Another possible solution is going to be the WinRM service is not available. You can correct that by doing
 
-
-.. codeblock:: powershell
-
-   $EventInfo = Get-WinEvent -LogName 'Microsoft-Windows-Forwarding/Operational' -MaxEvents 1
-   If ($EventInfo.LevelDisplayName -ne "Information") {
-       cmd /c 'sc config WinRM type= own'
-   }  # End If
+``$EventInfo = Get-WinEvent -LogName 'Microsoft-Windows-Forwarding/Operational' -MaxEvents 1``
+``If ($EventInfo.LevelDisplayName -ne "Information") { cmd /c 'sc config WinRM type= own' }  # End If``
 
 
 Windows Event Forwarding (WEF) Application
