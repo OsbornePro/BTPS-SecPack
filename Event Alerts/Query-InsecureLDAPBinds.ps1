@@ -96,7 +96,7 @@ Function Find-InsecureLDAPBinds {
 $Results = Find-InsecureLDAPBinds -ComputerName localhost -Hours 24 -Verbose
 $Final = $Results | ForEach-Object {
 
-            $Obj = New-Object -TypeName PSObject | Select-Object -Property "Hostname","IPAddress","Port","User","BindType"
+            $Obj = New-Object -TypeName PSObject | Select-Object -Property "Hostname","IPAddress","Port","User","BindType","Message"
             $Obj.Hostname = $(Resolve-DnsName -Name $_.IPAddress -Server $env:COMPUTERNAME | Select-Object -ExpandProperty Name -First 1 | Out-String)
             $Obj.IPAddress = $_.IPAddress
             $Obj.Port = $_.Port
