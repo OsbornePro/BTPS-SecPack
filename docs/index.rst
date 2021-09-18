@@ -389,11 +389,11 @@ Useful WinRM Info and Commands To Know
 --------------------------------------
 Setup WinRM over HTTPS may require the need to know a few commands. I have included these commands below.
 
-``Enable-PSRemoting -Force # Enables firewall rules for WinRM``
-``winrm qc -q # Qucik config for WinRM 5985``
-``winrm enum winrm/config/listener # Enumerate cert thumbprint used on different winrm ports``
-``winrm delete winrm/config/listener?Address=*+Transport=HTTPS # Delete winrm certificate and stop listener on 5986. This allows new cert to be attached to port``
-``winrm create winrm/config/listener?Address=*+Transport=HTTPS # Creates a WinRM listener on 5986 using any available certificate``
+- ``Enable-PSRemoting -Force # Enables firewall rules for WinRM``
+- ``winrm qc -q # Qucik config for WinRM 5985``
+- ``winrm enum winrm/config/listener # Enumerate cert thumbprint used on different winrm ports``
+- ``winrm delete winrm/config/listener?Address=*+Transport=HTTPS # Delete winrm certificate and stop listener on 5986. This allows new cert to be attached to port``
+- ``winrm create winrm/config/listener?Address=*+Transport=HTTPS # Creates a WinRM listener on 5986 using any available certificate``
 
 The below command defines a certificate to use on port 5986. Certificate Template needed is a Web Server certificate from Windows PKI
 
