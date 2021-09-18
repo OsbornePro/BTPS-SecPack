@@ -404,6 +404,14 @@ The below command defines a certificate to use on port 5986. Certificate Templat
 
 **CERTIFICATE SHOULD BE USED FOR SERVER AND CLIENT AUTHENTICATION WHEN USING WINDOWS EVENT COLLECTION**
 
+Another thing you will need to do to use Windows Event Collection is below
+1. Log onto your Windows Event Collection Server with an administrator account
+2. Open the local machine certificate store (certlm.msc)
+3. Drop down Certificates - Local Computer > Personal > Certificates
+4. Right click on your WinRM Certificate and go to "All Tasks" > "Manage Private Keys...."
+5. Go th the "Security" tab and click the "Add" button
+6. Give the NETOWRK SERVICE user "Full Control" to the private key and click Apply
+
 
 **SERVER CERTIFICATE INFO:**
 
