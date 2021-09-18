@@ -749,6 +749,7 @@ If your source event collector is not receiving any events yet you will need to 
    winrm invoke Restore winrm/Config                          # Restore the Listener configuration
    winrm set winrm/config/client @ allowunencrypted= false    # Manually prevent unencrypted communication
    winrm set winrm/config/service @ allowunencrypted= true    # Manually prevent unencrypted communication
+   winrm set winrm/config/service @{CertificateThumbprint="$Thumbprint"}
    winrm set winrm/config/client @ trustedhosts= *.domain.com # Manually define trusted hosts
    #
    # Test remote connection using PowerShell
