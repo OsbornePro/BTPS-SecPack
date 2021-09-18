@@ -685,7 +685,9 @@ You can issue the below commands
    $CAThumbprint = Read-Host -Prompt "Enter the thumbprint of your Root CA"
    cmd /c winrm create winrm/config/service/certmapping?Issuer=$CAThumbprint+Subject=*+URI=* @{UserName="WEFAdmin";Password="gemKFueq4bn4nASHwUtfh3Pycv2kZu8dKK6v"} -remote:localhost
    # EXAMPLE OF ABOVE COMMAND ENUMERATED
-   # winrm create winrm/config/service/certmapping?Issuer=15c9df608e454371022622588616ca818e658bd4+Subject=*+URI=* @{UserName="WEFAdmin";Password="gemKFueq4bn4nASHwUtfh3Pycv2kZu8dKK6v"} -remote:localhost 
+   # winrm create winrm/config/service/certmapping?Issuer=15c9df608e454371022622588616ca818e658bd4+Subject=*+URI=* @{UserName="WEFAdmin";Password="gemKFueq4bn4nASHwUtfh3Pycv2kZu8dKK6v"} -remote:localhost
+   # OR IN POWERSHELL
+   # New-Item -Path WSMan:\localhost\ClientCertificate -Subject "Hostname.domain.com" -URI * -Issuer $RootCAThumbprint -Credential (Get-Credential -Username WEFAdmin -Message "This needs to be the credentials of a local administrator") -Force
 
 
 **NEXT** We can then configure the "Domain Computers" and "Domain Controllers" source collection using my prebuilt XML file with the below commands. 
@@ -748,6 +750,9 @@ If your source event collector is not receiving any events yet you will need to 
    winrm set winrm/config/client @ allowunencrypted= false    # Manually prevent unencrypted communication
    winrm set winrm/config/service @ allowunencrypted= true    # Manually prevent unencrypted communication
    winrm set winrm/config/client @ trustedhosts= *.domain.com # Manually define trusted hosts
+   #
+   # Test remote connection using PowerShell
+   Test-WsMane -ComputerName server.domain.com -UseSSL -Authentication ClientCertificate -CertificateThumbprint <Thumbprint>
    #
    # CERTMAPPING COMMANDS
    winrm get winrm/config/service/certmapper?Issuer=15c9df608e454371022622588616ca818e658bd4+Subject=*+URI=*
