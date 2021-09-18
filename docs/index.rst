@@ -402,6 +402,9 @@ The below command defines a certificate to use on port 5986. Certificate Templat
    New-WSManInstance -ResourceUri WinRM/Config/Listener -SelectorSet @{Address = "*"; Transport = "HTTPS"} -ValueSet @{Hostname = FqdnRequiredHere.domain.com; CertificateThumbprint = $Thumbprint }
 
 
+__CERTIFICATE SHOULD BE USED FOR SERVER AND CLIENT AUTHENTICATION WHEN USING WINDOWS EVENT COLLECTION__
+
+
 **SERVER CERTIFICATE INFO:**
 
 The certificate thumbprint value that you are going to need in **"Group Policy Setting 1"** below is from your internal domains Private Key Infrastructure (PKI). This value will vary as these values are unique to the certificate. The Root Certificate Authority (CA) assigns certificates to your devices. When a device receives a certificate, it gets assigned under the Root CA's certificate. This creates what is called a Certificate Chain. If it helps to see this represented in a directory tree format, it would look something like the below tree structure. Your domain would not have an Intermediate CA most likely but I included it for the visual.
@@ -410,6 +413,10 @@ The certificate thumbprint value that you are going to need in **"Group Policy S
     * Intermediate CA Certificate
         * Assigned Device Certificate
         * Assigned Device Certificate <-- *This certificate's thumbprint gets assigned to port 5986 on the client device*
+
+Add a friendly name to your WinRM over HTTPS servers certificate. I do this because the code that performs a lookup operation on some OS versions of Windows doesn't know how to retrieve the friendly name of a certificate in a PKCS#7 file.
+
+__REFERENCE:__ https://docs.microsoft.com/en-us/troubleshoot/iis/error-install-certificate
 
 
 **CLIENT CERTIFICATE INFO:**
@@ -636,6 +643,14 @@ The below command can be used to obtain the value you need to copy
 ```(wevtutil gl security | Select-String -Pattern "channelAccess").ToString().Trim().Replace("channelAccess: ","")```
 
 
+
+**GROUP POLICY SETTING 3**
+
+The group policy setting **Computer Configuration > Administrative Templates > Windows Components > Windows Remote Shell > Allow Remote Shell Access** needs to be set to a value of **"Enabled"**. 
+
+**NOTE:** The CIS Benchmarks have recommendations to Disable this policy setting. There is debate over this given that powershell is now legitimately used by administrators to remotely access devices. I suggest using your Windows firewall and tailoring the other WinRM group policies we have defined above to closely match your environment if this is a concern for you. 
+
+
 Configure Source Initiated WEC Server
 -------------------------------------
 
@@ -725,17 +740,26 @@ If your source event collector is not receiving any events yet you will need to 
 
 .. code-block:: powershell
 
-   winrm get winrm/config
-   winrm get winrm/config/service
-   winrm enum winrm/config/listener
-   winrm get winrm/config/service/certmapper
+   winrm get winrm/config                                     # View applied GPO and other settings for WinRM
+   winrm get winrm/config/service                             # View applied settings on the WinRM service you have configured
+   winrm enum winrm/config/listener                           # Confirm the WinRM listener and certificate attached
+   winrm get http://schemas.microsoft.com/wbem/wsman/1/config # Confirm a computer certificate has been installed
+   winrm invoke Restore winrm/Config                          # Restore the Listener configuration
+   winrm set winrm/config/client @ allowunencrypted= false    # Manually prevent unencrypted communication
+   winrm set winrm/config/service @ allowunencrypted= true    # Manually prevent unencrypted communication
+   winrm set winrm/config/client @ trustedhosts= *.domain.com # Manually define trusted hosts
+   #
+   # CERTMAPPING COMMANDS
+   winrm get winrm/config/service/certmapper?Issuer=15c9df608e454371022622588616ca818e658bd4+Subject=*+URI=*
+   winrm create winrm/config/service/certmapping?Issuer=<Thumbprint>+Subject=*+URI=* @{Username="WEFAdmin";Password="Password123!"} -remote:localhost
+   winrm delete winrm/config/service/certmapping?Issuer=<Thumbprint>+Subject=*+URI=* 
 
 
-Execute the below command on a client to test communication and verify certificate being used
+The below command is how I manually test whether or not the WEF connection will work. This allows me to attempt a connection to the WEF server from a client device. The error message returned will be what you see in the event logs.
 
 .. code-block:: powershell
 
-   cmd /c 'winrm g winrm/config -r:https://<Event Collector FQDN>:5986 -a:certificate -certificate:"<Thumbprint of the client authentication certificate>"'``
+   cmd /c 'winrm g winrm/config -r:https://EventCollector.domain.com:5986 -a:certificate -certificate:"<Thumbprint Local Client WinRM Certifcate>"'``
 
 
 3. If you come accross the below message in your event logs it means there was an issue in validating the certificate on port 443 (*Not 5986*).
