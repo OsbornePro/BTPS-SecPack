@@ -608,6 +608,8 @@ WinRM over HTTPS is now configured for your environment. Great work! When you no
 Configure Windows Event Forwarding
 ==================================
 
+__REFERENCE:__ https://docs.microsoft.com/en-us/windows/win32/wec/setting-up-a-source-initiated-subscription
+
 Set the below Group Policy settings to configure Windows Event Forwarding with HTTPS using Certificate authentication
 
 **GROUP POLICY SETTING 1**
