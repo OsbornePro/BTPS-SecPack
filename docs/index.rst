@@ -402,7 +402,7 @@ The below command defines a certificate to use on port 5986. Certificate Templat
    New-WSManInstance -ResourceUri WinRM/Config/Listener -SelectorSet @{Address = "*"; Transport = "HTTPS"} -ValueSet @{Hostname = FqdnRequiredHere.domain.com; CertificateThumbprint = $Thumbprint }
 
 
-__CERTIFICATE SHOULD BE USED FOR SERVER AND CLIENT AUTHENTICATION WHEN USING WINDOWS EVENT COLLECTION__
+**CERTIFICATE SHOULD BE USED FOR SERVER AND CLIENT AUTHENTICATION WHEN USING WINDOWS EVENT COLLECTION**
 
 
 **SERVER CERTIFICATE INFO:**
@@ -416,7 +416,7 @@ The certificate thumbprint value that you are going to need in **"Group Policy S
 
 Add a friendly name to your WinRM over HTTPS servers certificate. I do this because the code that performs a lookup operation on some OS versions of Windows doesn't know how to retrieve the friendly name of a certificate in a PKCS#7 file.
 
-__REFERENCE:__ https://docs.microsoft.com/en-us/troubleshoot/iis/error-install-certificate
+**REFERENCE:** https://docs.microsoft.com/en-us/troubleshoot/iis/error-install-certificate
 
 
 **CLIENT CERTIFICATE INFO:**
