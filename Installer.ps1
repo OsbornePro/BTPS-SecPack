@@ -160,6 +160,7 @@ Write-Output "[!] IMPORTANT: In order to send emails you need to authenticate to
 `n`t 1 : Use a Credential File (if an attacker were to compromise the computer they can view the credentials). If you choose this option the Credential file will be saved too C:\Users\Administrator\AppData\Local\PackageManagement\btpssecpack.xml and permissions will be set.
 `n`t 2 : IP Authentication (If you are using Office365 you can configure a Connector to allow emails sent from your Public IP address to be good enough for authentication to your Exchange SMTP server)
 `n`t 3 : BEST OPTION : Free SMTP2GO account (This can enable IP address authentication or use credentials that do not authenticate to anywhere else in your environment. This is the best option in my opinion"
+Write-Host "Visit https://www.smtp2go.com/?s=osbornepro to create an SMTP2GO Account" -ForegroundColor Green
 
 $CredAnswer = Read-Host -Prompt "Select one of the above methods [1/2/3]"
 # CREDENTIAL FILE
@@ -201,7 +202,7 @@ ElseIf ($CredAnswer -eq "3") {
     $SmtpQuestion = Read-Host -Prompt "Do you need to create and SMTP2GO account? [y/N]"
     If ($SmtpQuestion -like "y*") {
 
-        Start-Process -FilePath "https://www.smtp2go.com/"
+        Start-Process -FilePath "https://www.smtp2go.com/?s=osbornepro"
 
     }  # End If
 
@@ -276,8 +277,18 @@ ForEach ($AlertFile in $AlertFiles) {
 
 Write-Warning "I am not able to sign alert scripts for you because we just changed the files to include your email information."
 Write-Output "[!] We are about to move the Alert scripts to other devices in your network. These should be Code Signed for Security Reasons."
-Write-Output "[*] If you do not have a Code Signing Certificate for $env:USERNAME please get one now"
-Pause
+
+$CreateCodeSigningCert = Read-Host -Prompt "Do you already have a Code Signing Certificate? [y/N]"
+If ($CreateCodeSigningCert -like "N*") {
+
+    Read-Host -Prompt "If you have not already enabled your Code Signing certificate template, do the following. Press ENTER when you are done `n`nLog into your Enterpirse Root CA Server. `nOpen 'certsrv.msc'. `nRight click on 'Certificate Templates' and select 'New' > 'Certificate Template to Issue' and select 'Code Signing' certificate. `nThis should now allow you to request a Code Signing Certificate."
+
+    $CodeSigningCert = Get-Certificate -Template "CodeSigning" -Url "ldap:" -CertStoreLocation "Cert:\CurrentUser\My"
+    Get-ChildItem | Where-Object { $_.Thumbprint -eq $CodeSigningCert.Certificate.Thumbprint } | ForEach-Object { $_.FriendlyName = "Code Signing Certificate" }
+    $CSThumbprint = $CodeSigningCert.Certificate.Thumbprint
+
+}  # End If
+
 Write-Output "[!] Below is a list of the alert scripts that are about to be signed with your Code Signing Certificate. `n"
 $CodeSignUs = "$BTPSHome\WEF Application\SQL-Query-Suspicous-Events.ps1","$BTPSHome\Local Port Scan Monitor\ListenPortMonitor.ps1","$BTPSHome\Local Port Scan Monitor\Watch-PortScan.ps1","$BTPSHome\Hardening Cmdlets\Reset-KerberosKeys.ps1","$BTPSHome\Event Alerts\DNSZoneTransferAlert.ps1","$BTPSHome\Event Alerts\Get-NewlyInstalledService.ps1","$BTPSHome\Event Alerts\NewComputerAlert.ps1","$BTPSHome\Event Alerts\Query-InsecureLDAPBinds.ps1","$BTPSHome\Event Alerts\ReviewForwardingRulesOffice.ps1","$BTPSHome\Event Alerts\UnusualUserSignInAlert.ps1","$BTPSHome\Device Discovery\Find-NewDevices.ps1","$BTPSHome\Account and Password Alerts\AccountsExpiringCheck.ps1","$BTPSHome\Account and Password Alerts\AttemptedPasswordChange.ps1","$BTPSHome\Account and Password Alerts\AttemptedPasswordReset.ps1","$BTPSHome\Account and Password Alerts\Failed.Username.and.Password.ps1","$BTPSHome\Account and Password Alerts\MonitorAdminEscalation.ps1","$BTPSHome\Account and Password Alerts\PasswordExpiryAlert.ps1","$BTPSHome\Account and Password Alerts\User.Account.Created.ps1","$BTPSHome\Account and Password Alerts\User.Account.Locked.ps1","$BTPSHome\Account and Password Alerts\User.Account.Unlocked.ps1"
 
@@ -357,7 +368,6 @@ If (!((Test-LDAPS -ComputerName $PrimaryDC).Protocol -eq 'LDAPS')) {
 
     Write-Warning "LDAP over SSL does not appear to be configured on $PrimaryDC. `nIf you wish to set this up I highly recommend the information at these links `nhttps://youtu.be/8rlk2xDkgLw `nhttps://social.technet.microsoft.com/wiki/contents/articles/2980.ldap-over-ssl-ldaps-certificate.aspx `nhttps://techcommunity.microsoft.com/t5/sql-server/step-by-step-guide-to-setup-ldaps-on-windows-server/ba-p/385362 `n`n[*] Continuing setup process of the BTPS Security Package."
 
-
 }  # End If
 Else {
 
@@ -371,7 +381,7 @@ Write-Output "[*] LDAP over SSL alert task is set to inform you who performs and
 
 If (!(Test-WSMan -ComputerName $PrimaryDC -UseSSL -ErrorAction SilentlyContinue)) {
 
-    Write-Warning "WinRM over SSL does not appear to be configured on $PrimaryDC `nI highly recommend using this. If you wish to set this up I suggest following my instructions at the below links.`nhttps://btps-secpack.com/winrm-over-https `nhttps://youtu.be/UcU2Iu9AXpM `nThis script will pause to give you time to set this up"
+    Write-Warning "WinRM over SSL does not appear to be configured on $PrimaryDC `nI highly recommend using this. If you wish to set this up I suggest following my instructions at the below links.`nhttps://btpssecpack.osbornepro.com/winrm-over-https `nhttps://youtu.be/UcU2Iu9AXpM `nThis script will pause to give you time to set this up"
     Pause
 
 }  # End If
@@ -431,7 +441,7 @@ If ($SysmonNetworkShareRequest -like "y*") {
     Write-Output "[*] Creating Hash Validation Checker task on $env:COMPUTERNAME. This task will still need to be pushed out to your environment using group policy. Instructions on that can be found HERE https://btps-secpack.com/sysmon-setup"
     Register-ScheduledTask -Xml (Get-Content -Path "C:\Sysmon\HashValidator.xml"| Out-String) -TaskName "Hash Validator" -TaskPath "\" -User $ScheduledTaskUser -Password $Password –Force
 
-    Write-Output "Follow the setup instructions at https://btps-secpack.com/sysmon-setup Page 6 to create the group policy that gets this on all the devices in your environment `nThis creates a new log in the event viewer that providers more detailed logging and allows you to use a task that monitors connections to your devices providing an alert whenver a blacklisted IP has been connected too"
+    Write-Output "Follow the setup instructions at https://btpssecpack.osbornepro.com/en/latest/#solo-sysmon-setup or https://raw.githubusercontent.com/OsbornePro/Documents/main/Sysmon%20Setup-0001.pdf. Visit Page 6 to create the group policy that gets this on all the devices in your environment `nThis creates a new log in the event viewer that providers more detailed logging and allows you to use a task that monitors connections to your devices providing an alert whenver a blacklisted IP has been connected too"
     Pause
 
 }  # End If
@@ -767,8 +777,8 @@ If ($EnableDoHOn.Count -gt 0) {
 # SIG # Begin signature block
 # MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUERI/mqoRjVfbid2VDfGutplK
-# HOigggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUTXnIrOig0s8tCZsLSJGzaeUp
+# geCgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
 # BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
 # BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
 # IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
@@ -828,11 +838,11 @@ If ($EnableDoHOn.Count -gt 0) {
 # aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
 # CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 # AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FIMvYBojc1edryhSgIfNuKlRwd0qMA0GCSqGSIb3DQEBAQUABIIBADnmqcseW8yq
-# c07ATAtszfpOmrqLrnAzAgQAp8ThejLQt0JvwI8nCIIbYJX3NgovugHxkmOiILcx
-# UCfvoBZv1R2wHmbbuczZ09U1dohv7BZe6DGKKXzTQbNuXqvFW8olHsrICO89LP6g
-# 6vTgIbbRzJfJYQE7kCXc/paGDJ4qsmx126fpWbRLXaHiVt0pf0CkHw3WFBTozcBr
-# Dlakt95R14aNprtR1HJH/rD0qfM5rreR5DifiW8fBqvrf1Krox1f5goG1v4PJa+C
-# xkFLxZgqZ7fBrSwyPXZNxtr46BV5YElT9kWIYjEoZf3xcdJLoK32F1Wb8zF0RXHK
-# j97dQdj/9TU=
+# FH2byPpczeryFydkfJ05Qir5bBJyMA0GCSqGSIb3DQEBAQUABIIBAFw+cQqOcRxo
+# cI/R55hfMiyh6pF4BTxMFwbh7d+TsyP1x42nEmDZsMiQpJZQjlbUPvoVutA0H2S9
+# lY5yMHVvNzpL40guV3vJ9EADcZm7Kh2fUkjpot6UL8QJZ65GiKQuxEGZgSQAwAel
+# sH1f3x4eEhSiySgMyEqanJk+bx1IKk57I1XQrdzf4+a6g2gPCijDRpq1zzh/nhP6
+# akQcWewnsVmAe9qT9AjOau44yf/9RW1ECAs8EytgG1AobsJM4yBgEIYoGT3QlbEq
+# +DWgeDOTR/nOOUlnxCP4wS7S1UdjGqH8vGZK6y5F7BKB0bvKCzSPlFq6mMj1bgvp
+# G5tuAuGCU3E=
 # SIG # End signature block
