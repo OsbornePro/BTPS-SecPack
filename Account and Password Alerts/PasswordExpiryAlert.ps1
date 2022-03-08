@@ -13,7 +13,7 @@ $Policy =  $PasswordPolicy | Select @{n="PolicyType";e={"Password"}},`
                                   8 {"Passwords can be simple, and the administrator account can be locked out"}
                                   9 {"Passwords must be complex, and the administrator account can be locked out"}
                                   Default {$_.pwdProperties}}}}
-$PolicyString = "Max Password Age: $($Policy.maxPwdAge)<br>`nPassword History: $($Policy.pwdHistoryLength)<br>`nMinimum Password Length: $($Policy.minPwdLength)"
+$PolicyString = (("Max Password Age: $($Policy.maxPwdAge)<br>`nPassword History: $($Policy.pwdHistoryLength)<br>`nMinimum Password Length: $($Policy.minPwdLength)") | Out-String).Trim()
 [String]$EnvDomain = ([System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()).Name
 [DateTime]$TodaysDate = Get-Date
 [Array]$UserDetails = Get-ADUser -Filter { Enabled -eq $True -and PasswordNeverExpires -eq $False} –Properties * | Select-Object -Property "Displayname","Mail", @{l="ExpiryDate";e={$_.PasswordLastSet.AddDays($MaxPassAge)}}
