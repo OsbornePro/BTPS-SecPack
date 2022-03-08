@@ -95,6 +95,7 @@ I wrote an initial install script to automatically set up as much of these prote
     - Enable RDP Network Level Authentication to prevent not domain computers from RDPing into a client
     - Update any available driver updates on a local or remote machine
     - Add a notification banner to emails that users receive in Outlook when the sender name matches a name in the company and the email address is not from the internal domain
+    - Create Transport Rule that enables Microsoft Exchange servers to reject failed DMARC email messages
 - __Local Port Scan Monitor__ [VIEW](https://github.com/tobor88/BTPS-SecPack/tree/master/Local%20Port%20Scan%20Monitor)
     - Receive an alert when a port scan is detected on a local device
     - Receive an alert for when a bind shell is opened and keep a record of all established connections to a device including the port and protocols used
