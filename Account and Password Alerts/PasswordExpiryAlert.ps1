@@ -114,7 +114,7 @@ $PolicyString<br>
     <li>Press <strong>Ctrl+Alt+Del</strong> and click the `"<strong>Change Password</strong>`" Button</li>
     <li>Enter your current password on the first line and your new password on the second and third lines</li>
 </ol>
-<h4>How Do I Change my Password Wihtout a Computer?</h4>
+<h4>How Do I Change my Password Without a Computer?</h4>
  <strong>You are able to change your password at the following link: <a href='https://account.activedirectory.windowsazure.com/ChangePassword.aspx?BrandContextID=O365&ruO365='>HERE: Change Password Link</a> <br>
  <br>
 <hr><br>" | Out-String
