@@ -11,11 +11,25 @@ If (!([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]
 
 }  # End If
 
-
+$Logo = @"
+╔═══╗░░╔╗░░░░░░░░░░░░╔═══╗░░░░░
+║╔═╗║░░║║░░░░░░░░░░░░║╔═╗║░░░░░
+║║░║╠══╣╚═╦══╦═╦═╗╔══╣╚═╝╠═╦══╗
+║║░║║══╣╔╗║╔╗║╔╣╔╗╣║═╣╔══╣╔╣╔╗║
+║╚═╝╠══║╚╝║╚╝║║║║║║║═╣║░░║║║╚╝║
+╚═══╩══╩══╩══╩╝╚╝╚╩══╩╝░░╚╝╚══╝
+===============================
+If you can't beat `em tech `em!
+===============================
+https://osbornepro.com
+https://btpssecpack.osbornepro.com
+EMAIL: info@osbornepro.com
+"@
+Write-Output "$Logo"
 Write-Output "==============================================================================================================================="
 Write-Output "|                                                     OsbornePro                                                              |"
-Write-Output "|                                         The B.T.P.S. Security Package                                                       |"
-Write-Output "|                      https://www.btps-secpack.com Beginning the installation of the B.T.P.S Security Package                |"
+Write-Output "|                                           The B.T.P.S. Security Package                                                     |"
+Write-Output "|                 https://www.btpssecpack.osbornepro.com Beginning the installation of the B.T.P.S Security Package           |"
 Write-Output "==============================================================================================================================="
 Write-Output "[i] Suggestions and feedback are always appreciated"
 
