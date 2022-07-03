@@ -1,15 +1,11 @@
 Welcome to The B.T.P.S Security Package's documentation!
 ========================================================
+# `OsbornePro Site <https://osbornepro.com>`_
 * `GitHub Page <https://github.com/OsbornePro/BTPS-SecPack>`_
 * `GitLab Page <https://gitlab.com/tobor88/BTPS-SecPack>`_
 * `PayPal Donations <https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=AGKU5LWZA67XC&currency_code=USD&source=url>`_
 * `LiberPay Donations <https://liberapay.com/tobor/donate>`_
 * `Report Issues <https://osbornepro.com/schedule-or-contact>`_
-
-
-**Code Signing**
-
-If for whatever reason you would like me to use my legitimate Code Signing Certificate to sign any of the scripts in this repository that you have modified in some way, feel free to email me your request at info@osbornepro.com and include the script in TXT file attachment. I will then sign it ASAP and send it back to you.
 
 
 **Contributions**
@@ -22,17 +18,18 @@ This repo also assumes that you have referenced the Windows Event Logging Cheat 
 
 The `Installer.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/Installer.ps1>`_ script is good to go. I created a virtual environment and ran everything from scratch to ensure you get the max protection and visibility possible with the least amount of fuss. If you experience any trouble please let me know so I am aware and can fix it. If you experience any issues or need help, feel free to reach out to me. My aim is to make this as easy to get going as possible. If something is too difficult or confusing please tell me about it. rosborne@osbornepro.com I am still adding content to this site as it is fairly new.
 
-**FEATURES COMING SOON**
+**EXPAND THIS PROJECT BY UTILIZING ELASTICSEARCH**
 
-* **ELK SIEM Tool:** I am going to set up a configuration for the ELK SIEM tool. This tool is free for certain uses and offers a purchase if desired. It will include `Elasticsearch <https://www.elastic.co/elasticsearch/>`_, `Kibana <https://www.elastic.co/kibana>`_, and `Winlogbeat <https://www.elastic.co/beats/winlogbeat>`_. The configuration is going to use the Windows Event Forwarding (WEF) configuration. The purpose of this is to prevent the need to install agents on the devices in your environment. The free version does not offer LDAP authentication unfortunately. The configuration will use TLS certificates to encrypt communications on the local host and listen for outside connections if you decide to install other stack programs such as `APM-Server <https://www.elastic.co/apm>`_, `Heartbeat <https://www.elastic.co/beats/heartbeat>`_, or `Metricbeat <https://www.elastic.co/beats/metricbeat>`_. `Winlogbeat <https://www.elastic.co/beats/winlogbeat>`_ logs will be modified to include `GeoIP data <https://www.elastic.co/blog/geoip-in-the-elastic-stack>`_ tags that can be used for mapping IP addresses. Default passwords will of course also be changed. I will also create a Docker file that can be used to prevent the need for too much manual set up. When available it can be obtained from the Official OsbornePro LLC docker site: https://hub.docker.com/orgs/osbornepro
-* I am **NO** longer planning on integrating the `Virus Total API <https://support.virustotal.com/hc/en-us/articles/115002100149-API>`_ for MD5 hash comparisons. This does not provide enough cost per value; however, I included a script to do this in case it is valuable to your situation. The script is located here: https://github.com/OsbornePro/BTPS-SecPack/blob/master/Sysmon/HashValidator.ps1
+* **ELK SIEM Tool:** I was going to set up a configuration for the ELK SIEM tool, but they make changes so often that it is too much work to keep up with. I do not receive donations for this project which discourages me from putting that kind of time in. The Elaticsearch tool is free for certain uses and offers a purchase if desired. It includes `Elasticsearch <https://www.elastic.co/elasticsearch/>`_, `Kibana <https://www.elastic.co/kibana>`_, and `Elastic Agent <https://www.elastic.co/downloads/elastic-agent>`_. The configuration should use the source collection Windows Event Forwarding (WEF) configuration to collect logs using WinRM over HTTPS directly on the Elasticsearch sever, which then locally imports the local Sysmon and local Forwarded Event logs into Elasticsearch. The purpose of this is to prevent the need to install agents on the devices in your environment. The free version does not offer LDAP authentication unfortunately. The configuration will use TLS certificates to encrypt communications on the local host and listen for outside connections.
+
+* I am **NO** longer planning to integrate the `Virus Total API <https://support.virustotal.com/hc/en-us/articles/115002100149-API>`_ for MD5 hash comparisons. This does not provide enough cost per value; however, I included a script to do this in case it is valuable to your situation. The script is located here: https://github.com/OsbornePro/BTPS-SecPack/blob/master/Sysmon/HashValidator.ps1 and can be used if desired. This will be more beneficial in smaller environments I would think.
 
 
 **IMPORTANT:** This **Blue Team PowerShell Security Package**, assumes that you have referenced the `Windows Event Logging Cheat Sheet <https://www.malwarearchaeology.com/cheat-sheets/>`_ for logging in your environment. Use `LOG-MD <https://www.imfsecurity.com/free>`_ or `CIS-CAT <https://www.cisecurity.org/cis-benchmarks/>`_ (*an SCAP Tool*) to ensure the recommended logging is configured. These logging recommendations adhere to commonly accepted guidelines in the cyber security community. Even without the use of this security application, these guidelines should be followed to better assist your organization in the event of a compromise.
 
 
 **CODE CONTRIBUTIONS**
-I am always open to suggestions and ideas as well as contributions if  anyone wishes to help add to this package. Credit will of course be given where credit is due. If you wish to contribute I have placed some info on that `HERE <https://github.com/tobor88/BTPS-SecPack/blob/master/CONTRIBUTING.md>`_.
+I am always open to suggestions and ideas as well as contributions if anyone wishes to help add to this package. Credit will of course be given where credit is due. If you wish to contribute, I have placed info on that `HERE <https://github.com/tobor88/BTPS-SecPack/blob/master/CONTRIBUTING.md>`_.
 
 
 **What Purpose Does This Serve?**
@@ -41,14 +38,14 @@ This repository contains a collection of PowerShell tools that can be utilized t
 
 **IMPORTANT NOTE FOR LARGE ENVIRONMENTS**
 
-For the case of organizations with 1,000’s of devices; you may find that this entire suite does not apply to you. This has to do with how some of the discoveries operate. For example the alert I have in the `Device Discovery <https://github.com/OsbornePro/BTPS-SecPack/tree/master/Device%20Discovery>`_ directory relies on DHCP assigned IP addresses. All DHCP servers in an environment are queried to create a list of known MAC addresses. This information is then saved to a CSV file for reference in discovering any new devices that join a network. This file could become too large to be effective. The other alert I can see not being effective is the `"Local Port Scan Alert" <https://github.com/tobor88/BTPS-SecPack/blob/master/Local%20Port%20Scan%20Monitor/Watch-PortScan.ps1>`_. This is because if there is an over abundance of connections the script will not be able to cover all of the connections quickly enough. Other alerts in this security package are still appropriate no matter the network size as they are Event ID based typically. To begin, I suggest setting up WinRM over HTTPS in your environment.
+For the case of organizations with 1,000’s of devices; you may find that this entire suite does not apply to you. This has to do with how some of the discoveries operate. For example, the alert I have in the `Device Discovery <https://github.com/OsbornePro/BTPS-SecPack/tree/master/Device%20Discovery>`_ directory relies on DHCP assigned IP addresses. All DHCP servers in an environment are queried to create a list of known MAC addresses. This information is then saved to a CSV file for reference in discovering any new devices that join a network. This file could become too large to be effective. The other alert I can see not being effective is the `"Local Port Scan Alert" <https://github.com/tobor88/BTPS-SecPack/blob/master/Local%20Port%20Scan%20Monitor/Watch-PortScan.ps1>`_. This is because if there is an overabundance of connections the script will not be able to cover all the connections quickly enough. Other alerts in this security package are still appropriate no matter the network size as they are Event ID based typically. To begin, I suggest setting up WinRM over HTTPS in your environment.
 
 Functionality in The Blue Team PowerShell Security Package
 ----------------------------------------------------------
 
 
 **Account Lockout Notification**
-This alert lets you know when a user account has been locked out. There is also an alert to be notified when a locked out account has been manually unlocked.
+This alert lets you know when a user account has been locked-out. There is also an alert to be notified when a locked-out account has been manually unlocked.
 
 .. image:: img/AccountLockout.png
    :scale: 100
@@ -66,7 +63,7 @@ This alert informs the cyber security team when a port scan has been attempted a
 
 
 **AutoRuns Logging**
-This is showing the Autoruns Event Viewer entry that gets created. An easy to read CSV file also gets saved to ``C:\\Program Files\\AutorunsToWinEventLog\\AutorunsOutput.csv`` Thanks to:  `https://github.com/palantir/windows-event-forwarding/tree/master/AutorunsToWinEventLog <https://github.com/palantir/windows-event-forwarding/tree/master/AutorunsToWinEventLog>`_
+This is showing the Autoruns Event Viewer entry that gets created. An easy-to-read CSV file also gets saved to ``C:\\Program Files\\AutorunsToWinEventLog\\AutorunsOutput.csv`` Thanks to:  `https://github.com/palantir/windows-event-forwarding/tree/master/AutorunsToWinEventLog <https://github.com/palantir/windows-event-forwarding/tree/master/AutorunsToWinEventLog>`_
 
 .. image:: img/AutoRuns.png
     :scale: 100
@@ -75,7 +72,7 @@ This is showing the Autoruns Event Viewer entry that gets created. An easy to re
 
 
 **Blacklisted IP Logging**
-When a device establishes a connection to an IP that is on 4 or more blacklists or a domain that is less than 2 years old you will be informed. The events are also stored in the Event Viewer under **"MaliciousIPs"**. It seems that an IP address on 3 blacklists does not necessarily mean it is dangerous or something to do anything about. Correct me if my analysis is wrong.
+When a device establishes a connection to an IP that is on 4 or more blacklists or a domain that is less than 2 years old you will be informed. The events are also stored in the Event Viewer under **"MaliciousIPs"**. An IP address on 3 blacklists does not necessarily mean it is dangerous or something to do anything about. Correct me if my analysis is wrong.
 
 .. image:: img/BlacklistedIP.png
     :scale: 100
@@ -93,7 +90,7 @@ This alert is meant to come in once a week. It allows administrators to easily v
 
 
 **Track Network Connection History**
-`ListenPortMonitor.ps1's <https://github.com/OsbornePro/BTPS-SecPack/blob/master/Local%20Port%20Scan%20Monitor/ListenPortMonitor.ps1>`_ main goal is to keep an eye open for newly opened ports on a server to discover possible Reverse Shells or Bind Shells. A connection history log is kept to help trace connections that have been established with a server.
+`ListenPortMonitor.ps1's <https://github.com/OsbornePro/BTPS-SecPack/blob/master/Local%20Port%20Scan%20Monitor/ListenPortMonitor.ps1>`_ main goal is to keep an eye open for newly opened ports on a server to discover possible Reverse Shells or Bind Shells. A connection history log is kept helping trace connections that have been established with a server.
 
 .. image:: img/ConnectionHistory.png
     :scale: 100
@@ -111,7 +108,7 @@ Hardening cmdlet allows you to quickly and easily disable weak TLS protocols and
 
 
 **DNS Zone Transfer Alerts**
-This alert was triggered by an executed DNS Zone transfer. Normal DNS server communication does not trigger this alert. Manually requesting a zone transfer will, allowing you to discover any attackers looking to learn about your environment.
+An executed DNS Zone transfer triggered this alert. Normal DNS server communication does not trigger this alert. Manually requesting a zone transfer will, allowing you to discover any attackers looking to learn about your environment.
 
 .. image:: img/DNSZoneTransfer.png
     :scale: 100
@@ -129,7 +126,7 @@ This hardening cmdlet allows you to easily enable or if desired disable DNS over
 
 
 **Insecure LDAP Bind Notifications**
-This alert is to let you know when an LDAP Bind occurs that is not encrypted with LDAP over SSL. This can help to implement LDAP over SSL in an environment or discover possible LDAP enumeration attempts from an attacker.
+This alert is to let you know when an unecrypted LDAP Bind occurs. This helps to implement LDAP over SSL in an environment and discovers possible LDAP enumeration attempts from an attacker.
 
 .. image:: img/InsecureLdapBinds.png
     :scale: 100
@@ -147,7 +144,7 @@ This alert is displaying 4 devices that recently were physically plugged into an
 
 
 **User Changed Password Notification**
-Receive an alert whenever a user has changed their password. Compare this value to the Administrator list you receive. This allow you to notice any passwords changing outside normal conditions.
+Receive an alert whenever a user has changed their password. Compare this value to the Administrator list you receive. This allows you to notice any passwords changing outside normal conditions.
 
 .. image:: img/NormalPasswordChange.png
     :scale: 100
@@ -156,7 +153,7 @@ Receive an alert whenever a user has changed their password. Compare this value 
 
 
 **Admin Changed Another Users Password Notification**
-This alert informs you when a users password has been changed by an Administrator or other user. Allowing user to change passwords through Azure will generate this alert as well.
+This alert informs you when a user's password has been changed by an Administrator or other user. Allowing user to change passwords through Azure will generate this alert as well.
 
 .. image:: img/PasswordChanged.png
     :scale: 100
@@ -165,7 +162,7 @@ This alert informs you when a users password has been changed by an Administrato
 
 
 **List of Expiring Passwords Notification**
-Receive a list of users whose passwords are expiring in the next 2 weeks. This helps you keep tabs and who is expected to be changing their passwords. Someone not on this list who has their password changed may be under attack.
+Receive a list of users whose passwords are expiring in the next 2 weeks. This helps to keep tabs on expected password changes. Someone changing their password not on this list may be under attack.
 
 .. image:: img/PasswordsExpiring.png
     :scale: 100
@@ -174,7 +171,7 @@ Receive a list of users whose passwords are expiring in the next 2 weeks. This h
 
 
 **Local Port Scan Notification**
-This alert informs the cyber security team when a port scan has been attempted against a server. This currently does not work for File Servers or VoIP servers which have hundreds of unique IP addresses connecting a minute.
+This alert informs the cyber security team when a port scan has been attempted against a server. This currently does not work for File Servers or VoIP servers which have hundreds of unique IP addresses connecting a minute. This works as is but still requires some fine tuning. To trigger this alert I have had to perform aggressive nmap scans.
 
 .. image:: img/PortScanDetection.png
     :scale: 100
@@ -192,7 +189,7 @@ This is some output showing the results of what happens when the `RemediateCompr
 
 
 **Suspicious Event Occurred**
-This alert was triggered from centralized logs using Windows Event Forwarding. System Update, when run on Lenovo computers as a standard user, will create a temp account, add it to the local administrators group and install missing updates. It then removes the created account from the local Administrators group and deletes the account. If this were an attacker trying to cover their tracks this would have caught it.
+This alert is triggered using high priority centralized logs from Windows Event Forwarding that are imported into a SQL server. A System Update, when run on Lenovo computers as a standard user, will create a temp account, add it to the local administrators group and install missing updates. It then removes the created account from the local Administrators group and deletes the account. If this were an attacker trying to cover their tracks this would catch it.
 
 .. image:: img/SuspiciousEventTriggered.png
     :scale: 100
@@ -219,7 +216,7 @@ This alert lets IT Administrators know when a user account is about to expire.
 
 
 **User Account Unlocked**
-This alert informs administrators when a user account has been manually unlocked as well as who unlocked what account.
+This alert informs administrators when a user account has been manually unlocked. It provides information on who unlocked the account.
 
 .. image:: img/UserAccountUnlocked.png
     :scale: 100
@@ -228,7 +225,7 @@ This alert informs administrators when a user account has been manually unlocked
 
 Using the "microsoft-teams" branch repository
 =============================================
-If you wish to use Microsoft Teams for sending alerts instead of using email you will want to load the `microsoft-teams <https://github.com/OsbornePro/BTPS-SecPack/tree/microsoft-teams>`_ branch for this repository which has the Teams alert modifications. It will take me a little while to implement this as a configuration option in the install script. Using Microsoft Teams for alert posts does not remove the need for certain email notifications in this repository. Email will still be used for some of the actions. These Teams Posts are able to be completed after you first create a webhook. So-called webhooks offer the possibility to send alerts or other notifications to a Microsoft Teams channel.
+If you wish to use Microsoft Teams for sending alerts instead of using email you will want to load the `microsoft-teams <https://github.com/OsbornePro/BTPS-SecPack/tree/microsoft-teams>`_ branch for this repository which has the Teams alert modifications. It will take me a little while to implement this as a configuration option in the install script. Using Microsoft Teams for alert posts does not remove the need for certain email notifications in this repository. Email will still be used for some of the actions. These Teams Posts can be completed after you first create a webhook. So-called webhooks offer the possibility to send alerts or other notifications to a Microsoft Teams channel.
 
 * `Microsoft Documentation to Create a Webhook <https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook>`_
 * `Microsoft Documentation on Using Webhooks <https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using?tabs=cURL>`_
@@ -236,7 +233,7 @@ If you wish to use Microsoft Teams for sending alerts instead of using email you
 You can create a webhook using the following steps (if you are an admin)
 
 #. Open the Microsoft Teams application
-#. In the left hand pane click **Teams**
+#. In the left-hand pane click **Teams**
 #. Click the more options icon represented by 3 dots **...** next to one of the desired Teams Channels. Example Channel Name: General
 #. Clicking those 3 dots will display a dropdown menu. Click **Connectors**
 #. Click the **Add** button next to **Incoming Webhook**
@@ -277,9 +274,9 @@ Here is what you need to do in order to execute this file.
 
 1. Log into your Primary Domain Controller using an account with Administrator permissions.
 2. Open an Administrative PowerShell session **(Windows Key + X, The press A)**.
-3. Execute the command in step 4. This can be done by highlighting the command. Right click the highlighted text and select "COPY". Then Right Click inside your PowerShell window. If this does not paste right away you can paste by doing the key combo **(Ctrl + V)**. This command executes all the text on that webpage inside of your powershell session without downloading the file to your disk drive.
+3. Execute the command in step 4. This can be done by highlighting the command. Right click the highlighted text and select "COPY". Then Right Click inside your PowerShell window. If this does not paste right away you can paste by doing the key combo **(Ctrl + V)**. This command executes all the text on that webpage inside of your PowerShell session without downloading the file to your disk drive.
 4. ``IEX (New-Object -TypeName System.Net.WebClient).downloadString('https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/Installer.ps1')``
-5. The installation of the B.T.P.S Security Package should then start. Some Next Generation Anti-Virus providers may block script execution in this manner. If that is the case use the below method to accomplish the same task.
+5. The installation of the B.T.P.S Security Package should then start. Some Next Generation Anti-Virus providers may block script execution in this manner. If that is the case, use the below method to accomplish the same task.
 
 
 **IF ABOVE COMMAND METHOD DOES NOT WORK**
@@ -288,11 +285,11 @@ Some Endpoint Detection and Response (EDR) and Next Generation Anti-Virus provid
 
 1. Log into your Primary Domain Controller using an account with Administrator permissions.
 2. Open an Administrative PowerShell session **(Windows Key + X, The press A)**.
-3. The command displayed in step 4 will download the script to your disk in your Downloads directory. Copy and paste the command into your admin powershell session and press **ENTER** to execute it.
+3. The command displayed in step 4 will download the script to your disk in your Downloads directory. Copy and paste the command into your admin PowerShell session and press **ENTER** to execute it.
 4. ``Invoke-WebRequest -Uri "https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/Installer.ps1" -OutFile "$env:USERPROFILE\Downloads\Installer.ps1"``
-5. Execute the command line in step 6 to ensure your Execution Policy allows the script to execute easily. Copy and paste the command into your admin powershell session and press **ENTER** to execute it.
+5. Execute the command line in step 6 to ensure your Execution Policy allows the script to execute easily. Copy and paste the command into your admin PowerShell session and press **ENTER** to execute it.
 6. ``Set-ExecutionPolicy RemoteSigned -Force``
-7. Execute the command line in step 8 to run the script and being installation. Include the period at the beginning of the command. Copy and paste the command into your admin powershell session and press **ENTER** to execute it.
+7. Execute the command line in step 8 to run the script and being installation. Include the period at the beginning of the command. Copy and paste the command into your admin PowerShell session and press **ENTER** to execute it.
 8. ``."$env:USERPROFILE\Downlods\Installer.ps1"``
 9. The installation of the B.T.P.S. Security Package should then begin.
 
@@ -335,7 +332,7 @@ https://github.com/OsbornePro/Documents/raw/main/Installer.ps1%20Demo.pdf
 
 Using the Canary Files
 ======================
-I have included some fake executables in the BTPS Security Package. These executables do not do anything other than print the help message info from the actualy executables. This was done to make them look legitimate if an attacker attempts to execute them. By making these fake executables `Canary Files <https://www.canarytokens.org/generate>`_ we can receive email alerts whenever an attacker executes them.
+I have included fake executables in the BTPS Security Package. These executables do not do anything other than print the help message info from the actual executables. This was done to make them look legitimate if an attacker attempts to execute them. By making these fake executables `Canary Files <https://www.canarytokens.org/generate>`_ we can receive email alerts whenever an attacker executes them. This also works if the attacker downloads the executable to their attack machine and runs the file. (As long as they have internet you should get an email notification)
 
 How To Set Up Your Canary Tokens
 --------------------------------
@@ -354,11 +351,11 @@ How To Set Up Your Canary Tokens
 * ``C:\Temp`` Common directory for storing files an admin may want to delete later but never did
 * ``C:\Windows\Temp``` Common directory for storing files an admin may want to delete later but never did
 * ``C:\Windows\System32``` In your Path variable to make files easier to execute
-* ``C:\Users\Public\Downloads``` Common place for downloaded exectuables
-* ``C:\Users\Administrator\Downloads``` Common place for downloaded exectuables
+* ``C:\Users\Public\Downloads``` Common place for downloaded executables
+* ``C:\Users\Administrator\Downloads``` Common place for downloaded executables
 * ``C:\Windows\System32\spool\drivers\color``` Commonly used by attackers to save files under the System32 directory tree
 
-Use PowerShell to create a fake custom save location for Microsoft Edge Temp files. When you click "Open" in Microsoft Edge this is where those temporaryly saved file locations are placed
+Use PowerShell to create a fake custom save location for Microsoft Edge Temp files. When you click "Open" in Microsoft Edge this is where those temporarily saved file locations are placed
 
 .. code-block:: powershell
 
@@ -375,19 +372,19 @@ Below is a list of the executables I have included to try and bait an attacker i
 * ``procdump.exe`` Used for dumping process memory which may contain clear text passwords or other info
 * ``PsExec.exe`` Used for executing commands on remote devices using SMB
 
-If any of the above executables are run they will display the actualy executable's help message. This is done to make it seem like they are legitimate. Maybe we can trick an attacker into thinking their command line is bad or someone messed up the executables compilation. When they do this we will receive an email alert thanks to the canary token.
+If any of the above executables are run, they will display the actual executable's help message making it seem legitimate. The goal of this is to trick an attacker into thinking their command line is bad or someone messed up the executables compilation. In the process, we will receive an email alert thanks to the canary token.
 
 
 Configure WinRM over HTTPS
 ==========================
-I posted a YouTube video covering the settings configured for WinRM over HTTPS communication through the use of Group Policy. These settings can be seen in the sections below.
+I posted a YouTube video covering the settings configured for WinRM over HTTPS communication using Group Policy. These settings can be seen in the sections below.
 
 `YouTube Video : Configure WinRM over HTTPS Instructions <https://youtu.be/UcU2Iu9AXpM>`_
 
 
-Useful WinRM Info and Commands To Know
+Useful WinRM Info and Commands to Know
 --------------------------------------
-Setup WinRM over HTTPS may require the need to know a few commands. I have included these commands below.
+Setup WinRM over HTTPS may require you to know a few commands. I have included these commands below.
 
 - ``Enable-PSRemoting -Force # Enables firewall rules for WinRM``
 - ``winrm qc -q # Qucik config for WinRM 5985``
@@ -421,14 +418,14 @@ Another thing you will need to do to use Windows Event Collection is below
 
 **SERVER CERTIFICATE INFO:**
 
-The certificate thumbprint value that you are going to need in **"Group Policy Setting 1"** below is from your internal domains Private Key Infrastructure (PKI). This value will vary as these values are unique to the certificate. The Root Certificate Authority (CA) assigns certificates to your devices. When a device receives a certificate, it gets assigned under the Root CA's certificate. This creates what is called a Certificate Chain. If it helps to see this represented in a directory tree format, it would look something like the below tree structure. Your domain would not have an Intermediate CA most likely but I included it for the visual.
+The certificate thumbprint value that you are going to need in **"Group Policy Setting 1"** below, is from your internal domains Private Key Infrastructure (PKI). This value will vary as these values are unique to the certificate. The Root Certificate Authority (CA) assigns certificates to your devices. When a device receives a certificate, it gets assigned under the Root CA's certificate. This creates what is called a Certificate Chain. If it helps to see this represented in a directory tree format, view the below tree structure. Your domain would not have an Intermediate CA most likely but I included it for the visual.
 
 * Root CA Certificate <-- *This is the certificate thumbprint you need*
     * Intermediate CA Certificate
         * Assigned Device Certificate
         * Assigned Device Certificate <-- *This certificate's thumbprint gets assigned to port 5986 on the client device*
 
-Add a friendly name to your WinRM over HTTPS servers certificate. I do this because the code that performs a lookup operation on some OS versions of Windows doesn't know how to retrieve the friendly name of a certificate in a PKCS#7 file.
+Add a friendly name to your WinRM over HTTPS server's certificate. I do this because the code that performs a lookup operation on some OS versions of Windows does not know how to retrieve the friendly name of a certificate in a PKCS#7 file.
 
 **REFERENCE:** https://docs.microsoft.com/en-us/troubleshoot/iis/error-install-certificate
 
@@ -470,7 +467,7 @@ Then click **OK** to save.
 
 **GROUP POLICY SETTING 2**
 
-Next, still on the same policy object, is the list of IP addresses that are allowed to do remote management access  on the target computer.
+Next, still on the same policy object, is the list of IP addresses that are allowed to do remote management access on the target computer.
 
 Go to **Computer Configuration > Policies > Administrative Templates > Windows Components > Windows Remote Management (WinRM) > WinRM Services**.
 
@@ -478,7 +475,7 @@ Then double click on **"Allow remote server management through WinRM"**" to modi
 
 Set the policy to **"Enabled"**
 
-Set the **IPv4 Filter** to * or an all encompassing subnet for your environment such as ``10.0.0.0/16``
+Set the **IPv4 Filter** to * or an all-encompassing subnet for your environment such as ``10.0.0.0/16``
 
 Leave the **IPv6 Filter** blank or set it to a wildcard ``*`` as well.
 
@@ -491,9 +488,9 @@ Click **OK** to save.
 
 Edit the settings — Opening Firewall ports
 
-Next we will create a new rule for the Firewall on the targeted client PC's.
+Next, we will create a new rule for the Firewall on the targeted client PC's.
 
-Go to **Computer Configurations > Policies > Security Settings > Windows  Firewall and Advanced Security > Windows Firewall and Advanced  Security**
+Go to **Computer Configurations > Policies > Security Settings > Windows Firewall and Advanced Security > Windows Firewall and Advanced  Security**
 
 Then right click on **Inbound Rules** > **New Rule**
 
@@ -538,7 +535,7 @@ Set to **"Enabled"**
 
 Define the filter you used in **Group Policy Setting 4** for these allowed values.
 
-For example you may have used a Wildcard ``*`` or defined an all encompassing subnet range such as ``10.0.0.0/16``
+For example, you may have used a Wildcard ``*`` or defined an all-encompassing subnet range such as ``10.0.0.0/16``
 
 
 
@@ -551,11 +548,11 @@ This will allow WinRM communication between any host ending in yourdomain.com.
 
 Then set **"Allow delegating fresh credentials with NTLM-only server authentication"** under that same tree to that value ``WSMAN/*.yourdomain.com``.
 
-For example my email rosborne@osbornepro.com is in the domain osbornepro.com.
+For example, my email rosborne@osbornepro.com is in the domain osbornepro.com.
 
 I would set the value to ``WSMAN/*.osbornepro.com``.
 
-We also want to Enable **"Encryption Oracle Remediation"** and set the drop down value to **"Force Updated Clients"**.
+We also want to Enable **"Encryption Oracle Remediation"** and set the drop-down value to **"Force Updated Clients"**.
 
 This is to prevent `CVE-2018-0886 <https://nvd.nist.gov/vuln/detail/CVE-2018-0886>`_ exploitation.
 
@@ -607,7 +604,7 @@ Create a Registry Setting that gets pushed out through Group Policy containing t
 
 
 **CONCLUSION**
-WinRM over HTTPS is now configured for your environment. Great work! When you now use PowerShell commands such as ``Invoke-Command`` or ``New-PSSession`` you will need to specify the ``-UseSSL`` parameter in order to use WinRM over HTTPS. Port 5985 will not accept connections in an ideal setup.
+WinRM over HTTPS is now configured for your environment. Magnificent! When you now use PowerShell commands such as ``Invoke-Command`` or ``New-PSSession`` you will need to specify the ``-UseSSL`` parameter in order to use WinRM over HTTPS. Port 5985 will not accept connections in an ideal setup.
 
 
 
@@ -620,18 +617,18 @@ Set the below Group Policy settings to configure Windows Event Forwarding with H
 
 **GROUP POLICY SETTING 1**
 
-The Group Policy setting **"Computer Configuration > Policies > Administrative Templates > Windows Components > Event Forwarding > Configure Target Subscription Manager"** needs to be set to **WinRM over HTTPS (Port 5986)**: In my environment I added 2 entries for this to cover all basis. One has the CA certificate thumbprint with with spaces after every 2 numbers, and the other entry is without spaces. The example values are below.
+The Group Policy setting **"Computer Configuration > Policies > Administrative Templates > Windows Components > Event Forwarding > Configure Target Subscription Manager"** needs to be set to **WinRM over HTTPS (Port 5986)**: In my environment I added 2 entries for this to cover all basis. One has the CA certificate thumbprint with spaces after every 2 numbers, and the other entry is without spaces. The example values are below.
 
-1. **Example Entry 1**
+1. **Example Entry 1 Uses Certifiate Authentication**
 
 ``Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900,IssuerCA=ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff``
 
-2. **Example Entry 2**
+2. **Example Entry 2 Uses Certificate Authentication**
 
 ``Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900,IssuerCA=ffffffffffffffffffffffffffffffffffffffff``
 **NOTE:** The default Refresh rate value is 900 seconds or 15 minutes. This does not need to be defined. I included it to be thorough.
 
-3. **Kerberos Example Entry 3 (OPTIONAL IF YOU HAVE ARE HAVING TROUBLE WITH CERTIFICATES AND WANT TO TRY AND GET IT TOO WORK)** 
+3. **Example Entry 3 Uses Kerberos Authentication (OPTIONAL IF YOU HAVE ARE HAVING TROUBLE WITH CERTIFICATES AND WANT TO TRY AND GET IT TOO WORK)** 
 
 Using the below value without a certificate defined will allow/use Kerberos for authentication which is fine to use
 ``Server=https://wef.domain.com:5986/wsman/SubscriptionManager/WEC,Refresh=900``
@@ -828,7 +825,7 @@ Windows Event Forwarding (WEF) Application
 
 **Summary**
 
-The purpose of this web application is to easily investigate any email alerts received that indicate a possible compromise. This server has Windows Event Forwarding (WEF), configured in a "source collector" set up. This means that the clients in the environment initiate connections to the server before sending logs. When one of the suspicious event ID's occur on any of the devices, the event info is forwarded to the WEF source collector server using WinRM over HTTPS. Once an hour the collected event logs are imported into a SQL database. Any newly discovered events that indicate possible compromise trigger an email alert which is then sent to the IT Administrators. This application can be used to search that SQL database and view the details of an event. The SQL database is useful because searching a SQL database is 100x faster than parsing the Windows Event Logs through XML. It also stores critical events for a longer period of time than the events would normally exists inside Event Viewer. This is because when Event Viewer logs reach a certain size, old logs are removed to make room for new ones.
+The purpose of this web application is to easily investigate any email alerts received that indicate compromise. This server has Windows Event Forwarding (WEF), configured in a "source collector" set up. This means that the clients in the environment initiate connections to the server before sending logs. When one of the suspicious event IDs occur on any of the devices, the event info is forwarded to the WEF source collector server using WinRM over HTTPS. Collected event logs are imported into a SQL database every hour. Any newly discovered events that indicate possible compromise trigger an email alert which is then sent to the IT Administrators. This application can be used to search that SQL database and view the details of an event. Searching a SQL database is 100x faster than parsing the Windows Event Logs through XML. This method stores critical events for a longer period of time than Event Viewer. When Event Viewer logs reach a certain size, old logs are removed to make room for new ones. Some admins may save backups of the overflow Event Viewer logs which requires more effort to search.
 
 
 Protection against SQL injections and CSRF have been implemented. Penetration testing has been performed to ensure the security of the application. There are no presently discovered vulnerabilities. Security is a feature! If you find a vulnerability that I have not please let me know so I can fix it. rosborne@osbornepro.com
