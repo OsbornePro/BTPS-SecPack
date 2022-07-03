@@ -1,6 +1,6 @@
 # The Blue Team PowerShell Security Package
 
-![OsbornePro](https://raw.githubusercontent.com/tobor88/OsbornePro-The-Blue-Team-PowerShell-Security-Package/master/WEF%20Application/WEF/WEF/wwwroot/images/Logo.png)
+![OsbornePro](https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/docs/img/Logo.png)
 
 <img src="https://img.shields.io/liberapay/goal/tobor.svg?logo=liberapay">
 
