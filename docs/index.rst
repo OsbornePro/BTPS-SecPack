@@ -1,6 +1,7 @@
 Welcome to The B.T.P.S Security Package's documentation!
 ========================================================
-# `OsbornePro Site <https://osbornepro.com>`_
+
+* `OsbornePro Site <https://osbornepro.com>`_
 * `GitHub Page <https://github.com/OsbornePro/BTPS-SecPack>`_
 * `GitLab Page <https://gitlab.com/tobor88/BTPS-SecPack>`_
 * `PayPal Donations <https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=AGKU5LWZA67XC&currency_code=USD&source=url>`_
