@@ -2,6 +2,8 @@
 
 ![OsbornePro](https://raw.githubusercontent.com/tobor88/OsbornePro-The-Blue-Team-PowerShell-Security-Package/master/WEF%20Application/WEF/WEF/wwwroot/images/Logo.png)
 
+<img src="https://img.shields.io/liberapay/goal/tobor.svg?logo=liberapay">
+
 ## Using Microsoft Teams for Alerts Instead of Email
 
 If you wish to use Microsoft Teams for sending alerts instead of using email you will want to load the [microsoft-teams](https://github.com/OsbornePro/BTPS-SecPack/tree/microsoft-teams) branch for this repository which has the Teams alert modifications. It will take me a little while to implement this as a configuration option in the install script. Using Microsoft Teams for alert posts does not remove the need for certain email notifications in this repository. Email will still be used for some of the actions. These Teams Posts are able to be completed after you first create a webhook. So-called webhooks offer the possibility to send alerts or other notifications to a Microsoft Teams channel. I personally still prefer emails after using this message because they are easier to sort through, in my opinion.
