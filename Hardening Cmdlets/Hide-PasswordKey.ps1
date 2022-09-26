@@ -92,7 +92,7 @@ BEGIN {
 
 } PROCESS {
 
-    If ($PSCmdletBinding.ParameterSetName -eq "File") {
+    If ($PSCmdlet.ParameterSetName -eq "File") {
 
         $Date = (Get-Date).Ticks
         $KeyFilePath = "$($Path)\$($Date)-key.txt"
@@ -125,13 +125,13 @@ BEGIN {
         [Security.Cryptography.RNGCryptoServiceProvider]::Create().GetBytes($Key)
         $Base64 = ConvertFrom-SecureString -SecureString $Password -Key $Key 
 
-        If ($PSCmdletBinding.ParameterSetName -eq "File") {
+        If ($PSCmdlet.ParameterSetName -eq "File") {
 
             $Key | Out-File -FilePath $KeyFilePath -Encoding UTF8 -Force -Confirm:$False
-            $Base64 | Out-File -FilePath $PasswordFile -Encoding UTF8 -Force -Confirm:$False
+            $Base64 | Out-File -FilePath $AESPasswordPath -Encoding UTF8 -Force -Confirm:$False
 
             Write-Verbose "Setting secure file permissions on the newly created files containing your encrypted password and keys"
-            $Acl = Get-Acl -Path @($KeyFilePath, $PasswordFile)
+            $Acl = Get-Acl -Path @($KeyFilePath, $AESPasswordPath)
             $Acl.SetAccessRuleProtection($True, $False)
 
             $Permission = 'NT AUTHORITY\SYSTEM', 'FullControl', 'Allow'
@@ -139,7 +139,7 @@ BEGIN {
             $Permission = 'BUILTIN\Administrators', 'FullControl', 'Allow'
             $Acl.AddAccessRule($(New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $Permission))
             $Acl.SetOwner((New-Object -TypeName System.Security.Principal.NTAccount('BUILTIN\Administrators')))
-            $Acl | Set-Acl -Path @($KeyFilePath, $PasswordFile)
+            $Acl | Set-Acl -Path @($KeyFilePath, $AESPasswordPath)
 
         }  # End If
 
