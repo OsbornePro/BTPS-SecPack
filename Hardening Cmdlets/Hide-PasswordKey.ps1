@@ -111,11 +111,12 @@ BEGIN {
         Write-Output -InputObject "`t`$PasswordFile = `"`$env:TEMP\637997375371890206-aes.txt`""
         Write-Output -InputObject "`t`$KeyFile = `"`$env:TEMP\637997375371890206-key.txt`""
         Write-Output -InputObject "`t`$Key = Get-Content -Path `$KeyFile"
-        Write-Output -InputObject "`t`$Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList `"account@osbornepro.com`", (Get-Content -Path `$PasswordFile | ConvertTo-SecureString -SecureKey (Get-Content -Path `$KeyFile`"))"
+        Write-Output -InputObject "`t`$Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList `"account@osbornepro.com`", (Get-Content -Path `$PasswordFile | ConvertTo
+        String -Key (Get-Content -Path `$KeyFile`"))"
         Write-Output -InputObject "`n2.) Build a credential object using returned values in your file. The script containing your Base64 and Key values should like the below."
         Write-Output -InputObject "`t`$Base64 = `"76492d1116743f0423413b16050a5345MgB8AFgAYQBvACsAMwBNAFcAOQA1AFYAbgAvAGUAeABCAEEAMAB4AEkAWQAvAEEAPQA9AHwANgA1ADgAMQBhAGEAMwAyADEANABjADYAMQAyADAAOQBkAGQANQBjADcAYwAxADIAOAA4AGIAYgBmADcAYQA1ADkANQA4ADYAZAAyADEANAAzADcANgA3ADgAZgA4ADAAMQAwADMAYgAxAGQANwAxADIAYgBmAGQAZABkAGYANgBjADgANgAxADYANgA3AGYAYgA2ADYAZQBjADkAMABiADkAOABiAGMAZAA2ADAAYgBmAGMAOQBhAGIAMABlADAA`""
         Write-Output -InputObject "`t`$Key = `"`@(105, 85, 8, 171, 52, 213, 195, 166, 125, 30, 36, 236, 228, 184, 116, 121, 208, 187, 142, 159, 104, 204, 138, 116, 121, 75, 107, 28, 64, 6, 195, 191)`""
-        Write-Output -InputObject "`t`$Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList `"account@osbornepro.com`", (`$Base64 | ConvertTo-SecureString -SecureKey `$Key`")) `n"
+        Write-Output -InputObject "`t`$Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList `"account@osbornepro.com`", (`$Base64 | ConvertTo-SecureString -Key `$Key`")) `n"
         Return
 
     } Else {
