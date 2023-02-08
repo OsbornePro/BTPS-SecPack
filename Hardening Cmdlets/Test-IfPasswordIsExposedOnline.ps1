@@ -1,4 +1,48 @@
 Function Test-IfPasswordIsExposedOnline {
+<#
+.SYNOPSIS
+This cmdlet is used to check haveibeenpwned.com for exposed passwords.
+
+
+.DESCRIPTION
+Enter your password as a secure string. It is then hashed to perform a query to haveibeenpwned.com returning results if found
+
+
+.PARAMETER Password
+Enter your password as in SecureString format using ConvertTo-SecureString or Read-Host -AsSecureString
+
+
+.EXAMPLE
+Test-IfPasswordIsExposedOnline -Password (Read-Host -Prompt "Enter your password" -AsSecureString)
+
+
+.INPUTS
+System.Security.SecureString
+
+
+.OUTPUS
+PSCustomObject
+
+
+.NOTES
+Author: Robert H. Osborne
+Alias: tobor
+Contact: rosborne@osbornepro.com
+
+
+.LINK
+https://osbornepro.com
+https://encrypit.osbornepro.com
+https://btpssecpack.osbornepro.com
+https://writeups.osbornepro.com
+https://github.com/tobor88
+https://github.com/OsbornePro
+https://gitlab.com/tobor88
+https://www.powershellgallery.com/profiles/tobor
+https://www.linkedin.com/in/roberthosborne/
+https://www.credly.com/users/roberthosborne/badges
+https://www.hackthebox.eu/profile/52286
+#>
   [CmdletBinding()]
     param (
       [Parameter(
