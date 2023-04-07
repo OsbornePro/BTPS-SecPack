@@ -387,6 +387,7 @@ Useful WinRM Info and Commands to Know
 --------------------------------------
 Setup WinRM over HTTPS may require you to know a few commands. I have included these commands below.
 
+- ``winrm invoke Restore winrm/Config``
 - ``Enable-PSRemoting -Force # Enables firewall rules for WinRM``
 - ``winrm qc -q # Qucik config for WinRM 5985``
 - ``winrm enum winrm/config/listener # Enumerate cert thumbprint used on different winrm ports``
