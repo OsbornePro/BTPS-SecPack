@@ -846,8 +846,6 @@ REFERENCE LINK https://github.com/SwiftOnSecurity/sysmon-config/blob/master/sysm
 			<!--Misc-->
 			<TargetObject condition="is">HKLM\System\CurrentControlSet\Services\WMPNetworkSvc\Start</TargetObject>
 			<Image condition="is">C:\Program Files (x86)\Webroot\WRSA.exe</Image>
-			<Image condition="is">\\usav-dcp\Sysmon\Sysmon.exe</Image>
-			<Image condition="is">\\usav-dcp.usav.org\Sysmon\Sysmon.exe</Image>
 			<TargetObject condition="is">HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\DisableAntiSpyware</TargetObject>
 			<TargetObject condition="is">HKLM\SOFTWARE\Policies\Microsoft\WindowsFirewall\DomainProfile\EnableFirewall</TargetObject>
 			<TargetObject condition="is">HKLM\SOFTWARE\Policies\Microsoft\WindowsFirewall\PublicProfile\EnableFirewall</TargetObject>
