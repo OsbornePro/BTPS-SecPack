@@ -19,6 +19,40 @@ This repo also assumes that you have referenced the Windows Event Logging Cheat 
 
 The `Installer.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/Installer.ps1>`_ script is good to go. I created a virtual environment and ran everything from scratch to ensure you get the max protection and visibility possible with the least amount of fuss. If you experience any trouble please let me know so I am aware and can fix it. If you experience any issues or need help, feel free to reach out to me. My aim is to make this as easy to get going as possible. If something is too difficult or confusing please tell me about it. rosborne@osbornepro.com I am still adding content to this site as it is fairly new.
 
+**EMAIL AUTHENTICATION**
+
+I am now familiar with useage of the Azure Key Vault and will look at incorporating it into another repository for this package. Using the below code you can retrieve a Secret from the Azure Key Vault using a ServicePrincipalName and associated Certificate for Certificate authentication. The returned secret is used to create a Credential object in PowerShell for the Send-MailMessage cmdlet.
+
+```powershell
+$Modules = "Microsoft.PowerShell.SecretManagement","Az.Accounts","Az.KeyVault"
+ForEach ($Module in $Modules) {
+
+  If (!(Get-Module -Name $Module -ListAvailable)) {
+
+      Install-Module -Name $Module -Force
+
+  }  # End If
+
+}  # End ForEach
+Import-Module -Name $Modules -Force -ErrorAction SilentlyContinue
+
+$Thumbprint = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" # Thumbprint of SPN AppIds authentication certificate
+$AppId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" # Application ID containing the ServicePrincipal Name with a certificate attached to it
+$DirectoryID = "kkkkkkkk-kkkk-kkkk-kkkk-kkkkkkkkkkkk" # Azure Key Vault Tenant ID
+
+$ConnectionResult = Connect-AzAccount -Tenant $DirectoryID -ApplicationId $AppId -CertificateThumbprint $Thumbprint -ServicePrincipal
+$KeyVaultName = 'SMTPAccount'
+$SecretName = "AlertPassword"
+
+# BUILDS A LOCAL VAULT THAT USES AZURE AUTH
+#$RegisterVault = Register-SecretVault -Name $KeyVaultName -ModuleName Az.KeyVault -VaultParameters @{AZKVaultName=$AzKeyVaultName; SubscriptionId = 'ssssssss-ssss-ssss-ssss-ssssssssssss' } -ErrorAction SilentlyContinue
+
+$EmailPassword = Get-Secret -Vault $KeyVaultName -Name $SecretName # Returns a Secure String instad of clear text preventing clear text from entering memory
+$EmailCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @("support@transmedics.com", $EmailPassword)
+
+Send-MailMessage -To $To -From $From -Credential $EmailCredential -Body "Test" -Subject "Example" -SmtpServer smtp.office365.com -Port 587 -UseSSL
+```
+
 **EXPAND THIS PROJECT BY UTILIZING ELASTICSEARCH**
 
 * **ELK SIEM Tool:** I was going to set up a configuration for the ELK SIEM tool, but they make changes so often that it is too much work to keep up with. I do not receive donations for this project which discourages me from putting that kind of time in. The Elaticsearch tool is free for certain uses and offers a purchase if desired. It includes `Elasticsearch <https://www.elastic.co/elasticsearch/>`_, `Kibana <https://www.elastic.co/kibana>`_, and `Elastic Agent <https://www.elastic.co/downloads/elastic-agent>`_. The configuration should use the source collection Windows Event Forwarding (WEF) configuration to collect logs using WinRM over HTTPS directly on the Elasticsearch sever, which then locally imports the local Sysmon and local Forwarded Event logs into Elasticsearch. The purpose of this is to prevent the need to install agents on the devices in your environment. The free version does not offer LDAP authentication unfortunately. The configuration will use TLS certificates to encrypt communications on the local host and listen for outside connections.
