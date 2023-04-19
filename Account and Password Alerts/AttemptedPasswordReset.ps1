@@ -5,11 +5,11 @@ $Results = $Event | ForEach-Object {
 
             $Obj = New-Object -TypeName PSObject | Select-Object -Property EventID, EffectedUser, ExecutingUser, MachineName, Date, Message
             $Obj.EventID = $_.Id
-            $Obj.EffectedUser = $_.Properties[0].Value
+            $Obj.EffectedUser = "$(If ($_.Properties[0].Value -like '') { $Event[0].Properties[4].Value.Replace('$','') } Else { $_.Properties[0].Value })"
             $Obj.ExecutingUser = $_.Properties[4].Value
             $Obj.MachineName = $_.MachineName
             $Obj.Date = $_.TimeCreated
-            $Obj.Message = "An attempt was made to change an account password"
+            $Obj.Message = "$(If ($_.Properties[0].Value -like '') { 'An Computer System account reset its password' } ElseIf ($_.Properties[4].Value -like "MSOL_*") { 'A user used the Azure to reset their password' } Else { 'An attempt was made to change an account password' })"
 
             $Obj
 
@@ -44,9 +44,8 @@ td {
 </style>
 "@ # End CSS
 
-    $PreContent = "<Title>NOTIFICATION: A Password Change Has Been Attempted on one account from a different account</Title>"
-    $NoteLine = "This Message was Sent on $(Get-Date -Format 'MM/dd/yyyy HH:mm:ss')"
-    $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
+    $PreContent = "<Title>NOTIFICATION: An account has attempted to change the password of another account</Title>"
+    $PostContent = "<br><p><font size='2'><i>This Message was Sent on $(Get-Date -Format 'MM/dd/yyyy HH:mm:ss')</i></font>"
     $MailBody = $Results | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "<br>The below table contains information on a user whose password was attempted to be changed by another user.<br><br><hr><br><br>" | Out-String
 
     Send-MailMessage -From FromEmail -To ToEmail -Subject "AD Event: User Attempted to Change Other Users Password" -BodyAsHtml -Body "$MailBody" -SmtpServer UseSmtpServer -Credential $Credential -UseSSL -Port 587
