@@ -23,35 +23,37 @@ The `Installer.ps1 <https://github.com/OsbornePro/BTPS-SecPack/blob/master/Insta
 
 I am now familiar with useage of the Azure Key Vault and will look at incorporating it into another repository for this package. Using the below code you can retrieve a Secret from the Azure Key Vault using a ServicePrincipalName and associated Certificate for Certificate authentication. The returned secret is used to create a Credential object in PowerShell for the Send-MailMessage cmdlet.
 
-```powershell
-$Modules = "Microsoft.PowerShell.SecretManagement","Az.Accounts","Az.KeyVault"
-ForEach ($Module in $Modules) {
 
-  If (!(Get-Module -Name $Module -ListAvailable)) {
+.. code-block:: powershell
 
-      Install-Module -Name $Module -Force
+    $Modules = "Microsoft.PowerShell.SecretManagement","Az.Accounts","Az.KeyVault"
+    ForEach ($Module in $Modules) {
 
-  }  # End If
+      If (!(Get-Module -Name $Module -ListAvailable)) {
 
-}  # End ForEach
-Import-Module -Name $Modules -Force -ErrorAction SilentlyContinue
+          Install-Module -Name $Module -Force
 
-$Thumbprint = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" # Thumbprint of SPN AppIds authentication certificate
-$AppId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" # Application ID containing the ServicePrincipal Name with a certificate attached to it
-$DirectoryID = "kkkkkkkk-kkkk-kkkk-kkkk-kkkkkkkkkkkk" # Azure Key Vault Tenant ID
+      }  # End If
 
-$ConnectionResult = Connect-AzAccount -Tenant $DirectoryID -ApplicationId $AppId -CertificateThumbprint $Thumbprint -ServicePrincipal
-$KeyVaultName = 'SMTPAccount'
-$SecretName = "AlertPassword"
+    }  # End ForEach
+    Import-Module -Name $Modules -Force -ErrorAction SilentlyContinue
 
-# BUILDS A LOCAL VAULT THAT USES AZURE AUTH
-#$RegisterVault = Register-SecretVault -Name $KeyVaultName -ModuleName Az.KeyVault -VaultParameters @{AZKVaultName=$AzKeyVaultName; SubscriptionId = 'ssssssss-ssss-ssss-ssss-ssssssssssss' } -ErrorAction SilentlyContinue
+    $Thumbprint = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" # Thumbprint of SPN AppIds authentication certificate
+    $AppId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" # Application ID containing the ServicePrincipal Name with a certificate attached to it
+    $DirectoryID = "kkkkkkkk-kkkk-kkkk-kkkk-kkkkkkkkkkkk" # Azure Key Vault Tenant ID
 
-$EmailPassword = Get-Secret -Vault $KeyVaultName -Name $SecretName # Returns a Secure String instad of clear text preventing clear text from entering memory
-$EmailCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @("support@transmedics.com", $EmailPassword)
+    $ConnectionResult = Connect-AzAccount -Tenant $DirectoryID -ApplicationId $AppId -CertificateThumbprint $Thumbprint -ServicePrincipal
+    $KeyVaultName = 'SMTPAccount'
+    $SecretName = "AlertPassword"
 
-Send-MailMessage -To $To -From $From -Credential $EmailCredential -Body "Test" -Subject "Example" -SmtpServer smtp.office365.com -Port 587 -UseSSL
-```
+    # BUILDS A LOCAL VAULT THAT USES AZURE AUTH
+    #$RegisterVault = Register-SecretVault -Name $KeyVaultName -ModuleName Az.KeyVault -VaultParameters @{AZKVaultName=$AzKeyVaultName; SubscriptionId = 'ssssssss-ssss-ssss-ssss-ssssssssssss' } -ErrorAction SilentlyContinue
+
+    $EmailPassword = Get-Secret -Vault $KeyVaultName -Name $SecretName # Returns a Secure String instad of clear text preventing clear text from entering memory
+    $EmailCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @("support@transmedics.com", $EmailPassword)
+
+    Send-MailMessage -To $To -From $From -Credential $EmailCredential -Body "Test" -Subject "Example" -SmtpServer smtp.office365.com -Port 587 -UseSSL
+
 
 **EXPAND THIS PROJECT BY UTILIZING ELASTICSEARCH**
 
