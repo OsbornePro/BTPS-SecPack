@@ -682,6 +682,10 @@ In **Script Name** enter the following value ``\\dc01.yourdomain.com\NETLOGON\Co
 **CONCLUSION**
 WinRM over HTTPS is now configured for your environment. Magnificent! When you now use PowerShell commands such as ``Invoke-Command`` or ``New-PSSession`` you will need to specify the ``-UseSSL`` parameter in order to use WinRM over HTTPS. Port 5985 will not accept connections in an ideal setup.
 
+**ERROR MESSAGE**
+If you are on a domain controller you may receive the error message *The WS-Management service cannot process the request. The service is configured to not accept any remote shell requests*. 
+There is a group policy object which needs to be amended to resolve this issue. The setting can be located at **Computer Configuration > Administrative Templates > Windows Components > Windows Remote Shell > Allow Remote Shell Access**. The run the command ``gpupdate /force`` and reboot the server.
+
 
 
 Configure Windows Event Forwarding
