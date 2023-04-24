@@ -638,6 +638,47 @@ Create a Registry Setting that gets pushed out through Group Policy containing t
 |    Value: ``1`` REG_DWORD Decimal
 
 
+**GROUP POLICY SETTING 9**
+Create a PowerShell startup script to assign the distributed WinRM over HTTP certificates to port 5986
+
+** CONTENTS OF POWERSHELL SCRIPT**
+
+.. code-block:: powershell
+
+    New-Item -Path "$env:TEMP\Script\Logs" -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+    Try { Start-Transcript -Path "$env:TEMP\Script\Logs\PSTranscript_WinRM_Config.txt" -Append -ErrorAction SilentlyContinue } Catch { Write-Output -InputObject "[*] $(Get-Date -Format 'MM-dd-yyyy hh:mm:ss') Transcript already logging session" }
+    Write-Output -InputObject "[*] $(Get-Date -Format 'MM-dd-yyyy hh:mm:ss') Begin script execution"
+    $ScriptResult = "Successfully"
+    $Icon = "*"
+    $Today = Get-Date
+    $RootCA = "$env:USERDOMAIN-CA01-CA"
+    $WinRMCertTemplateName = "WinRM over HTTPS"
+    $FQDN = ([System.Net.Dns]::GetHostByName(($env:COMPUTERNAME))).Hostname
+    $WinRMCertificate = Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object -FilterScript { $_.Extensions.Format(0) -match "$TemplateName" }
+    $Thumbprint = $WinRMCertificate.Thumbprint
+    $CurrentListener = Get-ChildItem -Path WSMAN:\Localhost\Listener | Where-Object -Property Keys -like "Transport=HTTPS"
+    If ($CurrentListener ) {
+        Write-Output -InputObject "[*] $(Get-Date -Format 'MM-dd-yyyy hh:mm:ss') Deleting the current WinRM over HTTPS Listener"
+        $CurrentListener | Remove-Item -Recurse -Force
+        Write-Output -InputObject "[*] $(Get-Date -Format 'MM-dd-yyyy hh:mm:ss') Configuring WinRM over HTTPS listener to use certificate $Thumbrint"
+        New-WSManInstance -ResourceURI WinRM/Config/Listener -SelectorSet @{Address="*"; Transport="HTTPS"} -ValueSet @{Hostname=$Hostname; CertificateThumbprint=$Thumbprint}
+    } ElseIf (!($CurrentListener)) {
+        Write-Output -InputObject "[*] $(Get-Date -Format 'MM-dd-yyyy hh:mm:ss') Configuring WinRM over HTTPS listener to use certificate $Thumbrint"
+        New-WSManInstance -ResourceURI WinRM/Config/Listener -SelectorSet @{Address="*"; Transport="HTTPS"} -ValueSet @{Hostname=$Hostname; CertificateThumbprint=$Thumbprint}
+    } Else {
+        Write-Output -InputObject "[x] $(Get-Date -Format 'MM-dd-yyyy hh:mm:ss') FAILED to retrieve a certificate to assign to port 5986"
+        $ScriptResult = "in Failure"
+        $Icon = "x"
+    }  # End If ElseIf Else
+    Write-Output -InputObject "[$Icon] $(Get-Date -Format 'MM-dd-yyyy hh:mm:ss') End script execution ended $ScriptResult"
+    Stop-Transcript -ErrorAction SilentlyContinue
+   
+
+Under **Computer Coniguration > Windows Settings > Scripts (Startup/Shutdown)** double click **Startup**
+A new window will open. Select the **PowerShell Scripts** tab
+Click the **Add** button
+In **Script Name** enter the following value ``\\dc01.yourdomain.com\NETLOGON\ConfigureWinRMoverHttps.ps1``
+
 **CONCLUSION**
 WinRM over HTTPS is now configured for your environment. Magnificent! When you now use PowerShell commands such as ``Invoke-Command`` or ``New-PSSession`` you will need to specify the ``-UseSSL`` parameter in order to use WinRM over HTTPS. Port 5985 will not accept connections in an ideal setup.
 
