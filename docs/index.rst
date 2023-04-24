@@ -498,7 +498,7 @@ In the recovery tab select **"Restart the Service"** from the three failure opti
 
 Set **"Reset Fail Count after"** to **0** days and **"Reset Service after"** to **1** minutes.
 
-Then click **OK** to save.
+Leave the rest of the values as their deafults and click **OK** to save.
 
 
 
@@ -513,7 +513,7 @@ Then double click on **"Allow remote server management through WinRM"**" to modi
 
 Set the policy to **"Enabled"**
 
-Set the **IPv4 Filter** to * or an all-encompassing subnet for your environment such as ``10.0.0.0/16``
+Set the **IPv4 Filter** to * or an all-encompassing subnet for your environment such as ``10.0.0.0/16, 127.0.0.0/8``
 
 Leave the **IPv6 Filter** blank or set it to a wildcard ``*`` as well.
 
@@ -536,7 +536,7 @@ Create a new rule called ``Allow WinRM over HTTPS``
 
 We want to allow the inbound connection on port **5986**
 
-Leave the Tick mark on **"Domain"** and **"Private"**
+Leave the Tick mark on **"Domain"** and if you plan on enabling WinRM over HTTPS with non-domain joined machines define the **"Private"** profile also
 
 We then want to create a few more firewall rules using the default firewall rules
 
@@ -550,11 +550,9 @@ We then want to create a few more firewall rules using the default firewall rule
 * Remote Scheduled Tasks Management (RPC)
 
 
-This should be enabled to **Allow inbound traffic** in the **"Domain"**, and **"Private"** profiles
+This should be enabled to **Allow inbound traffic** in the **"Domain"** category. If you plan on enabling WinRM over HTTPS with non-domain joined machines define the **"Private"** profile also
 
-For good measure if you like you can deny traffic on port 5985.
-
-This is done by adding firewall default firewall rule **"Windows Remote Management (HTTP-In)"**, and Blocking traffic to that port.
+For good measure if you like you can deny traffic on port 5985. This is done by adding firewall default firewall rule **"Windows Remote Management (HTTP-In)"**, and Blocking traffic to that port. You will want to change the Firewall Profile to apply to All (Domain, Public, Private) for the deny rule.
 
 
 
@@ -602,14 +600,12 @@ This is to prevent `CVE-2018-0886 <https://nvd.nist.gov/vuln/detail/CVE-2018-088
 Under **Administrative Templates > Windows Components/Windows Remote Management (WinRM)/WinRM Client** set the below settings.
 
 * **Allow Basic authentication:** ``Enabled``
-* **Allow CredSSP authentication:** ``Enabled``
-* **IPv4 filter:** ``*``
-* **Allow remote server management through WinRM:** ``Enabled``
-* **IPv6 filter:** ``*``
+* **Allow CredSSP authentication:** ``Enabled`` This is used with Windows Admin Center (WAC)
 * **Allow unencrypted traffic:** ``Disabled``
-* **Disallow WinRM from storing RunAs credentials:** ``Enabled``
-* **Disallow Kerberos authentication:** ``Disabled`` : **IMPORTANT:** If you are using `CIS-CAT Pro Dashboard (CCPD) <https://www.cisecurity.org/cybersecurity-tools/cis-cat-pro/>`_ or are using Kerberos authentication with Windows Event Forwarding **ENABLE** this instead)
-
+* **Disallow Digest authentication:** ``Disabled`` : This is requird for WinRM to be set up initially and have its settings modified
+* **Disallow Kerberos authentication:** ``Disabled`` : **IMPORTANT:** If you are using `CIS-CAT Pro Dashboard (CCPD) <https://www.cisecurity.org/cybersecurity-tools/cis-cat-pro/>`_ or are using Kerberos authentication with Windows Event Forwarding **ENABLE** this instead. This also may be useful if you use Kerberos as a backup to certificate authentication with Windows Event Forwarding)
+* **Disallow Negotiate authentication:** ``Enabled`` This determines whether authentication is handled by Kerberos or NTLM. Kerberos is the preferred mechanism. Negotiate authentication on Windows-based systems is also called Windows Integrated Authentication.
+* **Trusted Hosts:** ``*.domain.com``
 
 
 
@@ -618,16 +614,16 @@ Under **Administrative Templates > Windows Components/Windows Remote Management 
 Under **Administrative Templates > Windows Components/Windows Remote Management (WinRM)/WinRM Service** set the below settings
 
 * **Allow Basic authentication:** ``Enabled``
-* **Allow remote server management through WinRM:** ``Enabled``
 * **Allow CredSSP authentication:** ``Enabled``
-* **IPv4 filter:** ``*``
+* **Allow remote server management through WinRM:** ``Enabled``
+* **IPv4 filter:** ``10.0.0.0/16, 127.0.0.0/8``
 * **IPv6 filter:** ``*``
 * **Allow unencrypted traffic:** ``Disabled``
 * **Disallow Kerberos authentication:** ``Disabled``
+* **Disallow Negotiate authentication:** ``Disabled``
 * **Disallow WinRM from storing RunAs credentials:** ``Enabled``
 * **Turn On Compatibility HTTP Listener:** ``Disabled``
-* **Turn On Compatibility HTTPS Listener:** ``Enabled``
-
+* **Turn On Compatibility HTTPS Listener:** ``Disabled``
 
 
 
@@ -636,9 +632,10 @@ Create a Registry Setting that gets pushed out through Group Policy containing t
 
 **SETTING:**
 
+|    Action: Update
 |    Path: ``HKLM:\Software\Policies\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\010103000F0000F0010000000F0000F0C967A3643C3AD745950DA7859209176EF5B87C875FA20DF21951640E807D7C24\Category``
 |    Name: ``State``
-|    Value: ``1``
+|    Value: ``1`` REG_DWORD Decimal
 
 
 **CONCLUSION**
