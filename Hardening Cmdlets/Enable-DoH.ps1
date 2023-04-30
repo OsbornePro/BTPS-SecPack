@@ -82,7 +82,7 @@ PROCESS {
     } Else {
 
         Write-Verbose -Message "[v] Enabling DNS over HTTPS for all Windows applications"
-        New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters" -Name EnableAutoDOH -PropertyType DWORD -Value 2 -Force
+        New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters" -Name EnableAutoDOH -PropertyType DWORD -Value 2 -Force | Out-Null
         $Result = "DNS over HTTPS is being enabled. Device will require a restart for change to finish taking effect"
 
     }  # End Else
@@ -96,5 +96,7 @@ PROCESS {
         Restart-Computer -Confirm
 
     }  # End If
+
+}  # End B P E
 
 }  # End Function Enable-DoH
