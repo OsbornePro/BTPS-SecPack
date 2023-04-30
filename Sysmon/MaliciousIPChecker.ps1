@@ -1,5 +1,6 @@
-# This will need to be run as an Administrator
-
+#Requires -Version 3.0
+#Requires -RunAsAdministrator
+Function Get-ValidIPAddressFromString {
 <#
 .SYNOPSIS
 This cmdlet is used to extract all of the unique IPv4 addresses out from each line of a log file
@@ -50,7 +51,7 @@ System.String
 System.String
 
 #>
-Function Get-ValidIPAddressFromString {
+    [OutputType(System.String[]])
     [CmdletBinding(DefaultParameterSetName="Line")]
         param(
             [Parameter(
@@ -108,6 +109,7 @@ Function Get-ValidIPAddressFromString {
 
 
 # REFERNCE: https://www.kittell.net/code/powershell-domain-whois/
+ Function Get-WhoIs {
 <#
 .SYNOPSIS
 Does a raw WHOIS query and returns the results
@@ -140,16 +142,17 @@ Future development should look at http://cvs.savannah.gnu.org/viewvc/jwhois/jwho
 v0.3 Added documentation, examples, error handling for ip lookups, etc.
 v0.2 Now strips command prefixes off when forwarding queries (if you want to send the prefix to the forwarded server, specify that server with the original query).
 v0.1 Now able to re-query the correct whois for .com and .org to get the full information!
- #>
- Function Get-WhoIs {
+#>
     [CmdletBinding()]
         param(
             # The query to send to WHOIS servers
-            [Parameter(Position=0, ValueFromRemainingArguments=$True)]
+            [Parameter(
+                Position=0,
+                ValueFromRemainingArguments=$True)]
             [String]$Query,
 
             # A specific whois server to search
-            [string]$Server,
+            [String]$Server,
 
             # Disable forwarding to new whois servers
             [Switch]$NoForward)  # End param
@@ -191,7 +194,7 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
         }  # End If
         ElseIf (!$Server) {
 
-            $Server = $TLDs.GetEnumerator() | Where-Object { $Query -like  ("*"+$_.Name) } | Select-Object -ExpandProperty Value -First 1
+            $Server = $TLDs.GetEnumerator() | Where-Object -FilterScript { $Query -like  ("*"+$_.Name) } | Select-Object -ExpandProperty Value -First 1
 
         }  # End ElseIf
 
@@ -205,14 +208,14 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
 
         Do {
 
-            Write-Verbose "Connecting to $Server"
-            $Client = New-Object -TypeName System.Net.Sockets.TcpClient $Server, 43
+            Write-Verbose -Message "[v] Connecting to $Server"
+            $Client = New-Object -TypeName System.Net.Sockets.TcpClient -ArgumentList @($Server, 43)
 
             Try {
 
                 $Stream = $Client.GetStream()
 
-                Write-Verbose "Sending Query: $Query"
+                Write-Verbose -Message "[v] Sending Query: $Query"
                 $Data = [System.Text.Encoding]::Ascii.GetBytes( $Query + "`r`n" )
                 $Stream.Write($Data, 0, $Data.Length)
 
@@ -223,11 +226,11 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
 
                 If ($Result -Match "(?s)Whois Server:\s*(\S+)\s*") {
 
-                    Write-Warning "Recommended WHOIS server: ${Server}"
+                    Write-Warning -Message "[!] Recommended WHOIS server: ${Server}"
 
                     If (!$NoForward) {
 
-                        Write-verbose "Non-Authoritative Results:`n${Result}"
+                        Write-Verbose -Message "[v] Non-Authoritative Results:`n${Result}"
                         # cache, in case we can't get an answer at the forwarder
                         If (!$CachedResult) {
 
@@ -269,7 +272,7 @@ v0.1 Now able to re-query the correct whois for .com and .org to get the full in
         $Result
         If ($CachedResult -and ($Result -Split "`n").Count -lt 5) {
 
-            Write-Warning "Original Result from ${CachedServer}:"
+            Write-Warning -Message "[!] Original Result from ${CachedServer}:"
             $CachedResult
 
         }  # End If
@@ -399,7 +402,7 @@ Function Invoke-IPBlacklistCheck {
 
             If ($BlacklistedOn.Count -gt 3) {
 
-                Write-Verbose "Create an event in MaliciousIPs in Event Viewer Tree"
+                Write-Verbose -Message "[v] Create an event in MaliciousIPs in Event Viewer Tree"
                 Foreach ($Item in $BlacklistedOn) {
 
                     $EventMessage = Get-WinEvent -FilterHashtable @{LogName="Microsoft-Windows-Sysmon/Operational"; Id=3} | Where-Object -Property Message -like "*$IP*" | Select-Object -First 1 -ExpandProperty Message | Out-String
@@ -427,18 +430,18 @@ Get-WinEvent -FilterHashTable @{LogName="Microsoft-Windows-Sysmon/Operational"; 
 $IPList = Get-ValidIPAddressFromString -Path $TmpEventFile
 ForEach ($IP in $IPList) {
 
-    Write-Verbose "Checking $IP against blacklists"
+    Write-Verbose -Message "[v] Checking $IP against blacklists"
     Invoke-IPBlacklistCheck -IPAddress $IP -Verbose
 
-    Write-Verbose "Checking $IP domain creation date"
+    Write-Verbose -Message "[v] Checking $IP domain creation date"
     $Creation = Try { (((Get-WhoIs -Query $IP).Split(' ') | Select-String -Pattern $DateRegex)[0] -Replace 'Updated:','').Replace("Updated:","").Trim() } Catch { Clear-Variable -Name Creation -ErrorAction SilentlyContinue }
     $CreationDate = [Datetime]::ParseExact("$Creation", 'yyyy-MM-dd', $Null)
 
     If (($Creation) -and (($Now.AddYears(-2) -le $CreationDate))) {
 
-        Write-Verbose "Creating an event in MaliciousIPs Event Viewer Tree for a young domain"
+        Write-Verbose -Message "[v] Creating an event in MaliciousIPs Event Viewer Tree for a young domain"
 
-        $Message = Write-Output "Domain was found to be less than a year old. WHOIS Information is below: `n" + ($Results  | Out-String -Width 1000)
+        $Message = Write-Output -InputObject "[*] Domain was found to be less than a year old. WHOIS Information is below: `n" + ($Results  | Out-String -Width 1000)
         Write-EventLog -LogName MaliciousIPs -Source MaliciousIPs -EntryType Information -EventId 2 -Message $Message
 
     }  # End If
