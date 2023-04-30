@@ -1,4 +1,5 @@
-Function Set-SecureFilePermissions {
+#Requires -Version 3.0
+Function Set-SecureFilePermission {
 <#
 .SYNOPSIS
 This cmdlet was created to set retrictive permissions on scripts that were created to run as tasks on servers.
@@ -65,7 +66,7 @@ https://www.linkedin.com/in/roberthosborne/
 https://www.credly.com/users/roberthosborne/badges
 https://www.hackthebox.eu/profile/52286
 #>
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName="Local")]
         param(
             [Parameter(
                 Mandatory=$True,
@@ -87,71 +88,63 @@ https://www.hackthebox.eu/profile/52286
             [String]$Owner = 'BUILTIN\Administrators',
 
             [Parameter(
-                Mandatory=$False,
-                ValueFromPipeline=$False)]  # End Parameter
+                ParameterSetName="Remote",
+                Mandatory=$True,
+                ValueFromPipeline=$False,
+                HelpMessage="[H] Enter the computer name(s) you wish to change permissions of a file on"    
+            )]  # End Parameter
             [Alias('cn')]
-            [String[]]$ComputerName = $env:COMPUTERNAME,
+            [String[]]$ComputerName,
             
             [Parameter(
+                ParameterSetName="Remote",
                 Mandatory=$False
             )]  # End Parameter
-            [Switch][Bool]
-            $UseSSL
+            [Switch]$UseSSL
         )  # End param
 
-    $SSL = $False
-    If ($UseSSL.IsPresent) {
-    
-        $SSL = $True
-        
-    }  # End If
-    
-    If ($ComputerName -eq $env:COMPUTERNAME) {
+    If ($PSCmdlet.PSBoundParameters -eq "Remote") {
 
-        Write-Verbose -Message "Modifying access rule proteciton"
-        $Acl = Get-Acl -Path "$Path"
+        Invoke-Command -HideComputerName $ComputerName -UseSSL:$UseSSL.IsPresent -ScriptBlock {
+
+            Write-Verbose -Message "Modifying access rule proteciton"
+            $Acl = Get-Acl -Path "$Using:Path"
+            $Acl.SetAccessRuleProtection($True, $False)
+
+            ForEach ($U in $Using:Username) {
+
+                Write-Verbose -Message "Adding $U permissions for $Using:Path"
+                $Permission = $U, 'FullControl', 'Allow'
+                $AccessRule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $Permission
+                $Acl.AddAccessRule($AccessRule)
+
+            }  # End ForEach
+
+            Write-Verbose -Message "Changing the owner of $Using:Path to $Using:Owner"
+            $Acl.SetOwner((New-Object -TypeName System.Security.Principal.NTAccount("$Using:Owner")))
+            $Acl | Set-Acl -Path "$Using:Path"
+
+        }  # End Invoke-Command
+
+    } Else {
+        
+        Write-Verbose -Message "[v] Modifying access rule proteciton"
+        $Acl = Get-Acl -Path "$Path" -Verbose:$False
         $Acl.SetAccessRuleProtection($True, $False)
 
         ForEach ($U in $Username) {
 
-            Write-Verbose -Message "Adding $U permissions for $Path"
-            $Permission = $U, 'FullControl', 'Allow'
+            Write-Verbose -Message "[v] Adding $U permissions for $Path"
+            $Permission = @($U, 'FullControl', 'Allow')
             $AccessRule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $Permission
             $Acl.AddAccessRule($AccessRule)
 
         }  # End ForEach
 
-        Write-Verbose -Message "Changing the owner of $Path to $Owner"
+        Write-Verbose -Message "[v] Changing the owner of $Path to $Owner"
         $Acl.SetOwner((New-Object -TypeName System.Security.Principal.NTAccount("$Owner")))
-        $Acl | Set-Acl -Path "$Path"
-
-    } Else {
-
-        ForEach ($C in $ComputerName) {
-
-            Invoke-Command -HideComputerName $C -UseSSL:$SSL -ScriptBlock {
-
-                Write-Verbose -Message "Modifying access rule proteciton"
-                $Acl = Get-Acl -Path "$Using:Path"
-                $Acl.SetAccessRuleProtection($True, $False)
-
-                ForEach ($U in $Using:Username) {
-
-                    Write-Verbose -Message "Adding $U permissions for $Using:Path"
-                    $Permission = $U, 'FullControl', 'Allow'
-                    $AccessRule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $Permission
-                    $Acl.AddAccessRule($AccessRule)
-
-                }  # End ForEach
-
-                Write-Verbose -Message "Changing the owner of $Using:Path to $Using:Owner"
-                $Acl.SetOwner((New-Object -TypeName System.Security.Principal.NTAccount("$Using:Owner")))
-                $Acl | Set-Acl -Path "$Using:Path"
-
-            }  # End Invoke-Command
-
-        }  # End ForEach
-
+        $Acl | Set-Acl -Path "$Path" -Verbose:$False
+        
     }  # End If Else
 
-}  # End Function Set-SecureFilePermissions
+}  # End Function Set-SecureFilePermission
