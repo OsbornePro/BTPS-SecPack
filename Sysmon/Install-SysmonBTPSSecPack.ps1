@@ -260,7 +260,7 @@ sysmon.exe -accepteula -i `"\\$PrimaryDC\NETLOGON\Sysmon\$ConfigFileName`"
     2.) 'Group Policy Management' Window will open. Expand 'Forest: $Domain' > Expand 'Domains' > Expand '$Domain' > Expand 'Group Policy Objects' > Right click on 'Settings Sysmon' and select Edit
     3.) Navigate the dropdowns from 'Computer Management' > 'Policies' > 'Windows Settings' > 'Scripts' > and Double Click 'Startup' to open the 'Startup Properties' Window
     4.) With the 'Scripts' tab selected click the 'Add' button.
-    5.) In the 'Script Name' text box enter your network share path to sysmon.bat which is most likely '\\$PrimaryDC.$Domain\Sysmon\sysmon.bat'. Leave the 'Parameters' text box blank
+    5.) In the 'Script Name' text box enter your network share path to sysmon.bat which is most likely '\\$PrimaryDC.$Domain\NETLOGON\Sysmon\sysmon.bat'. Leave the 'Parameters' text box blank
     6.) Click OK and then click OK again. This completes our GPO for Sysmon
 
     For images and more info on how to configure Group Policy for Malicious IP Checker and Process Hash Validator visit https://btpssecpack.osbornepro.com/en/latest/#solo-sysmon-setup
