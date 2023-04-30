@@ -10,11 +10,12 @@ If ($OSArchitecture -notmatch "64") {
     $AutorunsExecutable = "Autorunsc.exe"
 
 }  # End If
+
 $AutorunsPath = "$($AutoRunsDir)\$($AutorunsExecutable)"
 If (!(Test-Path -Path $AutoRunsPath)) {
 
   [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
-  Invoke-WebRequest -Uri "https://live.sysinternals.com/autorunsc64.exe" -OutFile "$AutoRunsPath" -Method GET -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::FireFox
+  Invoke-WebRequest -Uri "https://live.sysinternals.com/$($AutorunsExecutable)" -OutFile "$AutoRunsPath" -Method GET -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::FireFox
 
 }  # End If
 
