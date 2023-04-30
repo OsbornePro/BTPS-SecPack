@@ -63,18 +63,18 @@ None
 
 BEGIN {
 
-    $LogfileExists = Get-Eventlog -List | Where-Object {$_.logdisplayname -eq "Autoruns"}
+    $LogfileExists = Get-Eventlog -List -Verbose:$False | Where-Object {$_.logdisplayname -eq "Autoruns"}
     If (!($LogfileExists)) {
 
       Write-Verbose -Message "[v] Creating the Event Log View entry AutorunsToWinEventLog"
-      New-EventLog -LogName "Autoruns" -Source "AutorunsToWinEventLog"
-      Limit-EventLog -LogName "Autoruns" -OverflowAction OverWriteAsNeeded -MaximumSize $($MaxLogSize)KB
+      New-EventLog -LogName "Autoruns" -Source "AutorunsToWinEventLog" -Verbose:$False
+      Limit-EventLog -LogName "Autoruns" -OverflowAction OverWriteAsNeeded -MaximumSize [Int32]"$($MaxLogSize)KB" -Verbose:$False
 
     }  # End If
     
 } PROCESS {
 
-    $OSArchitecture = (Get-CimInstance -ClassName Win32_OperatingSystem).OSArchitecture
+    $OSArchitecture = (Get-CimInstance -ClassName Win32_OperatingSystem -Verbose:$False).OSArchitecture
     $AutorunsCsv = "$($AutorunsDirectory)\AutorunsOutput.csv"
     $AutorunsExecutable = "Autorunsc64.exe"
     If ($OSArchitecture -notmatch "64") {
@@ -83,25 +83,25 @@ BEGIN {
 
     }  # End If
 
-    $Proc = Start-Process -FilePath "$($AutorunsDirectory)\$($AutorunsExecutable)" -ArgumentList @('-nobanner', '/accepteula', '-a *', '-c', '-h', '-s', '-v', '-vt', '*')  -RedirectStandardOut $AutorunsCsv -WindowStyle Hidden -Passthru
+    $Proc = Start-Process -FilePath "$($AutorunsDirectory)\$($AutorunsExecutable)" -ArgumentList @('-nobanner', '/accepteula', '-a *', '-c', '-h', '-s', '-v', '-vt', '*') -RedirectStandardOut $AutorunsCsv -WindowStyle Hidden -Passthru -Verbose:$False
     $Proc.WaitForExit()
-    $AutoRunsArray = Import-Csv -Delimiter ',' -Path $AutoRunsCsv
+    $AutoRunsArray = Import-Csv -Delimiter ',' -Path $AutoRunsCsv -Verbose:$False
     
     Foreach ($Item in $AutoRunsArray) {
 
         $Item = Write-Output -InputObject $Item | Out-String -Width 1000
-        Write-EventLog -LogName "Autoruns" -Source "AutorunsToWinEventLog" -EntryType Information -EventId 1 -Message $Item
+        Write-EventLog -LogName "Autoruns" -Source "AutorunsToWinEventLog" -EntryType Information -EventId 1 -Message $Item -Verbose:$False
 
     }  # End ForEach
     
-    $ComputerName = "$((Get-CimInstance -ClassName Win32_ComputerSystem).DNSHostName).$((Get-CimInstance -ClassName Win32_ComputerSystem).Domain)"
+    $ComputerName = "$((Get-CimInstance -ClassName Win32_ComputerSystem -Verbose:$False).DNSHostName).$((Get-CimInstance -ClassName Win32_ComputerSystem -Verbose:$False).Domain)"
     $DomainFQDN = $ComputerName.Split(".")[1..($ComputerName.Split(".").length-1)] -Join "."
 
-    $LocalGroups = Get-LocalGroup | Where-Object -FilterScript { ($_.SID -Match "S-1-5-32-555") -or ($_.SID -Match "S-1-5-32-544") -or ($_.SID -Match "S-1-5-32-562") }
+    $LocalGroups = Get-LocalGroup -Verbose:$False | Where-Object -FilterScript { ($_.SID -Match "S-1-5-32-555") -or ($_.SID -Match "S-1-5-32-544") -or ($_.SID -Match "S-1-5-32-562") }
     $LocalGroups | ForEach-Object {
 
         $GroupName = $_
-        Get-LocalGroupMember -Name $GroupName | Where-Object { $_.PrincipalSource -Match "ActiveDirectory" } | ForEach-Object {
+        Get-LocalGroupMember -Name $GroupName -Verbose:$False | Where-Object { $_.PrincipalSource -Match "ActiveDirectory" } | ForEach-Object {
 
             $PrincipalName = $_.Name.Split("\")[1] + "@" + $DomainFQDN
             $Member = New-Object -TypeName PSObject
@@ -115,14 +115,14 @@ PrincipalType: $($Member.PrincipalType)
 PrincipalName: $($Member.PrincipalName)
 "@
 
-            Write-EventLog -LogName "Autoruns" -Source "AutorunsToWinEventLog" -EntryType Information -EventId 2 -Message $Data
+            Write-EventLog -LogName "Autoruns" -Source "AutorunsToWinEventLog" -EntryType Information -EventId 2 -Message $Data -Verbose:$False
 
         }  # End ForEach-Object
 
     }  # End ForEach-Object
 
     Write-Verbose -Message "[v] Creating a CSV File containing autoruns information for the day"
-    $AutoRunsArray | Export-Csv -Path $AutorunsCsv -Delimiter ',' -NoTypeInformation -Force
+    $AutoRunsArray | Export-Csv -Path $AutorunsCsv -Delimiter ',' -NoTypeInformation -Force -Verbose:$False
 
 } END {
 
