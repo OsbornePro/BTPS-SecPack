@@ -159,7 +159,7 @@ BEGIN {
             Expand-Archive -Path $SysmonDownloadPath -Destination "$NetlogonLocalPath\Sysmon" -Force
             If (!(Test-Path -Path "$NetlogonLocalPath\Sysmon\Sysmon.exe")) {
 
-                Throw "[x] Failed to extract the sysmon.zip file to C:\Sysmon Ensure you have the appropriate permissions to extract to $SysmonPath"
+                Throw "[x] Failed to extract the sysmon.zip file to $NetlogonLocalPath\Sysmon Ensure you have the appropriate permissions to extract to $SysmonPath"
 
             }  # End If
 
