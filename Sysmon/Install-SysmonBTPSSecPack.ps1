@@ -1,4 +1,5 @@
 #Requires -Version 3.0
+#Requires -RunAsAdministrator
 <#
 .SYNOPSIS
 This script is used to setup the initial configuration of a Sysmon logging deployment on a Primary Domain Controller
