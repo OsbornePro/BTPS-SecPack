@@ -49,7 +49,7 @@ None
             ValueFromPipeline=$False,
             ValueFromPipelineByPropertyName=$False
         )]  # End Parameter
-        [String]$AutorunsDirectory = "c:\Program Files\AutorunsToWinEventLog"
+        [String]$AutorunsDirectory = "$env:ProgramFiles\AutorunsToWinEventLog",
     
         [Parameter(
             Position=1,
@@ -68,7 +68,7 @@ BEGIN {
 
       Write-Verbose -Message "[v] Creating the Event Log View entry AutorunsToWinEventLog"
       New-EventLog -LogName "Autoruns" -Source "AutorunsToWinEventLog"
-      Limit-EventLog -LogName "Autoruns" -OverflowAction OverWriteAsNeeded -MaximumSize "$($MaxLogSize)KB"
+      Limit-EventLog -LogName "Autoruns" -OverflowAction OverWriteAsNeeded -MaximumSize $($MaxLogSize)KB
 
     }  # End If
     
