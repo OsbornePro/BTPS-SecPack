@@ -1,163 +1,272 @@
-# This script is meant to simplify the install of Sysmon according the BTPS Sec Pack https://www.btps-secpack.com/
-$DomainObj = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
-$PrimaryDC = ($DomainObj.PdcRoleOwner).Name
-$Domain = $DomainObj.Forest.Name
-If ($PrimaryDC -ne "$env:COMPUTERNAME.$Domain") {
-
-    Throw "[x] This script is required to run on $PrimaryDC, your primary domain controller in order to push out sysmon through Group Polciy"
-
-}  # End If
+#Requires -Version 3.0
+<#
+.SYNOPSIS
+This script is used to setup the initial configuration of a Sysmon logging deployment on a Primary Domain Controller
 
 
-Write-Output "[*] Ensuring PowerShell uses TLSv1.2 for downloads"
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+.DESCRIPTION
+Download a prebuilt Sysmon config logging file and the Sysmon executable. Set up Sysmon for deployment to devices in the domain
 
 
-Write-Output "[*] Downloading the Sysinternals Suite tool Sysmon from Microsoft at https://download.sysinternals.com/files/Sysmon.zip"
-(New-Object -TypeName System.Net.WebClient).downloadFile("https://download.sysinternals.com/files/Sysmon.zip", "$env:USERPROFILE\Downloads\Sysmon.zip")
+.PARAMETER SysmonPath
+Spceify where to save the sysmon.exe file on remote devices
+
+.PARAMETER SysmonDownloadUri
+Specify where to download the Sysinternals Sysmon.zip archive file from
+
+.PARAMETER SysmonDownloadPath
+Specify where to save the Sysinternals Sysmon.zip archive file
+
+.PARAMETER SysmonConfigUri
+Specify the URL to download your Sysmon XML configuration file from
+
+.PARAMETER UseHashValidator
+Specify you want to use the hash validator in your deployment
+
+.PARAMETER UseMaliciousIPChecker
+Specify you want to use the Malicious IP Checker in your deployment
+
+.PARAMETER VirusTotalApiKey
+Enter your Virust Total API for use with the Malicious IP checker or the Hash Validator
 
 
-Write-Output "[*] Unzipping the download Sysmon.zip file to your C:\Sysmon"
-Expand-Archive -Path "$env:USERPROFILE\Downloads\Sysmon.zip" -Destination "C:\Sysmon\"
-If (!(Test-Path -Path "C:\Sysmon\Sysmon.exe")) {
-
-    Throw "Failed to extract the sysmon.zip file to C:\Sysmon. Ensure you have the appropriate permissions to download to C:\"
-
-}  # End If
+.NOTES
+Author: Robert H. Osborne
+Alias: tobor
+Contact: rosborne@osbornepro.com
 
 
-Write-Output "[*] Downloading the sysmon.xml configuration file from the B.T.P.S. Security Package Github repository"
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/sysmon.xml" -OutFile "C:\Sysmon\sysmon.xml"
-
-Write-Output "[*] Downloading the sysmon.bat install file from the B.T.P.S. Security Package Github repositroy"
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/sysmon.bat" -OutFile "C:\Sysmon\sysmon.bat"
-
-Write-Output "[*] Modifying sysmon.bat to contain appropriate values for your environment"
-(Get-Content -Path "C:\Sysmon\sysmon.bat") -Replace "DomainControllerHostname", "$PrimaryDC" -Replace "NETLOGON", "Sysmon" | Set-Content -Path "C:\Sysmon\sysmon.bat"
-
-$Answer1 = Read-Host -Prompt "Would you like to add the Malicious IP checker to devices in your environment as well? This provides extra checks against domains and IP addresses collected by Sysmon logged network connections. [y/N]"
-If ($Answer1 -like "y*") {
-
-    Write-Output "[*] Downloading the Task Template for Malicious IP checker and the Script it executes"
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/MaliciousIPChecker.xml" -OutFile "C:\Sysmon\MaliciousIPChecker.xml"
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/MaliciousIPChecker.ps1" -OutFile "C:\Sysmon\MaliciousIPChecker.ps1"
-
-}  # End If
-
-$Answer2 = Read-Host -Prompt "[*] Would you like to download the Process Hash Validator as well? This script and task is used to perform extra analysis on process logs collected by Sysmon. [y/N]"
-If ($Answer2 -like "y*") {
-
-    Write-Output "[*] Downloading Process Hash Validator task and the script that gets executed"
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/HashValidator.xml" -OutFile "C:\Sysmon\HashValidator.xml"
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/HashValidator.ps1" -OutFile "C:\Sysmon\HashValidator.ps1"
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/Whitelist.csv" -OutFile "C:\Sysmon\Whitelist.csv"
-
-    $VTAnswer = Read-Host -Prompt "Do you have a Virus Total API Key? [y/N]"
-    If ($VTAnswer -notlike "y*") {
-
-        Start-Process -FilePath "https://www.virustotal.com/gui/join-us"
-        Pause
-
-    }  # End Else
-    $VTAPIKey = Read-Host -Prompt "Paste your Virus Total API Key here: "
-    ((Get-Content -Path "C:\Sysmon\HashValidator.ps1") -Replace "$VirusTotalApiKey = ''","$VirusTotalApiKey = '$VTAPIKey'") | Set-Content -Path "C:\sysmon\HashValidator.ps1"
-
-}  # End If
-
-Write-Output "[*] Turning C:\Sysmon into a Network Share for use with pushing out Sysmon logging to domain joined devices"
-New-SmbShare -Name "Sysmon" -Path "C:\Sysmon" -FullAccess "$Domain\Domain Admins","Administrators" -ChangeAccess "Users"
-
-Write-Output '[*] Disabling SMB version 1'
-Set-SmbServerConfiguration -EnableSMB1Protocol $False -Force
-
-Write-Output '[*] Enabling SMBv2 and SMBv3'
-Set-SmbServerConfiguration -EnableSMB2Protocol $True -Force
+.LINK
+https://btpssecpack.osbornepro.com
+https://github.com/tobor88
+https://github.com/osbornepro
+https://www.powershellgallery.com/profiles/tobor
+https://osbornepro.com
+https://writeups.osbornepro.com
+https://encrypit.osbornepro.com
+https://www.powershellgallery.com/profiles/tobor
+https://www.hackthebox.eu/profile/52286
+https://www.linkedin.com/in/roberthosborne/
+https://www.credly.com/users/roberthosborne/badges
 
 
-Write-Output "[*] Creating a GPO called 'Settings Sysmon' for you to configure \\$PrimaryDC\Sysmon\sysmon.bat as a startup script. I am not able to configure the rest through PowerShell unfortunately. The settings for this is easy however"
-New-GPO -Name "Settings Sysmon" -Domain $Domain -Comment "Group policy object used to get sysmon installed on domain joined devices"
+.INPUTS
+None
 
-Write-Output "INSTRUCTIONS ON CONFIGURING SYSMON STARTUP SCRIPT IN GPO"
-Write-Output "  1.) In Server Manager on $PrimaryDC, go to Tools > 'Group Policy Management'"
-Write-Output "  2.) 'Group Policy Management' Window will open. Expand 'Forest: $Domain' > Expand 'Domains' > Expand '$Domain' > Expand 'Group Policy Objects' > Right click on 'Settings Sysmon' and select Edit"
-Write-Output "  3.) Navigate the dropdowns from 'Computer Management' > 'Policies' > 'Windows Settings' > 'Scripts' > and Double Click 'Startup' to open the 'Startup Properties' Window"
-Write-Output "  4.) With the 'Scripts' tab selected click the 'Add' button."
-Write-Output "  5.) In the 'Script Name' text box enter your network share path to sysmon.bat which is most likely '\\$PrimaryDC.$Domain\Sysmon\sysmon.bat'. Leave the 'Parameters' text box blank"
-Write-Output "  6.) Click OK and then click OK again. This completes our GPO for Sysmon"
 
-Pause
+.OUTPUTS
+System.String
+#>
+[OutputType([System.String])]
+[CmdletBinding(DefaultParameterSetName="SysmonOnly")]
+param(
+    [Parameter(
+        Position=0,
+        Mandatory=$False,
+        ValueFromPipeline=$False,
+        ValueFromPipelineByPropertyName=$False,
+        HelpMessage="Define the parent path for saving Sysmon related files too "
+    )]  # End Parameter
+    [String]$SysmonPath = "C:\Program Files\Sysmon",
 
-Write-Host "For images and more info on how to configure Group Policy for Malicious IP Checker and Process Hash Validator visit https://btps-secpack.com/sysmon-setup"
+    [Parameter(
+        Position=1,
+        Mandatory=$False,
+        ValueFromPipeline=$False,
+        ValueFromPipelineByPropertyName=$False,
+        HelpMessage="Define the locaion to download your Sysmon Zip file from or Sysmon executable from"
+    )]  # End Parameter
+    [ValidateScript({$_ -like "*.zip" -or $_ -like "*/sysmon.exe"})]
+    [String]$SysmonDownloadUri = "https://download.sysinternals.com/files/Sysmon.zip",
 
-# SIG # Begin signature block
-# MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
-# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUJnMM/drfe9VIPXm7kyhiWggF
-# B5Ogggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
-# BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
-# BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
-# IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
-# MDUwMzA3MDAwMFowgbQxCzAJBgNVBAYTAlVTMRAwDgYDVQQIEwdBcml6b25hMRMw
-# EQYDVQQHEwpTY290dHNkYWxlMRowGAYDVQQKExFHb0RhZGR5LmNvbSwgSW5jLjEt
-# MCsGA1UECxMkaHR0cDovL2NlcnRzLmdvZGFkZHkuY29tL3JlcG9zaXRvcnkvMTMw
-# MQYDVQQDEypHbyBEYWRkeSBTZWN1cmUgQ2VydGlmaWNhdGUgQXV0aG9yaXR5IC0g
-# RzIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC54MsQ1K92vdSTYusw
-# ZLiBCGzDBNliF44v/z5lz4/OYuY8UhzaFkVLVat4a2ODYpDOD2lsmcgaFItMzEUz
-# 6ojcnqOvK/6AYZ15V8TPLvQ/MDxdR/yaFrzDN5ZBUY4RS1T4KL7QjL7wMDge87Am
-# +GZHY23ecSZHjzhHU9FGHbTj3ADqRay9vHHZqm8A29vNMDp5T19MR/gd71vCxJ1g
-# O7GyQ5HYpDNO6rPWJ0+tJYqlxvTV0KaudAVkV4i1RFXULSo6Pvi4vekyCgKUZMQW
-# OlDxSq7neTOvDCAHf+jfBDnCaQJsY1L6d8EbyHSHyLmTGFBUNUtpTrw700kuH9zB
-# 0lL7AgMBAAGjggEaMIIBFjAPBgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIB
-# BjAdBgNVHQ4EFgQUQMK9J47MNIMwojPX+2yz8LQsgM4wHwYDVR0jBBgwFoAUOpqF
-# BxBnKLbv9r0FQW4gwZTaD94wNAYIKwYBBQUHAQEEKDAmMCQGCCsGAQUFBzABhhho
-# dHRwOi8vb2NzcC5nb2RhZGR5LmNvbS8wNQYDVR0fBC4wLDAqoCigJoYkaHR0cDov
-# L2NybC5nb2RhZGR5LmNvbS9nZHJvb3QtZzIuY3JsMEYGA1UdIAQ/MD0wOwYEVR0g
-# ADAzMDEGCCsGAQUFBwIBFiVodHRwczovL2NlcnRzLmdvZGFkZHkuY29tL3JlcG9z
-# aXRvcnkvMA0GCSqGSIb3DQEBCwUAA4IBAQAIfmyTEMg4uJapkEv/oV9PBO9sPpyI
-# BslQj6Zz91cxG7685C/b+LrTW+C05+Z5Yg4MotdqY3MxtfWoSKQ7CC2iXZDXtHwl
-# TxFWMMS2RJ17LJ3lXubvDGGqv+QqG+6EnriDfcFDzkSnE3ANkR/0yBOtg2DZ2HKo
-# cyQetawiDsoXiWJYRBuriSUBAA/NxBti21G00w9RKpv0vHP8ds42pM3Z2Czqrpv1
-# KrKQ0U11GIo/ikGQI31bS/6kA1ibRrLDYGCD+H1QQc7CoZDDu+8CL9IVVO5EFdkK
-# rqeKM+2xLXY2JtwE65/3YR8V3Idv7kaWKK2hJn0KCacuBKONvPi8BDABMIIFIzCC
-# BAugAwIBAgIIXIhNoAmmSAYwDQYJKoZIhvcNAQELBQAwgbQxCzAJBgNVBAYTAlVT
-# MRAwDgYDVQQIEwdBcml6b25hMRMwEQYDVQQHEwpTY290dHNkYWxlMRowGAYDVQQK
-# ExFHb0RhZGR5LmNvbSwgSW5jLjEtMCsGA1UECxMkaHR0cDovL2NlcnRzLmdvZGFk
-# ZHkuY29tL3JlcG9zaXRvcnkvMTMwMQYDVQQDEypHbyBEYWRkeSBTZWN1cmUgQ2Vy
-# dGlmaWNhdGUgQXV0aG9yaXR5IC0gRzIwHhcNMjAxMTE1MjMyMDI5WhcNMjExMTA0
-# MTkzNjM2WjBlMQswCQYDVQQGEwJVUzERMA8GA1UECBMIQ29sb3JhZG8xGTAXBgNV
-# BAcTEENvbG9yYWRvIFNwcmluZ3MxEzARBgNVBAoTCk9zYm9ybmVQcm8xEzARBgNV
-# BAMTCk9zYm9ybmVQcm8wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDJ
-# V6Cvuf47D4iFITUSNj0ucZk+BfmrRG7XVOOiY9o7qJgaAN88SBSY45rpZtGnEVAY
-# Avj6coNuAqLa8k7+Im72TkMpoLAK0FZtrg6PTfJgi2pFWP+UrTaorLZnG3oIhzNG
-# Bt5oqBEy+BsVoUfA8/aFey3FedKuD1CeTKrghedqvGB+wGefMyT/+jaC99ezqGqs
-# SoXXCBeH6wJahstM5WAddUOylTkTEfyfsqWfMsgWbVn3VokIqpL6rE6YCtNROkZq
-# fCLZ7MJb5hQEl191qYc5VlMKuWlQWGrgVvEIE/8lgJAMwVPDwLNcFnB+zyKb+ULu
-# rWG3gGaKUk1Z5fK6YQ+BAgMBAAGjggGFMIIBgTAMBgNVHRMBAf8EAjAAMBMGA1Ud
-# JQQMMAoGCCsGAQUFBwMDMA4GA1UdDwEB/wQEAwIHgDA1BgNVHR8ELjAsMCqgKKAm
-# hiRodHRwOi8vY3JsLmdvZGFkZHkuY29tL2dkaWcyczUtNi5jcmwwXQYDVR0gBFYw
-# VDBIBgtghkgBhv1tAQcXAjA5MDcGCCsGAQUFBwIBFitodHRwOi8vY2VydGlmaWNh
-# dGVzLmdvZGFkZHkuY29tL3JlcG9zaXRvcnkvMAgGBmeBDAEEATB2BggrBgEFBQcB
-# AQRqMGgwJAYIKwYBBQUHMAGGGGh0dHA6Ly9vY3NwLmdvZGFkZHkuY29tLzBABggr
-# BgEFBQcwAoY0aHR0cDovL2NlcnRpZmljYXRlcy5nb2RhZGR5LmNvbS9yZXBvc2l0
-# b3J5L2dkaWcyLmNydDAfBgNVHSMEGDAWgBRAwr0njsw0gzCiM9f7bLPwtCyAzjAd
-# BgNVHQ4EFgQUkWYB7pDl3xX+PlMK1XO7rUHjbrwwDQYJKoZIhvcNAQELBQADggEB
-# AFSsN3fgaGGCi6m8GuaIrJayKZeEpeIK1VHJyoa33eFUY+0vHaASnH3J/jVHW4BF
-# U3bgFR/H/4B0XbYPlB1f4TYrYh0Ig9goYHK30LiWf+qXaX3WY9mOV3rM6Q/JfPpf
-# x55uU9T4yeY8g3KyA7Y7PmH+ZRgcQqDOZ5IAwKgknYoH25mCZwoZ7z/oJESAstPL
-# vImVrSkCPHKQxZy/tdM9liOYB5R2o/EgOD5OH3B/GzwmyFG3CqrqI2L4btQKKhm+
-# CPrue5oXv2theaUOd+IYJW9LA3gvP/zVQhlOQ/IbDRt7BibQp0uWjYaMAOaEKxZN
-# IksPKEJ8AxAHIvr+3P8R17UxggJjMIICXwIBATCBwTCBtDELMAkGA1UEBhMCVVMx
-# EDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAYBgNVBAoT
-# EUdvRGFkZHkuY29tLCBJbmMuMS0wKwYDVQQLEyRodHRwOi8vY2VydHMuZ29kYWRk
-# eS5jb20vcmVwb3NpdG9yeS8xMzAxBgNVBAMTKkdvIERhZGR5IFNlY3VyZSBDZXJ0
-# aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
-# CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
-# AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FKKWwA2mXzlJnNwCk1H8JQLFi05SMA0GCSqGSIb3DQEBAQUABIIBAKUyLxsRwI3D
-# tzKPQAhdbYbaeyDAHMrtLwVdNWSzAVZ7udiSnCZMmu2ahDzUpmjl2064IqS8g8++
-# WtyihF4MHIXsEhkNNIcbpmqMRLZ+r0j14LHmjLw+Dc5vnR/ZECeuO4q1Ci1fEer/
-# iL3VXRC4sA0xsVTZHQfq18DSQGsCL0hLOlCG0FImx126DKjc3Tw729IGqZHvAKdu
-# ZNqx7UPuMDsuA6aA+bwJ57aqL7HKwtQed81h5LojUcqSfuK7YXrq4Upp+nrt7DrD
-# LSpEyG/ARKm32l29n9uCrM2Qp6KtG582ZQJ63+/MuzlS9bre09QwwAnpSuoGYEWG
-# xzPTlllYvS0=
-# SIG # End signature block
+    [Parameter(
+        Position=2,
+        Mandatory=$False,
+        ValueFromPipeline=$False,
+        ValueFromPipelineByPropertyName=$False,
+        HelpMessage="Define the locaion to download your Sysmon Zip file from or Sysmon executable from"
+    )]  # End Parameter
+    [String]$SysmonDownloadPath = "$env:TEMP\Sysmon.zip",
+
+    [Parameter(
+        Position=3,
+        Mandatory=$False,
+        ValueFromPipeline=$False,
+        ValueFromPipelineByPropertyName=$False,
+        HelpMessage="Define the Raw URL location for a Sysmon configuration file"
+    )]  # End Parameter
+    [ValidateScript({$_ -like "*.xml"})]
+    [String]$SysmonConfigUri = "https://raw.githubusercontent.com/OsbornePro/BTPS-SecPack/master/Sysmon/sysmon.xml",
+
+    [Parameter(
+        ParameterSetName="RequiresVirusTotal",
+        Mandatory=$False
+    )]  # End Parameter
+    [Switch]$UseHashValidator,
+
+    [Parameter(
+        ParameterSetName="RequiresVirusTotal",
+        Mandatory=$False
+    )]  # End Parameter
+    [Switch]$UseMaliciousIPChecker,
+
+    [Parameter(
+        ParameterSetName="RequiresVirusTotal",
+        Mandatory=$True,
+        ValueFromPipeline=$False,
+        ValueFromPipelineByPropertyName=$False,
+        HelpMessage="[H] A Virus Total API key is required to use the Malicious IP checker and/or the Hash Validator. `n[i] You can get an API key for free from https://www.virustotal.com/gui/join-us "
+    )]  # End Parameter
+    [String]$VirusTotalApiKey
+)  # End param
+
+BEGIN {
+
+    Write-Verbose -Message "[v] Ensuring PowerShell uses TLSv1.2 for downloads"
+    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+
+    Write-Verbose -Message "[v] Ensuring directory exists for Sysmon path defined: $SysmonPath"
+    New-Item -Path $SysmonPath -ItemType Directory -Force -Confirm:$False -ErrorAction SilentlyContinue | Out-Null
+
+} PROCESS {
+
+    Write-Verbose -Message "[v] Determinig whether the Domain Controller configuration or normal configuration is needed"
+    $DomainObj = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
+    $PrimaryDC = $DomainObj.PdcRoleOwner.Name
+    $Domain = $DomainObj.Forest.Name
+
+    If ($PrimaryDC.ToLower() -eq "$env:COMPUTERNAME.$((Get-CimInstance -ClassName Win32_ComputerSystem).Domain)".ToLower()) {
+
+        $OutFile = "$NetlogonLocalPath\Sysmon\sysmon-config.xml"
+        $ConfigFileName = $OutFile.Split('\')[-1]
+
+        Write-Verbose -Message "[v] Downloading the latest Sysinternals Suite tool Sysmon from Microsoft at https://download.sysinternals.com/files/Sysmon.zip"
+        (New-Object -TypeName System.Net.WebClient).downloadFile("$SysmonDownloadUri", "$SysmonDownloadPath")
+        If (!(Test-Path -Path $SysmonDownloadPath)) {
+
+            Throw "[x] Failed to download the Sysmon.zip file. File does not exist"
+
+        }  # End If Else
+
+        $NetlogonLocalPath = (Get-CimInstance -Class Win32_Share -Filter "Type=0 and Name LIKE 'NETLOGON'").Path
+        New-Item -Path "$NetlogonLocalPath\Sysmon" -ItemType Directory -Force -Confirm:$False -ErrorAction SilentlyContinue | Out-Null
+        If (Test-Path -Path "$NetlogonLocalPath\Sysmon\sysmon.exe") {
+
+            Write-Verbose -Message "[v] Sysmon files already exist in $NetlogonLocalPath\Sysmon"
+
+        } Else {
+
+            Expand-Archive -Path $SysmonDownloadPath -Destination "$NetlogonLocalPath\Sysmon" -Force
+            If (!(Test-Path -Path "$NetlogonLocalPath\Sysmon\Sysmon.exe")) {
+
+                Throw "[x] Failed to extract the sysmon.zip file to C:\Sysmon Ensure you have the appropriate permissions to extract to $SysmonPath"
+
+            }  # End If
+
+        }  # End If Else
+
+        If (Test-Path -Path "$NetlogonLocalPath\Sysmon\sysmon-config.xml") {
+
+            Write-Verbose -Message "[v] Sysmon config file already exist in $NetlogonLocalPath\Sysmon"
+
+        } Else {
+
+            Write-Verbose -Message "[v] Downloading the sysmonconfig-export.xml configuration file from the OsbornePro GitHub page"
+            Invoke-WebRequest -Uri $SysmonConfigUri -OutFile $OutFile | Out-Null
+            If (!(Test-Path -Path $OutFile)) {
+
+                Throw "[x] Failed to download the sysmon configuration file template to $NetlogonLocalPath\Sysmon\sysmon-config.xml"
+
+            }  # End If
+
+        }  # End If Else
+
+        Write-Verbose -Message "[v] Creating the bat install file"
+        $BatchContents = "if not exist `"$("$SysmonPath\$ConfigFileName".Replace($ConfigFileName, 'sysmon.exe'))`" (
+mkdir `"$SysmonPath`"
+copy /v /z /y `"\\$PrimaryDC\NETLOGON\Sysmon\sysmon.exe`" `"$("$SysmonPath\$ConfigFileName".Replace($ConfigFileName, 'sysmon.exe'))`"
+)
+
+sc query `"Sysmon`" | Find `"RUNNING`"
+If `"%ERRORLEVEL%`" EQU `"1`" (
+goto startsysmon
+)
+:startsysmon
+net start Sysmon
+
+If `"%ERRORLEVEL%`" EQU `"1`" (
+goto installsysmon
+)
+:installsysmon
+cd `"$SysmonPath`"
+sysmon.exe -accepteula -i `"\\$PrimaryDC\NETLOGON\Sysmon\$ConfigFileName`"
+"
+        New-Item -Path "$NetlogonLocalPath\Sysmon" -Name "sysmon-setup.bat" -ItemType File -Value $BatchContents -Force -Confirm:$False | Out-Null
+
+    } Else {
+
+        Write-Verbose -Message "[v] Copying Sysmon files to local machine"
+        Start-Process -FilePath "C:\Windows\System32\cmd.exe" -WorkingDirectory "C:\Windows\System32" -ArgumentList @("/c", "\\$PrimaryDC\NETLOGON\Sysmon\sysmon-setup.bat") -Wait
+
+    }  # End If Else
+
+    If ($UseMaliciousIPChecker.IsPresent) {
+
+        $Answer1 = "yes"
+
+    } Else {
+
+        $Answer1 = Read-Host -Prompt "[?] Would you like to add the Malicious IP checker to devices in your environment as well? This provides extra checks against domains and IP addresses collected by Sysmon logged network connections. [y/N]"
+
+    }  # End If Else
+
+    If ($Answer1 -like "y*") {
+
+        Write-Verbose -Message "[v] Downloading the Task Template for Malicious IP checker and the Script it executes"
+        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/MaliciousIPChecker.xml" -OutFile "$NetlogonLocalPath\Sysmon\MaliciousIPChecker.xml"
+        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/MaliciousIPChecker.ps1" -OutFile "$NetlogonLocalPath\Sysmon\MaliciousIPChecker.ps1"
+
+    }  # End If
+
+
+    If ($UseHashValidator.IsPresent) {
+
+        $Answer2 = "yes"
+
+    } Else {
+
+        $Answer2 = Read-Host -Prompt "[?] Would you like to download the Process Hash Validator as well? This script and task is used to perform extra analysis on process logs collected by Sysmon. [y/N]"
+
+    }  # End If Else
+
+    If ($Answer2 -like "y*") {
+
+        Write-Verbose -Message "[v] Downloading Process Hash Validator task and the script that gets executed"
+        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/HashValidator.xml" -OutFile "$NetlogonLocalPath\Sysmon\HashValidator.xml"
+        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/HashValidator.ps1" -OutFile "$NetlogonLocalPath\Sysmon\HashValidator.ps1"
+        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tobor88/BTPS-SecPack/master/Sysmon/Whitelist.csv" -OutFile "$NetlogonLocalPath\Sysmon\Whitelist.csv"
+
+        ((Get-Content -Path "$NetlogonLocalPath\Sysmon\HashValidator.ps1") -Replace "`$VirusTotalApiKey = ''","`$VirusTotalApiKey = '$VirusTotalApiKey'") | Set-Content -Path "$NetlogonLocalPath\Sysmon\HashValidator.ps1"
+
+    }  # End If
+
+    Write-Verbose -Message "[v] Creating a GPO called 'Settings Sysmon' for you to configure \\$PrimaryDC\Sysmon\sysmon.bat as a startup script. I am not able to configure the rest through PowerShell unfortunately. The settings for this is easy however"
+    New-GPO -Name "Settings Sysmon" -Domain $Domain -Comment "Group policy object used to get sysmon installed on domain joined devices"
+
+    $GPOInstructions = @"
+    INSTRUCTIONS ON CONFIGURING SYSMON STARTUP SCRIPT IN GPO"
+    1.) In Server Manager on $PrimaryDC, go to Tools > 'Group Policy Management'
+    2.) 'Group Policy Management' Window will open. Expand 'Forest: $Domain' > Expand 'Domains' > Expand '$Domain' > Expand 'Group Policy Objects' > Right click on 'Settings Sysmon' and select Edit
+    3.) Navigate the dropdowns from 'Computer Management' > 'Policies' > 'Windows Settings' > 'Scripts' > and Double Click 'Startup' to open the 'Startup Properties' Window
+    4.) With the 'Scripts' tab selected click the 'Add' button.
+    5.) In the 'Script Name' text box enter your network share path to sysmon.bat which is most likely '\\$PrimaryDC.$Domain\Sysmon\sysmon.bat'. Leave the 'Parameters' text box blank
+    6.) Click OK and then click OK again. This completes our GPO for Sysmon
+
+    For images and more info on how to configure Group Policy for Malicious IP Checker and Process Hash Validator visit https://btpssecpack.osbornepro.com/en/latest/#solo-sysmon-setup
+"@
+
+} END {
+
+    Return $GPOInstructions
+
+}  # End B P E
