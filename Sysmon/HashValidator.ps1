@@ -1,5 +1,6 @@
+#Requires -Version 3.0
 # This script is for extracting the IMPHASH and MD5 Hash from Sysmon logs in order to compare the hash to a whitelist of known Windows Processes. This will then log any processes that do not appear on the whitelist
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
 # IMPORTANT : GET A VIRUS TOTAL API KEY FROM https://www.virustotal.com/gui/join-us and place it in the value below
 $VirusTotalApiKey = ''
@@ -13,14 +14,14 @@ $WhitelistPath = "$env:USERPROFILE\Downloads\BTPS-SecPack-Master\Sysmon\Whitelis
 # Get-Content .\Whitelist.txt | ForEach-Object { $Md5Hash = Get-FileHash -Path $_ -Algorithm MD5 | Select-Object -ExpandProperty Hash; $FileName = $_.Split('\')[-1]; $Object = New-Object -TypeName PSObject -Property @{FileName=$FileName; MD5=$Md5Hash}; $Object | Select-Object -Property FileName,MD5 | Export-Csv -NoTypeInformation -Path .\Whitelist.csv -Append }
 If (!(Test-Path -Path $WhitelistPath)) {
 
-    Throw "Please define the location of Whitelist.csv on line 5 of this script. A starting template has been included in the BTPS SecPack Sysmon directory"
+    Throw "[x] Please define the location of Whitelist.csv on line 5 of this script. A starting template has been included in the BTPS SecPack Sysmon directory"
 
 }  # End If
 
 
 If ($Null -eq $VirusTotalApiKey) {
 
-    Throw "GET A VIRUS TOTAL API KEY FROM https://www.virustotal.com/gui/join-us and place it in this script as the $VirusTotalApiKey variable on line 15"
+    Throw "[x] GET A VIRUS TOTAL API KEY FROM https://www.virustotal.com/gui/join-us and place it in this script as the $VirusTotalApiKey variable on line 15"
 
 }  # End If
 
