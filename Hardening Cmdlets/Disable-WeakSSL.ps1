@@ -43,6 +43,8 @@ Indicates you want to disable TLSv1.3
 .PARAMETER EnableTLSv13
 Indicates you want to enable TLSv1.3. If TLS 1.3 is enabled and the certificate or server is not configured for it's use you will be unable to reach the HTTPS or other SSL encrypted service. Use the -DisableTLS13 switch to disable TLS1.3
 
+.PARAMETER EnableShaHashes
+Indicates you want to disable MD5 hashing and enable SHA1 and above hashing
 
 .EXAMPLE
 Disable-WeakSSL -WeakTLSCipherSuites -TripleDES -RC4 -SSLv2 -SSLv3 -TLSv1 -TLSv11
