@@ -1,3 +1,6 @@
+#Requires -Version 3.0
+#Requires -RunAsAdministrator
+Function Disable-WeakSSL {
 <#
 .SYNOPSIS
 This cmdlet was created to disable weak SSL protocols and Ciphers on a Windows Client and Server. If no parameters are specified, TLSv1.2, TLSv1.3 and AES256 are enabled and NULL encryption is disabled. Other ciphers can be disabled my individually specifying their values or by using the -CISBenchmarkRecommendations parameter.
@@ -77,113 +80,111 @@ https://www.credly.com/users/roberthosborne/badges
 https://www.hackthebox.eu/profile/52286
 
 #>
-Function Disable-WeakSSL {
-    [CmdletBinding()]
+    [CmdletBinding(SupportShouldProcess,ConfirmImpact="High")]
         param(
             [Parameter(
-                Mandatory=$False,
-                ValueFromPipeline=$False)]  # End Parameter
-            [Switch][Bool]$CISBenchmarkRecommendations,
+                Mandatory=$False
+            )]  # End Parameter
+            [Switch]$CISBenchmarkRecommendations,
 
             [Parameter(
-                Mandatory=$False,
-                ValueFromPipeline=$False)]  # End Parameter
-            [Switch][Bool]$WeakTLSCipherSuites,
+                Mandatory=$False
+            )]  # End Parameter
+            [Switch]$WeakTLSCipherSuites,
 
             [Parameter(
-                Mandatory=$False,
-                ValueFromPipeline=$False)]  # End Parameter
-            [Switch][Bool]$TripleDES,
+                Mandatory=$False
+            )]  # End Parameter
+            [Switch]$TripleDES,
 
             [Parameter(
-                Mandatory=$False,
-                ValueFromPipeline=$False)]  # End Parameter
-            [Switch][Bool]$RC4,
+                Mandatory=$False
+            )]  # End Parameter
+            [Switch]$RC4,
 
             [Parameter(
-                Mandatory=$False,
-                ValueFromPipeline=$False)]  # End Parameter
-            [Switch][Bool]$AES128,
+                Mandatory=$False
+            )]  # End Parameter
+            [Switch]$AES128,
 
             [Parameter(
-                Mandatory=$False,
-                ValueFromPipeline=$False)]  # End Parameter
-            [Switch][Bool]$SSLv2,
+                Mandatory=$False
+            )]  # End Parameter
+            [Switch]$SSLv2,
 
             [Parameter(
-                Mandatory=$False,
-                ValueFromPipeline=$False)]  # End Parameter
-            [Switch][Bool]$SSLv3,
+                Mandatory=$False
+            )]  # End Parameter
+            [Switch]$SSLv3,
 
             [Parameter(
-                Mandatory=$False,
-                ValueFromPipeline=$False)]  # End Parameter
-            [Switch][Bool]$TLSv1,
+                Mandatory=$False
+            )]  # End Parameter
+            [Switch]$TLSv1,
 
             [Parameter(
-                Mandatory=$False,
-                ValueFromPipeline=$False)]  # End Parameter
-            [Switch][Bool]$TLSv11,
+                Mandatory=$False
+            )]  # End Parameter
+            [Switch]$TLSv11,
 
             [Parameter(
-                Mandatory=$False,
-                ValueFromPipeline=$False)]  # End Parameter
-            [Switch][Bool]$DisableTLSv13,
+                Mandatory=$False
+            )]  # End Parameter
+            [Switch]$DisableTLSv13,
 
             [Parameter(
-                Mandatory=$False,
-                ValueFromPipeline=$False)]  # End Parameter
-            [Switch][Bool]$EnableTLSv13
+                Mandatory=$False
+            )]  # End Parameter
+            [Switch]$EnableTLSv13,
+            
+            [Parameter(
+                Mandatory=$False
+            )]  # End Parameter
+            [Switch]$EnableShaHashes
         ) # End param
 
 
-    If (($WeakTLSCipherSuites.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent))
-    {
+    If (($WeakTLSCipherSuites.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent) -and ($PSVersionTable.PSVersion.Major -ge 5)) {
 
-        Write-Verbose "Disabling Weak TLS Ciphers"
+        Write-Verbose -Message "[v] Disabling Weak TLS Ciphers"
+        $CipherSuitesToDisable = @("TLS_PSK_WITH_NULL_SHA256","TLS_PSK_WITH_NULL_SHA384","TLS_PSK_WITH_AES_128_CBC_SHA256","TLS_PSK_WITH_AES_256_CBC_SHA384","TLS_PSK_WITH_AES_128_GCM_SHA256","TLS_PSK_WITH_AES_256_GCM_SHA384","TLS_RSA_WITH_NULL_SHA","TLS_RSA_WITH_NULL_SHA256","TLS_RSA_WITH_RC4_128_MD5","TLS_RSA_WITH_RC4_128_SHA","TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA","TLS_DHE_DSS_WITH_AES_128_CBC_SHA","TLS_DHE_DSS_WITH_AES_256_CBC_SHA","TLS_DHE_DSS_WITH_AES_128_CBC_SHA256","TLS_DHE_RSA_WITH_AES_256_CBC_SHA","TLS_DHE_RSA_WITH_AES_128_CBC_SHA","TLS_RSA_WITH_AES_256_GCM_SHA384","TLS_RSA_WITH_AES_128_GCM_SHA256","TLS_RSA_WITH_AES_256_CBC_SHA256","TLS_RSA_WITH_AES_128_CBC_SHA256","TLS_RSA_WITH_AES_256_CBC_SHA","TLS_RSA_WITH_AES_128_CBC_SHA","TLS_DHE_DSS_WITH_AES_256_CBC_SHA256","TLS_RSA_WITH_3DES_EDE_CBC_SHA",)
+        ForEach ($Cipher in $CipherSuitesToDisable) {
+        
+            Disable-TlsCipherSuite -Name  -ErrorAction SilentlyContinue | Out-Null
 
-        Disable-TlsCipherSuite -Name "TLS_DHE_RSA_WITH_AES_256_CBC_SHA" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_DHE_RSA_WITH_AES_128_CBC_SHA" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_RSA_WITH_AES_256_GCM_SHA384" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_RSA_WITH_AES_128_GCM_SHA256" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_RSA_WITH_AES_256_CBC_SHA256" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_RSA_WITH_AES_128_CBC_SHA256" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_RSA_WITH_AES_256_CBC_SHA" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_RSA_WITH_AES_128_CBC_SHA" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_RSA_WITH_3DES_EDE_CBC_SHA" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_DHE_DSS_WITH_AES_128_CBC_SHA256" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_DHE_DSS_WITH_AES_256_CBC_SHA" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_DHE_DSS_WITH_AES_128_CBC_SHA" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_RSA_WITH_RC4_128_SHA" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_RSA_WITH_RC4_128_MD5" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_RSA_WITH_NULL_SHA256" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_RSA_WITH_NULL_SHA" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_PSK_WITH_AES_256_GCM_SHA384" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_PSK_WITH_AES_128_GCM_SHA256" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_PSK_WITH_AES_256_CBC_SHA384" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_PSK_WITH_AES_128_CBC_SHA256" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_PSK_WITH_NULL_SHA384" -ErrorAction SilentlyContinue | Out-Null
-        Disable-TlsCipherSuite -Name "TLS_PSK_WITH_NULL_SHA256" -ErrorAction SilentlyContinue | Out-Null
+        }  # End ForEach
+        
+        Write-Output -InputObject "=============================================================================================="
+        Write-Output -InputObject "|        A LIST OF ALLOWED TLS CIPHER SUITES ARE BELOW                                       |"
+        Write-Output -InputObject "=============================================================================================="
+        Get-ItemPropertyValue -Path HKLM:\SYSTEM\CurrentControlSet\Control\Cryptography\Configuration\Local\SSL\00010002 -Name Functions
 
-        Write-Output "=============================================================================================="
-        Write-Output "|        A LIST OF ALLOWED TLS CIPHER SUITES ARE BELOW                                       |"
-        Write-Output "=============================================================================================="
-        Get-TlsCipherSuite | Format-Table -Property Name,Certificate,Exchange,Hash
+    } ElseIf (($WeakTLSCipherSuites.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent) -and ($PSVersionTable.PSVersion.Major -lt 5)) {
+    
+        Write-Warning -Message "No changes will be made because I have not verified the registry settings yet for Server 2012 R2 and below OS to disable weak cipher suites"
+    
+    }  # End If ElseIf WeakCiphers
+    
+    If ($EnableShaHashes.IsPresent) {
 
-    }  # End If WeakCiphers
+        Write-Verbose -Message "[v] Disabling weak hash algorithms"
+        $Hashes = @("MD5","SHA","SHA256","SHA384","SHA512")
+        ForEach ($Hash in $Hashes) {
 
+            New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Hashes' -Force | Out-Null
+            New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Hashes\$Hash" -Name 'Enabled' -Value 'ffffffff' -PropertyType 'DWord' -Force | Out-Null
 
-    Write-Verbose "Disabling NULL Ciphers"
+        }  # End ForEach
 
+    }  # End If
+
+    Write-Verbose -Message "[v] Disabling NULL Ciphers"
     New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers\NULL' -Force | Out-Null
     New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers\NULL' -Name 'Enabled' -Value '0' -PropertyType 'DWord' -Force | Out-Null
 
     If (($TripleDES.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent)) {
 
-        Write-Verbose "Disabling DES Ciphers"
-
+        Write-Verbose -Message "[v] Disabling DES Ciphers"
         (Get-Item -Path 'HKLM:\').OpenSubKey('SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers', $true).CreateSubKey('DES 56/56')
         New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers\DES 56/56' -Name 'Enabled' -Value '0' -PropertyType 'DWord' -Force | Out-Null
         (Get-Item -Path 'HKLM:\').OpenSubKey('SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers', $true).CreateSubKey('Triple DES 168/168')
@@ -194,8 +195,7 @@ Function Disable-WeakSSL {
 
     If (($RC4.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent)) {
 
-        Write-Verbose "Disabling RC4 ciphers"
-
+        Write-Verbose -Message "[v] Disabling RC4 ciphers"
         (Get-Item -Path 'HKLM:\').OpenSubKey('SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers', $true).CreateSubKey('RC4 40/128')
         New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers\RC4 40/128' -Name 'Enabled' -Value '0' -PropertyType 'DWord' -Force | Out-Null
         (Get-Item -Path 'HKLM:\').OpenSubKey('SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers', $true).CreateSubKey('RC4 56/128')
@@ -209,22 +209,20 @@ Function Disable-WeakSSL {
 
     If (($AES128.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent)) {
 
-        Write-Verbose "Disabling AES 128/128"
-
+        Write-Verbose -Message "[v] Disabling AES 128/128"
         (Get-Item -Path 'HKLM:\').OpenSubKey('SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers', $true).CreateSubKey('AES 128/128')
         New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers\AES 128/128' -Name 'Enabled' -Value '0' -PropertyType 'DWord' -Force | Out-Null
 
     }  # End If
 
 
-    Write-Verbose "Enabling AES 256/256"
+    Write-Verbose -Message "[v] Enabling AES 256/256"
     (Get-Item -Path 'HKLM:\').OpenSubKey('SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers', $true).CreateSubKey('AES 256/256')
     New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers\AES 256/256' -Name 'Enabled' -Value '1' -PropertyType 'DWord' -Force | Out-Null
 
     If (($SSLv2.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent)) {
 
-        Write-Verbose "Disabling SSL 2.0"
-
+        Write-Verbose -Message "[v] Disabling SSL 2.0"
         New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\SSL 2.0\Server' -Force | Out-Null
         New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\SSL 2.0\Client' -Force | Out-Null
         New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\SSL 2.0\Server' -name 'Enabled' -value '0' -PropertyType 'DWord' -Force | Out-Null
@@ -235,8 +233,8 @@ Function Disable-WeakSSL {
     }  # End If
 
     If (($SSLv3.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent)) {
-        Write-Verbose "Disabling SSL 3.0"
 
+        Write-Verbose -Message "[v] Disabling SSL 3.0"
         New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\SSL 3.0\Server' -Force | Out-Null
         New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\SSL 3.0\Client' -Force | Out-Null
         New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\SSL 3.0\Server' -Name 'Enabled' -value '0' -PropertyType 'DWord' -Force | Out-Null
@@ -248,8 +246,7 @@ Function Disable-WeakSSL {
 
     If (($TLSv1.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent)) {
 
-        Write-Verbose "Disabling TLS v1.0"
-
+        Write-Verbose -Message "[v] Disabling TLS v1.0"
         New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server' -Force | Out-Null
         New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Client' -Force | Out-Null
         New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server' -Name 'Enabled' -value '0' -PropertyType 'DWord' -Force | Out-Null
@@ -261,8 +258,7 @@ Function Disable-WeakSSL {
 
     If (($TLSv11.IsPresent) -or ($CISBenchmarkRecommendations.IsPresent)) {
 
-        Write-Verbose "Disabling TLS v1.1"
-
+        Write-Verbose -Message "[v] Disabling TLS v1.1"
         New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server' -Force | Out-Null
         New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Client' -Force | Out-Null
         New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server' -Name 'Enabled' -Value '0' -PropertyType 'DWord' -Force | Out-Null
@@ -273,8 +269,7 @@ Function Disable-WeakSSL {
     }  # End If
 
 
-    Write-Verbose "Enabling TLS 1.2"
-
+    Write-Verbose -Message "[v] Enabling TLS 1.2"
     New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.2\Server' -Force | Out-Null
     New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.2\Client' -Force | Out-Null
     New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.2\Server' -Name 'Enabled' -Value '1' -PropertyType 'DWord' -Force | Out-Null
@@ -285,11 +280,10 @@ Function Disable-WeakSSL {
 
     If ($EnableTlsv13.IsPresent) {
 
-        Write-Verbose "Enabling TLS 1.3"
-        $Q = Read-Host -Prompt "If you enable TLSv1.3 on a server and the certificate or server is not configured for using that protocol, you will be unable to reach the TLS protected resource. `nAre you sure you want to continue [y/N]"
+        Write-Verbose -Message "[v] Enabling TLS 1.3"
+        $Q = Read-Host -Prompt "[?] If you enable TLSv1.3 on a server and the certificate or server is not configured for using that protocol, you will be unable to reach the TLS protected resource. `nAre you sure you want to continue [y/N]"
 
-        If ($Q -like "y*")
-        {
+        If ($Q -like "y*") {
 
             New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Server' -Force | Out-Null
             New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Client' -Force | Out-Null
@@ -305,8 +299,7 @@ Function Disable-WeakSSL {
 
     If ($DisableTlsv13.IsPresent) {
 
-        Write-Verbose "Disabling TLS 1.3"
-
+        Write-Verbose -Message "[v] Disabling TLS 1.3"
         New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Server' -Force | Out-Null
         New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Client' -Force | Out-Null
         New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.3\Server' -Name 'Enabled' -Value '0' -PropertyType 'DWord' -Force | Out-Null
@@ -317,76 +310,3 @@ Function Disable-WeakSSL {
     }  # End If
 
 } # End Function Disable-WeakSSL
-
-# SIG # Begin signature block
-# MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
-# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQULEXxVhsiNP+8+pY0axlPstOk
-# 8tagggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
-# BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
-# BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
-# IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
-# MDUwMzA3MDAwMFowgbQxCzAJBgNVBAYTAlVTMRAwDgYDVQQIEwdBcml6b25hMRMw
-# EQYDVQQHEwpTY290dHNkYWxlMRowGAYDVQQKExFHb0RhZGR5LmNvbSwgSW5jLjEt
-# MCsGA1UECxMkaHR0cDovL2NlcnRzLmdvZGFkZHkuY29tL3JlcG9zaXRvcnkvMTMw
-# MQYDVQQDEypHbyBEYWRkeSBTZWN1cmUgQ2VydGlmaWNhdGUgQXV0aG9yaXR5IC0g
-# RzIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC54MsQ1K92vdSTYusw
-# ZLiBCGzDBNliF44v/z5lz4/OYuY8UhzaFkVLVat4a2ODYpDOD2lsmcgaFItMzEUz
-# 6ojcnqOvK/6AYZ15V8TPLvQ/MDxdR/yaFrzDN5ZBUY4RS1T4KL7QjL7wMDge87Am
-# +GZHY23ecSZHjzhHU9FGHbTj3ADqRay9vHHZqm8A29vNMDp5T19MR/gd71vCxJ1g
-# O7GyQ5HYpDNO6rPWJ0+tJYqlxvTV0KaudAVkV4i1RFXULSo6Pvi4vekyCgKUZMQW
-# OlDxSq7neTOvDCAHf+jfBDnCaQJsY1L6d8EbyHSHyLmTGFBUNUtpTrw700kuH9zB
-# 0lL7AgMBAAGjggEaMIIBFjAPBgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIB
-# BjAdBgNVHQ4EFgQUQMK9J47MNIMwojPX+2yz8LQsgM4wHwYDVR0jBBgwFoAUOpqF
-# BxBnKLbv9r0FQW4gwZTaD94wNAYIKwYBBQUHAQEEKDAmMCQGCCsGAQUFBzABhhho
-# dHRwOi8vb2NzcC5nb2RhZGR5LmNvbS8wNQYDVR0fBC4wLDAqoCigJoYkaHR0cDov
-# L2NybC5nb2RhZGR5LmNvbS9nZHJvb3QtZzIuY3JsMEYGA1UdIAQ/MD0wOwYEVR0g
-# ADAzMDEGCCsGAQUFBwIBFiVodHRwczovL2NlcnRzLmdvZGFkZHkuY29tL3JlcG9z
-# aXRvcnkvMA0GCSqGSIb3DQEBCwUAA4IBAQAIfmyTEMg4uJapkEv/oV9PBO9sPpyI
-# BslQj6Zz91cxG7685C/b+LrTW+C05+Z5Yg4MotdqY3MxtfWoSKQ7CC2iXZDXtHwl
-# TxFWMMS2RJ17LJ3lXubvDGGqv+QqG+6EnriDfcFDzkSnE3ANkR/0yBOtg2DZ2HKo
-# cyQetawiDsoXiWJYRBuriSUBAA/NxBti21G00w9RKpv0vHP8ds42pM3Z2Czqrpv1
-# KrKQ0U11GIo/ikGQI31bS/6kA1ibRrLDYGCD+H1QQc7CoZDDu+8CL9IVVO5EFdkK
-# rqeKM+2xLXY2JtwE65/3YR8V3Idv7kaWKK2hJn0KCacuBKONvPi8BDABMIIFIzCC
-# BAugAwIBAgIIXIhNoAmmSAYwDQYJKoZIhvcNAQELBQAwgbQxCzAJBgNVBAYTAlVT
-# MRAwDgYDVQQIEwdBcml6b25hMRMwEQYDVQQHEwpTY290dHNkYWxlMRowGAYDVQQK
-# ExFHb0RhZGR5LmNvbSwgSW5jLjEtMCsGA1UECxMkaHR0cDovL2NlcnRzLmdvZGFk
-# ZHkuY29tL3JlcG9zaXRvcnkvMTMwMQYDVQQDEypHbyBEYWRkeSBTZWN1cmUgQ2Vy
-# dGlmaWNhdGUgQXV0aG9yaXR5IC0gRzIwHhcNMjAxMTE1MjMyMDI5WhcNMjExMTA0
-# MTkzNjM2WjBlMQswCQYDVQQGEwJVUzERMA8GA1UECBMIQ29sb3JhZG8xGTAXBgNV
-# BAcTEENvbG9yYWRvIFNwcmluZ3MxEzARBgNVBAoTCk9zYm9ybmVQcm8xEzARBgNV
-# BAMTCk9zYm9ybmVQcm8wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDJ
-# V6Cvuf47D4iFITUSNj0ucZk+BfmrRG7XVOOiY9o7qJgaAN88SBSY45rpZtGnEVAY
-# Avj6coNuAqLa8k7+Im72TkMpoLAK0FZtrg6PTfJgi2pFWP+UrTaorLZnG3oIhzNG
-# Bt5oqBEy+BsVoUfA8/aFey3FedKuD1CeTKrghedqvGB+wGefMyT/+jaC99ezqGqs
-# SoXXCBeH6wJahstM5WAddUOylTkTEfyfsqWfMsgWbVn3VokIqpL6rE6YCtNROkZq
-# fCLZ7MJb5hQEl191qYc5VlMKuWlQWGrgVvEIE/8lgJAMwVPDwLNcFnB+zyKb+ULu
-# rWG3gGaKUk1Z5fK6YQ+BAgMBAAGjggGFMIIBgTAMBgNVHRMBAf8EAjAAMBMGA1Ud
-# JQQMMAoGCCsGAQUFBwMDMA4GA1UdDwEB/wQEAwIHgDA1BgNVHR8ELjAsMCqgKKAm
-# hiRodHRwOi8vY3JsLmdvZGFkZHkuY29tL2dkaWcyczUtNi5jcmwwXQYDVR0gBFYw
-# VDBIBgtghkgBhv1tAQcXAjA5MDcGCCsGAQUFBwIBFitodHRwOi8vY2VydGlmaWNh
-# dGVzLmdvZGFkZHkuY29tL3JlcG9zaXRvcnkvMAgGBmeBDAEEATB2BggrBgEFBQcB
-# AQRqMGgwJAYIKwYBBQUHMAGGGGh0dHA6Ly9vY3NwLmdvZGFkZHkuY29tLzBABggr
-# BgEFBQcwAoY0aHR0cDovL2NlcnRpZmljYXRlcy5nb2RhZGR5LmNvbS9yZXBvc2l0
-# b3J5L2dkaWcyLmNydDAfBgNVHSMEGDAWgBRAwr0njsw0gzCiM9f7bLPwtCyAzjAd
-# BgNVHQ4EFgQUkWYB7pDl3xX+PlMK1XO7rUHjbrwwDQYJKoZIhvcNAQELBQADggEB
-# AFSsN3fgaGGCi6m8GuaIrJayKZeEpeIK1VHJyoa33eFUY+0vHaASnH3J/jVHW4BF
-# U3bgFR/H/4B0XbYPlB1f4TYrYh0Ig9goYHK30LiWf+qXaX3WY9mOV3rM6Q/JfPpf
-# x55uU9T4yeY8g3KyA7Y7PmH+ZRgcQqDOZ5IAwKgknYoH25mCZwoZ7z/oJESAstPL
-# vImVrSkCPHKQxZy/tdM9liOYB5R2o/EgOD5OH3B/GzwmyFG3CqrqI2L4btQKKhm+
-# CPrue5oXv2theaUOd+IYJW9LA3gvP/zVQhlOQ/IbDRt7BibQp0uWjYaMAOaEKxZN
-# IksPKEJ8AxAHIvr+3P8R17UxggJjMIICXwIBATCBwTCBtDELMAkGA1UEBhMCVVMx
-# EDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAYBgNVBAoT
-# EUdvRGFkZHkuY29tLCBJbmMuMS0wKwYDVQQLEyRodHRwOi8vY2VydHMuZ29kYWRk
-# eS5jb20vcmVwb3NpdG9yeS8xMzAxBgNVBAMTKkdvIERhZGR5IFNlY3VyZSBDZXJ0
-# aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
-# CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
-# AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FF4mQ4WV4AJtOva3dwszLnddFBCAMA0GCSqGSIb3DQEBAQUABIIBALU9lkzGOLcW
-# 88rowzVEbpERmG1CL5meihRDgY/owLbL3jC6OaMd8nV35FOP81eU8c1/OCLxYPoS
-# emefUpVhF817mHkRduS3Ollm4eWLVwc9bHV5vy83nyHf70X/2dTLb+av7Cqv9tE2
-# V5AkoJ/B48nAUXXnbwEOqdTiNiVYJpOJ9MC0sqLIaW2bJeF0yWyxgxhzk/1ZyB2k
-# J+MD3yOqkfGRI39vsoeJ9cEfPBgSe/5krhzS1HOWG5/I0nAYhhfN3EwYIaff6y1U
-# HDRbxTlC5qdTwB9ufmOKbTdO3U3Fp7O7R5XQBfNPjEV/RktDBIQ0sXdNo/I/Geqq
-# uvarioTto+o=
-# SIG # End signature block
