@@ -63,7 +63,7 @@ ForEach ($Users in $UserDetails) {
 <br>
 If you have received this email your sign in password has expired.<br>
 <br>
-You can reset your password using the following link: <a href='https://account.activedirectory.windowsazure.com/ChangePassword.aspx?BrandContextID=O365&ruO365='>HERE</a><br>
+You can reset your password using the following link: <a href='https://aka.ms/sspr'>HERE</a><br>
 <br>If you are in the office on a company device press <strong>(Ctrl + Alt + Del)</strong> and click the <strong>`"Change Password`"</strong> button. If you are using the VPN you will need to connect to the VPN before changing your password. <br>
 <br>
 <strong>Password Policy</strong><br>
@@ -115,7 +115,7 @@ $PolicyString<br>
     <li>Enter your current password on the first line and your new password on the second and third lines</li>
 </ol>
 <h4>How Do I Change my Password Without a Computer?</h4>
- <strong>You are able to change your password at the following link: <a href='https://account.activedirectory.windowsazure.com/ChangePassword.aspx?BrandContextID=O365&ruO365='>HERE: Change Password Link</a> <br>
+ <strong>You are able to change your password at the following link: <a href='https://aka.ms/sspr'>HERE: Change Password Link</a> <br>
  <br>
 <hr><br>" | Out-String
 
