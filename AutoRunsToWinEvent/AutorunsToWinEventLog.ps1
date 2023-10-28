@@ -58,7 +58,7 @@ None
             ValueFromPipelineByPropertyName=$False
         )]  # End Parameter
         [ValidateRange(1, 16776960)]
-        [Int]$MaxLogSize = 4194240
+        [Int64]$MaxLogSize = 4194240
     )  # End param
 
 BEGIN {
@@ -68,7 +68,7 @@ BEGIN {
 
       Write-Verbose -Message "[v] Creating the Event Log View entry AutorunsToWinEventLog"
       New-EventLog -LogName "Autoruns" -Source "AutorunsToWinEventLog" -Verbose:$False
-      Limit-EventLog -LogName "Autoruns" -OverflowAction OverWriteAsNeeded -MaximumSize [System.Int64]"$($MaxLogSize)KB" -Verbose:$False
+      Limit-EventLog -LogName "Autoruns" -OverflowAction OverWriteAsNeeded -MaximumSize "$($MaxLogSize)KB" -Verbose:$False
 
     }  # End If
     
