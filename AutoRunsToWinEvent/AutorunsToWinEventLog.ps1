@@ -68,7 +68,7 @@ BEGIN {
 
       Write-Verbose -Message "[v] Creating the Event Log View entry AutorunsToWinEventLog"
       New-EventLog -LogName "Autoruns" -Source "AutorunsToWinEventLog" -Verbose:$False
-      Limit-EventLog -LogName "Autoruns" -OverflowAction OverWriteAsNeeded -MaximumSize [Int32]"$($MaxLogSize)KB" -Verbose:$False
+      Limit-EventLog -LogName "Autoruns" -OverflowAction OverWriteAsNeeded -MaximumSize [System.Int64]"$($MaxLogSize)KB" -Verbose:$False
 
     }  # End If
     
