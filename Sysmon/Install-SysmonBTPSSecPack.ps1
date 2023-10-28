@@ -135,7 +135,7 @@ BEGIN {
     $DomainObj = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
     $PrimaryDC = $DomainObj.PdcRoleOwner.Name
     $Domain = $DomainObj.Forest.Name
-
+    $NetlogonLocalPath = (Get-CimInstance -Class Win32_Share -Filter "Type=0 and Name LIKE 'NETLOGON'").Path
     If ($PrimaryDC.ToLower() -eq "$env:COMPUTERNAME.$((Get-CimInstance -ClassName Win32_ComputerSystem).Domain)".ToLower()) {
 
         $OutFile = "$NetlogonLocalPath\Sysmon\sysmon-config.xml"
