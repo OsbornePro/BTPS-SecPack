@@ -1,35 +1,3 @@
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
-#html_theme = 'alabaster'
-html_theme = "sphinx_rtd_theme"
-html_logo = "img/OsborneProLogo.png"
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
-html_theme_options = {
-# Google Analytics # ID
-    'analytics_id': 'UA-145050521-2', #  Provided by Google in your dashboard
-    'analytics_anonymize_ip': False,
-    'logo_only': False,
-    'display_version': True,
-    'prev_next_buttons_location': 'bottom',
-    'style_external_links': False,
-    #'display_github': ''
-    #'vcs_pageview_mode': 'blob',
-    'vcs_pageview_mode': '',
-    'style_nav_header_background': '#011527',
-    # Toc options
-    'collapse_navigation': False,
-    'sticky_navigation': True,
-    'navigation_depth': -1,
-    'includehidden': True,
-    'titles_only': False
-}
-
-
-#
 # Configuration file for the Sphinx documentation builder.
 # http://www.sphinx-doc.org/en/stable/config
 
