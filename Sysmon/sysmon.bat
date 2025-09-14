@@ -2,8 +2,8 @@
 setlocal EnableExtensions EnableDelayedExpansion
 
 rem ----- Configuration -------------------------------------------------
-set "XML=\\DomainControllerHostname\NETLOGON\sysmon-config.xml"
-set "EXE=\\DomainControllerHostname\NETLOGON\sysmon.exe"
+set "XML=\\DomainControllerHostname\NETLOGON\Sysmon\sysmon-config.xml"
+set "EXE=\\DomainControllerHostname\NETLOGON\Sysmon\Sysmon.exe"
 set "LOG=%TEMP%\sysmon_deploy_%COMPUTERNAME%.log"
 
 rem ----- Logging start -------------------------------------------------
