@@ -1,129 +1,131 @@
-#Requires -Version 3.0
+#Requires -Version 5.1
 #Requires -RunAsAdministrator
 <#
 .SYNOPSIS
-This script executes the Sysinternals Autoruns CLI utility and saves the output to a CSV. The resulting CSV entries are written to a Windows Event Log called "Autoruns"
+Executes the Sysinternals Autoruns CLI utility and writes Autoruns data to a custom Windows Event Log.
 
 
 .DESCRIPTION
-Configure a new logging entry in the Windows Event log to keep track of registry values through the Sysinternals utility AutoRuns
+This script executes the Sysinternals Autoruns CLI utility, exports Autoruns data to CSV,
+and writes each Autoruns entry into a custom Windows Event Log named "Autoruns".
+
+The script also inventories select local privileged groups and writes group membership
+information into the same Windows Event Log.
 
 
 .PARAMETER AutorunsDirectory
-Define the directory to save the Autoruns related files too
+Defines the directory used to store Autoruns related files.
 
-.PARAMETER MaxLogSize
-Define the max log size for the Autoruns Windows Event Log entry to be created
-
-.NOTES
-Authors: Chris Long (@Centurion), Andy Robbins (@_wald0), Robert Osborne
-
-.LINK
-https://github.com/palantir/windows-event-forwarding/tree/master/AutorunsToWinEventLog
-https://learn.microsoft.com/en-us/sysinternals/downloads/autoruns
-https://github.com/tobor88
-https://github.com/osbornepro
-https://www.powershellgallery.com/profiles/tobor
-https://osbornepro.com
-https://writeups.osbornepro.com
-https://encrypit.osbornepro.com
-https://btpssecpack.osbornepro.com
-https://www.powershellgallery.com/profiles/tobor
-https://www.hackthebox.eu/profile/52286
-https://www.linkedin.com/in/roberthosborne/
-https://www.credly.com/users/roberthosborne/badges
+.PARAMETER MaxLogSizeKB
+Defines the maximum size in KB for the Autoruns Windows Event Log.
 
 
 .INPUTS
 None
 
-
-.OUTPUS
+.OUTPUTS
 None
+
+
+.NOTES
+Requires:
+- PowerShell 5.1
+- Administrator privileges
+- Sysinternals Autoruns CLI
 #>
 [CmdletBinding()]
-    param(
-        [Parameter(
-            Position=0,
-            Mandatory=$False,
-            ValueFromPipeline=$False,
-            ValueFromPipelineByPropertyName=$False
-        )]  # End Parameter
-        [String]$AutorunsDirectory = "$env:ProgramFiles\AutorunsToWinEventLog",
-    
-        [Parameter(
-            Position=1,
-            Mandatory=$False,
-            ValueFromPipeline=$False,
-            ValueFromPipelineByPropertyName=$False
-        )]  # End Parameter
-        [ValidateRange(1, 16776960)]
-        [Int64]$MaxLogSize = 4194240
-    )  # End param
+param (
+    [Parameter(
+        Position = 0
+    )]  # End Parameter
+    [ValidateNotNullOrEmpty()]
+    [String]$AutorunsDirectory = "$env:ProgramFiles\AutorunsToWinEventLog",
 
-BEGIN {
+    [Parameter(
+        Position = 1
+    )]  # End Parameter
+    [ValidateRange(1024, 16776960)]
+    [Int64]$MaxLogSizeKB = 4194240
+)  # End Param
 
-    $LogfileExists = Get-Eventlog -List -Verbose:$False | Where-Object {$_.logdisplayname -eq "Autoruns"}
-    If (!($LogfileExists)) {
+If (!(Test-Path -Path $AutorunsDirectory)) {
+    Write-Verbose -Message "[v] $(Get-Date -Format 'MM-dd-yyyy hh:mm:ss') Creating Autoruns directory"
+    New-Item -Path $AutorunsDirectory -ItemType Directory -Force | Out-Null
+}  # End If
 
-      Write-Verbose -Message "[v] Creating the Event Log View entry AutorunsToWinEventLog"
-      New-EventLog -LogName "Autoruns" -Source "AutorunsToWinEventLog" -Verbose:$False
-      Limit-EventLog -LogName "Autoruns" -OverflowAction OverWriteAsNeeded -MaximumSize "$($MaxLogSize)KB" -Verbose:$False
+$LogFileExists = Get-EventLog -List -ErrorAction SilentlyContinue | Where-Object -FilterScript { $_.LogDisplayName -eq "Autoruns" }
+If (!($LogFileExists)) {
+    Write-Verbose -Message "[v] $(Get-Date -Format 'MM-dd-yyyy hh:mm:ss') Creating Autoruns Event Log"
+    New-EventLog -LogName "Autoruns" -Source "AutorunsToWinEventLog"
+    Limit-EventLog -LogName "Autoruns" -OverflowAction OverwriteAsNeeded -MaximumSize ($MaxLogSizeKB * 1KB)
+}  # End If
 
-    }  # End If
-    
-} PROCESS {
+Try {
 
-    $OSArchitecture = (Get-CimInstance -ClassName Win32_OperatingSystem -Verbose:$False).OSArchitecture
-    $AutorunsCsv = "$($AutorunsDirectory)\AutorunsOutput.csv"
+    $OSArchitecture = (Get-CimInstance -ClassName Win32_OperatingSystem).OSArchitecture
     $AutorunsExecutable = "Autorunsc64.exe"
     If ($OSArchitecture -notmatch "64") {
-
         $AutorunsExecutable = "Autorunsc.exe"
-
     }  # End If
 
-    $Proc = Start-Process -FilePath "$($AutorunsDirectory)\$($AutorunsExecutable)" -ArgumentList @('-nobanner', '/accepteula', '-a *', '-c', '-h', '-s', '-v', '-vt', '*') -RedirectStandardOut $AutorunsCsv -WindowStyle Hidden -Passthru -Verbose:$False
-    $Proc.WaitForExit()
-    $AutoRunsArray = Import-Csv -Delimiter ',' -Path $AutoRunsCsv -Verbose:$False
-    
-    Foreach ($Item in $AutoRunsArray) {
+    $AutorunsPath = Join-Path -Path $AutorunsDirectory -ChildPath $AutorunsExecutable
+    $AutorunsCsv = Join-Path -Path $AutorunsDirectory -ChildPath "AutorunsOutput.csv"
+    If (!(Test-Path -Path $AutorunsPath)) {
+        Throw "Autoruns executable was not found at $AutorunsPath"
+    }  # End If
 
-        $Item = Write-Output -InputObject $Item | Out-String -Width 1000
-        Write-EventLog -LogName "Autoruns" -Source "AutorunsToWinEventLog" -EntryType Information -EventId 1 -Message $Item -Verbose:$False
+    Write-Verbose -Message "[v] $(Get-Date -Format 'MM-dd-yyyy hh:mm:ss') Executing Autoruns"
+    $Proc = Start-Process -FilePath $AutorunsPath -ArgumentList @(
+        '-nobanner',
+        '/accepteula',
+        '-a', '*',
+        '-c',
+        '-h',
+        '-s',
+        '-v',
+        '-vt', '*'
+    ) -RedirectStandardOut $AutorunsCsv -WindowStyle Hidden -PassThru
+
+    $Proc.WaitForExit()
+    If ($Proc.ExitCode -ne 0) {
+        Throw "Autoruns exited with code $($Proc.ExitCode)"
+    }  # End If
+
+    $AutoRunsArray = Import-Csv -Path $AutorunsCsv -Delimiter ','
+    ForEach ($Item in $AutoRunsArray) {
+
+        $Data = $Item | Out-String -Width 1000
+        Write-EventLog -LogName "Autoruns" -Source "AutorunsToWinEventLog" -EntryType Information -EventId 1 -Message $Data
 
     }  # End ForEach
-    
-    $ComputerName = "$((Get-CimInstance -ClassName Win32_ComputerSystem -Verbose:$False).DNSHostName).$((Get-CimInstance -ClassName Win32_ComputerSystem -Verbose:$False).Domain)"
-    $DomainFQDN = $ComputerName.Split(".")[1..($ComputerName.Split(".").length-1)] -Join "."
 
-    $LocalGroups = Get-LocalGroup -Verbose:$False | Where-Object -FilterScript { ($_.SID -Match "S-1-5-32-555") -or ($_.SID -Match "S-1-5-32-544") -or ($_.SID -Match "S-1-5-32-562") }
-    $LocalGroups | ForEach-Object {
+    $ComputerSystem = Get-CimInstance -ClassName Win32_ComputerSystem
+    $ComputerName = "$($ComputerSystem.DNSHostName).$($ComputerSystem.Domain)"
+    $DomainFQDN = $ComputerName.Split(".")[1..($ComputerName.Split(".").Length - 1)] -Join "."
+    $LocalGroups = Get-LocalGroup | Where-Object -FilterScript {
+        ($_.SID -Match "S-1-5-32-555") -or
+        ($_.SID -Match "S-1-5-32-544") -or
+        ($_.SID -Match "S-1-5-32-562")
+    }  # End Where-Object
 
-        $GroupName = $_
-        Get-LocalGroupMember -Name $GroupName -Verbose:$False | Where-Object { $_.PrincipalSource -Match "ActiveDirectory" } | ForEach-Object {
+    $LocalGroups | ForEach-Object -Process {
 
-            $PrincipalName = $_.Name.Split("\")[1] + "@" + $DomainFQDN
-            $Member = New-Object -TypeName PSObject
-            $Member | Add-Member Noteproperty 'GroupName' $GroupName
-            $Member | Add-Member Noteproperty 'PrincipalType' $_.ObjectClass
-            $Member | Add-Member Noteproperty 'PrincipalName' $principalname
-
+        $GroupName = $_.Name
+        Get-LocalGroupMember -Name $GroupName | Where-Object -FilterScript {
+            $_.PrincipalSource -Match "ActiveDirectory"
+        } | ForEach-Object -Process {
+            $PrincipalName = $_.Name.Split("\")[1] + "@$DomainFQDN"
             $Data = @"
-GroupName: $($Member.GroupName)
-PrincipalType: $($Member.PrincipalType)
-PrincipalName: $($Member.PrincipalName)
+GroupName: $GroupName
+PrincipalType: $($_.ObjectClass)
+PrincipalName: $PrincipalName
 "@
-
-            Write-EventLog -LogName "Autoruns" -Source "AutorunsToWinEventLog" -EntryType Information -EventId 2 -Message $Data -Verbose:$False
-
+            Write-EventLog -LogName "Autoruns" -Source "AutorunsToWinEventLog" -EntryType Information -EventId 2 -Message $Data
         }  # End ForEach-Object
 
     }  # End ForEach-Object
+    $AutoRunsArray | Export-Csv -Path $AutorunsCsv -Delimiter ',' -NoTypeInformation -Force
 
-    Write-Verbose -Message "[v] Creating a CSV File containing autoruns information for the day"
-    $AutoRunsArray | Export-Csv -Path $AutorunsCsv -Delimiter ',' -NoTypeInformation -Force -Verbose:$False
-
-} END {
-
-}  # End B P E
+} Catch {
+    Throw "[x] $(Get-Date -Format 'MM-dd-yyyy hh:mm:ss') Failed To Collect Autoruns Data. $($_.Exception.Message)"
+}  # End Try Catch
