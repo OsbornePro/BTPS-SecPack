@@ -1,18 +1,20 @@
+#Requires -Version 3.0
 # Alert IT when an account is locked out.
-$Event = Get-WinEvent -LogName Security -FilterXPath '*[System[EventID=4740 and TimeCreated[timediff(@SystemTime) <= 86400000]]]' -MaxEvents 1
 
-$Results = $Event | ForEach-Object {
+$Event = Get-WinEvent -LogName Security -FilterXPath '*[System[EventID=4740 and TimeCreated[timediff(@SystemTime) <= 86400000]]]' -MaxEvents 1 -ErrorAction SilentlyContinue
+$Results = $Event | ForEach-Object -Process {
 
-            $Obj = New-Object -TypeName PSObject | Select-Object -Property EventID, User, MachineName, ProcessID, SID, Date, Message
-            $Obj.EventID = $_.Id
-            $Obj.User = $_.Properties[0].Value
-            $Obj.MachineName = $_.MachineName
-            $Obj.ProcessID = $_.ProcessID
-            $Obj.SID = $_.Properties[2].Value
-            $Obj.Date = $_.TimeCreated
-            $Obj.Message = "A user account was locked out"
+    $Obj = New-Object -TypeName PSObject | Select-Object -Property EventID, LockedOutUser, UserSID, CallerComputerName, DC, Date, Message
 
-            $Obj
+    $Obj.EventID = $_.Id
+    $Obj.LockedOutUser = $_.Properties[0].Value
+    $Obj.UserSID = $_.Properties[2].Value
+    $Obj.CallerComputerName = $_.Properties[1].Value
+    $Obj.DC = $_.MachineName
+    $Obj.Date = $_.TimeCreated
+    $Obj.Message = "A user account was locked out"
+
+    Write-Output -InputObject $Obj
 
 }  # End ForEach-Object
 
@@ -22,34 +24,42 @@ If ($Results) {
 <style>
 table {
     font-family: verdana,arial,sans-serif;
-        font-size:11px;
-        color:#333333;
-        border-width: 1px;
-        border-color: #666666;
-        border-collapse: collapse;
+    font-size:11px;
+    color:#333333;
+    border-width: 1px;
+    border-color: #666666;
+    border-collapse: collapse;
 }
 th {
-        border-width: 1px;
-        padding: 8px;
-        border-style: solid;
-        border-color: #666666;
-        background-color: #dedede;
+    border-width: 1px;
+    padding: 8px;
+    border-style: solid;
+    border-color: #666666;
+    background-color: #dedede;
 }
 td {
-        border-width: 1px;
-        padding: 8px;
-        border-style: solid;
-        border-color: #666666;
-        background-color: #ffffff;
+    border-width: 1px;
+    padding: 8px;
+    border-style: solid;
+    border-color: #666666;
+    background-color: #ffffff;
 }
 </style>
 "@ # End CSS
 
-    $PreContent = "<Title>NOTIFICATION: A User Account has been Locked Out</Title>"
+    $PreContent = "<h2>NOTIFICATION: A User Account Has Been Locked Out</h2><p>The below table contains information on the user account that was locked out.</p>"
     $NoteLine = "This Message was Sent on $(Get-Date -Format 'MM/dd/yyyy HH:mm:ss')"
-    $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
-    $MailBody = $Results | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "<br>The below table contains information on the user whose account was locked out.<br><br><hr><br><br>" | Out-String
+    $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font></p>"
+    $MailBody = $Results | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent | Out-String
 
-   Send-MailMessage -From FromEmail -To ToEmail -Subject "AD Event: Account Lockout" -BodyAsHtml -Body "$MailBody" -SmtpServer UseSmtpServer -UseSSL -Port 587 -Credential $Credential
+    Try {
+
+        Send-MailMessage -From FromEmail -To ToEmail -Subject "AD Event: Account Lockout" -BodyAsHtml -Body $MailBody -SmtpServer UseSmtpServer -UseSSL -Port 587 -Credential $Credential -ErrorAction Stop
+
+    } Catch {
+
+        Throw "Failed To Send Account Lockout Alert. $($_.Exception.Message)"
+
+    }  # End Try Catch
 
 }  # End If
