@@ -1,322 +1,330 @@
+#Requires -Version 3.0
+#Requires -Modules DhcpServer
 <#
 .SYNOPSIS
-This cmdlet is used to discover new devices that have joined the network based on Client ID History of the DHCP Servers.
-
-
-.PARAMETER DhcpServers
-This parameter defines an array of DHCP servers in the environment
-
-.PARAMETER ComparePath
-This parameter defines the location of the csv file containing MAC history information. If the file does not exist it will be created.
-
-.PARAMETER MacVendorps1
-This parameter defines where the locations of the Get-MacVendor.ps1 file is
+This cmdlet is used to discover newly connected devices on the network based on DHCP Client ID history.
 
 
 .DESCRIPTION
-Find-NewDevices was made to discover new devices to have joined the network based on Client ID histroy of the DHCP Servers. This was made for System Administrators and does not take any input
+Find-NewDevices was created to identify devices that have not previously appeared in DHCP lease history across one or more DHCP servers.
+
+The cmdlet retrieves all active DHCP leases from every scope on the specified DHCP servers and compares the current Client IDs against a historical csv file containing previously discovered MAC addresses.
+
+If newly discovered devices are identified:
+    • Vendor information is resolved using the embedded Get-MACVendor helper function
+    • A formatted HTML email report is generated
+    • The newly discovered MAC addresses are appended to the historical comparison file
+
+This cmdlet is intended for System Administrators performing asset discovery, rogue device monitoring, or DHCP lease auditing.
+
+.PARAMETER DhcpServers
+Defines an array of DHCP servers to query for active leases.
+
+.PARAMETER ComparePath
+Defines the full path to the csv file used to store historical MAC address information.
+If the file does not exist, it will automatically be created during the first execution.
+
+.PARAMETER Credential
+Defines the PSCredential object used for SMTP authentication when sending email notifications.
+
+.PARAMETER SmtpServer
+Defines the SMTP server used for sending email notifications.
+
+.PARAMETER FromEmail
+Defines the sender email address used for the notification email.
+
+.PARAMETER ToEmail
+Defines the recipient email address used for the notification email.
+
+
+.EXAMPLE
+PS> Find-NewDevices `
+    -DhcpServers "DHCP01","DHCP02","10.10.10.10" `
+    -ComparePath "C:\Logs\DhcpHistory.csv" `
+    -Credential (Get-Credential) `
+    -SmtpServer "smtp.domain.com" `
+    -FromEmail "dhcp-alerts@domain.com" `
+    -ToEmail "sysadmin@domain.com" `
+    -Verbose
+# This example retrieves all active DHCP leases from the specified DHCP servers, compares them against the historical MAC address csv file, identifies newly discovered devices, resolves vendor information, updates the history file, and sends an HTML email report containing the newly discovered devices.
+
+
+.INPUTS
+None.
+You cannot pipe objects to this cmdlet.
+
+
+.OUTPUTS
+None.
+This cmdlet generates verbose output, writes informational messages to the console, updates a csv history file, and optionally sends HTML email notifications.
 
 
 .NOTES
 Author: Robert H. Osborne
 Contact: rosborne@osbornepro.com
-Alias: tobor
 
+Requirements:
+    • PowerShell 3.0+
+    • DhcpServer PowerShell Module
+    • MAC vendor csv file located at:
+        C:\Users\Public\Documents\PSGetHelp\MAC.Vendor.List.csv
 
-.EXAMPLE
-Find-NewDevices -DhcpServers 'DHCP1','10.10.10.10','DHCP3.domain.com' -ComparePath 'C:\DhcpHistory.csv' -MacVendorps1 .\Get-MacVendor.ps1
-# This example discvoers never before seen devies on the 3 different DHCP servers and sends an email if any are discovered.
+The MAC vendor csv file must contain the following headers:
+    • Assignment
+    • Organization Name
 
 
 .LINK
 https://osbornepro.com
-https://btpssecpack.osbornepro.com
-https://writeups.osbornepro.com
 https://github.com/OsbornePro
-https://gitlab.com/tobor88
 https://www.powershellgallery.com/profiles/tobor
-https://www.linkedin.com/in/roberthosborne/
-https://www.credly.com/users/roberthosborne/badges
-https://www.hackthebox.eu/profile/52286
-
-
-.INPUTS
-None
-
-
-.OUTPUTS
-None
-
 #>
+Function Get-MACVendor {
+    [CmdletBinding()]
+    param(
+        [Parameter(
+            Position=0,
+            Mandatory=$True,
+            HelpMessage='MAC-Address or the first 6 digits of it')]
+        [ValidateScript({
+            If ($_ -match "^(([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})|([0-9A-Fa-f]{2}){6})|([0-9A-Fa-f]{2}[:-]){2}([0-9A-Fa-f]{2})|([0-9A-Fa-f]{2}){3}$") {
+                Return $true
+            } Else {
+                Throw "Enter a valid MAC-Address (like 00:00:00:00:00:00 or 00-00-00-00-00-00)!"
+            }  # End Else
+        })]  # End ValidateScript
+        [String[]]$MACAddress
+    )  # End param
+
+    BEGIN {
+
+        # MAC-Vendor list path
+        ##################################################################################################################
+        $CSV_MACVendorList_Path = "C:\Users\Public\Documents\PSGetHelp\MAC.Vendor.List.csv"
+
+        If ([System.IO.File]::Exists($CSV_MACVendorList_Path)) {
+            $MAC_VendorList = Import-Csv -Path $CSV_MACVendorList_Path | Select-Object -Property "Assignment", "Organization Name"
+            #### The above values may change depending on your csv file. Just replace Assignment and Organization Name with whatever the headers are in your csv
+        } Else {
+            Throw [System.IO.FileNotFoundException] "No CSV-File to assign vendor with MAC-Address found!"
+        }  # End Else
+
+    } PROCESS {
+
+        ForEach ($MACAddress2 in $MACAddress) {
+
+            $Vendor = [String]::Empty
+            # Split it, so we can search the vendor (XX-XX-XX-XX-XX-XX to XX-XX-XX)
+            $MAC_VendorSearch = $MACAddress2.Replace("-","").Replace(":","").Substring(0,6)
+            ForEach ($ListEntry in $MAC_VendorList) {
+
+                If ($ListEntry.Assignment -eq $MAC_VendorSearch) {
+
+                    $Vendor = $ListEntry."Organization Name"
+                    [PSCustomObject] @{
+                        ClientId = $MACAddress2
+                        Vendor   = $Vendor
+                    }  # End CustomObject
+
+                }  # End If
+
+            }  # End ForEach
+
+        }  # End ForEach
+
+    } END {
+
+    }  # End B P E
+
+}  # End Function Get-MacVendor
+
 Function Find-NewDevices {
     [CmdletBinding()]
-        param (
-            [Parameter(
-                Mandatory=$True,
-                Position=0,
-                HelpMessage="Define the DHCP server or servers for the environment.")]  # End Parameter
-            [String[]]$DhcpServers,
+    param (
+        [Parameter(
+            Mandatory=$True,
+            Position=0,
+            HelpMessage="Define the DHCP server or servers for the environment.")]
+        [String[]]$DhcpServers,
 
-            [Parameter(
-                Mandatory=$True,
-                Position=1,
-                HelpMessage="Define the full path and file name to the csv file that will contain the MAC address history records.")]  # End Parameter
-            [String]$ComparePath,
+        [Parameter(
+            Mandatory=$True,
+            Position=1,
+            HelpMessage="Define the full path and file name to the csv file that will contain the MAC address history records.")]
+        [String]$ComparePath,
 
-            [Parameter(
-                Mandatory=$True,
-                Position=2,
-                HelpMessage="Define the full path and file name of the file containing the Get-MacVendor.ps1 file and cmdlet")]  # End Parameter
-            [String]$MacVendorps1
+        [Parameter(
+            Mandatory=$True,
+            Position=2)]
+        [PSCredential]$Credential,
 
-        )  # End param
+        [Parameter(
+            Mandatory=$True,
+            Position=3)]
+        [String]$SmtpServer,
 
-    Import-Module -Name DhcpServer
+        [Parameter(
+            Mandatory=$True,
+            Position=4)]
+        [String]$FromEmail,
 
+        [Parameter(
+            Mandatory=$True,
+            Position=5)]
+        [String]$ToEmail
+    )  # End Param
+
+    Import-Module -Name DhcpServer -ErrorAction Stop
     ForEach ($DhcpServer in $DhcpServers) {
 
-        Clear-Variable TableInfo,MailBody,PreContent,PostContent,NoteLine -ErrorAction SilentlyContinue
-
+        Clear-Variable -Name TableInfo,MailBody,PreContent,PostContent,NoteLine,AllInfo,Table,VendorList,NewMacAddresses -ErrorAction SilentlyContinue
         Write-Verbose "[*] Obtaining Scope Values"
-        $Scopes = @()
-        $Scopes = (Get-DhcpServerv4Scope -ComputerName $DhcpServer | Select-Object -ExpandProperty "ScopeID").IPAddressToString
+        Try {
+            $Scopes = Get-DhcpServerv4Scope -ComputerName $DhcpServer -ErrorAction Stop | Select-Object -ExpandProperty ScopeID
+        } Catch {
+            Write-Output -InputObject "[x] Failed Obtaining Scopes From $DhcpServer"
+            Write-Output -InputObject $_
+            Continue
+        }  # End Try Catch
 
-        Write-Verbose '[*] Finding Active Address Leases'
+        Write-Verbose -Message "[*] Finding Active Address Leases"
         Try {
 
-            Write-Verbose "[*] Building list of all clients in all DHCP scopes on $DhcpServer"
-
-            $CurrentDhcpList = @()
+            Write-Verbose -Message "[*] Building list of all clients in all DHCP scopes on $DhcpServer"
             $CurrentDhcpList = ForEach ($Scope in $Scopes) {
+                Get-DhcpServerv4Lease `
+                    -ComputerName $DhcpServer `
+                    -ScopeID $Scope `
+                    -AllLeases `
+                    -ErrorAction SilentlyContinue | Where-Object -FilterScript { $_.AddressState -like '*Active' }  # End Where-Object
 
-                Get-DHCPServerv4Lease -ComputerName $DhcpServer -ScopeID $Scope -AllLeases -ErrorAction SilentlyContinue | Where-Object { $_.AddressState -like '*Active' }
+            }  # End ForEach
 
-            } # End Foreach
+            If (!($CurrentDhcpList)) {
+                Write-Output -InputObject "[!] No DHCP Clients Retrieved From $DhcpServer"
+                Continue
+            }  # End If
 
-            If (Test-Path -Path "$ComparePath") {
+            If (!(Test-Path $ComparePath)) {
+                Write-Verbose -Message "[*] Initial Build of MAC Address History File"
+                $CurrentDhcpList | Select-Object -Property ClientID | Export-Csv -Path $ComparePath -NoTypeInformation
+            }  # End If
 
-                Write-Verbose "[*] List of known MAC Addresses has been found."
+            Write-Verbose -Message "[*] Importing MAC Address History"
+            $HistoryDhcpList = Import-Csv -Path $ComparePath
 
-            } # End If
-            Else {
-
-                Write-Verbose "[*] Initial Build of file containing MAC Address history is being created at $ComparePath"
-                $CurrentDhcpList | Select-Object -Property ClientID,IPAddress,ScopeID,Hostname,AddressState,LeaseExpiryTime | Export-Csv -Path "$ComparePath" -NoTypeInformation
-
-            } # End Else
-
-            $HistoryDhcpList = Import-Csv -Path "$ComparePath" -Header ClientID
-
-            If ($CurrentDhcpList) {
-
-                Write-Verbose "[*] Comparing Client ID History with Current Leases"
-
-                $NewMacAddresses = @()
-                $NewMacAddresses = (Compare-Object -ReferenceObject $HistoryDhcpList -DifferenceObject $CurrentDhcpList -Property ClientId | Where-Object {$_.SideIndicator -like "=>"}) | Select-Object -Property ClientId -ExcludeProperty SideIndicator -ExpandProperty ClientId -Unique
-
-            } # End If
-            Else {
-
-                Write-Output "[!] There were not any DHCP clients retrieved from $DhcpServer"
-                Break
-
-            } # End Else
+            Write-Verbose -Message "[*] Comparing Client ID History With Current Leases"
+            $NewMacAddresses = Compare-Object -ReferenceObject $HistoryDhcpList.ClientID -DifferenceObject $CurrentDhcpList.ClientID | Where-Object -FilterScript {
+                $_.SideIndicator -eq "=>"
+            } | Select-Object -ExpandProperty InputObject -Unique
 
             If ($NewMacAddresses) {
 
-                Write-Verbose "[*] Obtaining client lease information for newly found devices. "
-
-                $AllInfo = @()
+                Write-Verbose -Message "[*] New Devices Discovered"
                 $AllInfo = ForEach ($Scope in $Scopes) {
-                    # Uncomment and modify the where-object part of this pipe if you wish to exclude certain hostnames for whatever reason
-                    (Get-DhcpServerv4Lease -ComputerName $DhcpServer -ClientId $NewMacAddresses -ScopeId $Scope -ErrorAction SilentlyContinue) # | Where-Object -Property HostName -NotLike "DESKTOP*"
+                    Get-DhcpServerv4Lease `
+                        -ComputerName $DhcpServer `
+                        -ScopeId $Scope `
+                        -ClientId $NewMacAddresses `
+                        -ErrorAction SilentlyContinue
 
-                } # End Foreach
+                }  # End ForEach
 
-
-                Write-Verbose "[*] Updating Client ID History"
                 If ($AllInfo) {
-
-                    Write-Verbose "[*] Appending list of known MAC Addresses"
-                    $AllInfo | Select-Object -Property IPAddress,ScopeID,ClientID,Hostname,AddressState,LeaseExpiryTime | Export-Csv -Path $ComparePath -Append # Updates the HistoryDhcpList File
-
+                    Write-Verbose -Message "[*] Updating Client ID History"
+                    $AllInfo | Select-Object -Property ClientID | Export-Csv -Path $ComparePath -Append -NoTypeInformation
                 }  # End If
-                Else {
 
-                    Write-Verbose "[*] No accompanying information obtained for that MAC Address"
-
-                }  # End Else
-
-                Write-Verbose "[*] Getting Vendor Information from MAC Addresses of newly discovered devies"
-                Import-module -Function ."$MacVendorps1" -Force
-
-                $VendorList = @()
+                Write-Verbose -Message "[*] Getting Vendor Information"
                 $VendorList = Get-MACVendor -MacAddress $NewMacAddresses
-
                 If (!($VendorList)) {
+                    Write-Output -InputObject "[!] No Matching Vendor Information Found"
+                }  # End If
 
-                    Write-Output "[*] No matching vendor could be determined from the current MAC vendor list. If you believe this to be an error check the Get-MacVendor.ps1 file at $MacVendorps1"
+            } Else {
+                Write-Output -InputObject "[*] No New Devices Were Discovered On $DhcpServer"
+                Continue
+            }  # End If Else
 
-                } # End If
+        } Catch {
 
-            }  # End If
-            Else {
+            Write-Output -InputObject "[x] Error Encountered With $DhcpServer"
+            Write-Output -InputObject $_
+            Continue
+        }  # End Try Catch
 
-                Write-Output "[*] No new devices were discovered on $DhcpServer."
+        $Table = ForEach ($Vendor in $AllInfo) {
+            $VendorAssignment = Get-MacVendor -MacAddress $Vendor.ClientId
+            [PSCustomObject]@{
+                DhcpServer = $DhcpServer
+                HostName  = $Vendor.HostName
+                Scope     = $Vendor.ScopeId
+                IPAddress = $Vendor.IPAddress
+                ClientId  = $Vendor.ClientId
+                Vendor    = $VendorAssignment.Vendor
+            }  # End PSCustomObject
 
-            }  # End Else
+        }  # End ForEach
 
-        }  # End Try
-        Catch {
-
-            Write-Output "[x] Error encountered with $DhcpServer"
-            $Error[0]
-
-        }  # End Catch
-        Finally {
-
-            Import-Module -Function ."$MacVendorps1" -Force
-
-            $Table = @()
-            $Table = ForEach ($Vendor in $AllInfo) {
-
-                $VendorAssignment = Get-MacVendor -MACAddress $Vendor.ClientId
-
-                New-Object -TypeName PSObject -Property @{DhcpServer = $DhcpServer
-                                                          HostName = $Vendor.HostName
-                                                          Scope = $Vendor.ScopeId
-                                                          IPAddress = $Vendor.IPAddress
-                                                          ClientId = $Vendor.ClientId
-                                                          Vendor = $VendorAssignment.Vendor
-
-                 } # End Property
-
-             } # End ForEach
-
-    $Css = @"
+$Css = @"
 <style>
 table {
     font-family: verdana,arial,sans-serif;
-        font-size:11px;
-        color:#333333;
-        border-width: 1px;
-        border-color: #666666;
-        border-collapse: collapse;
+    font-size:11px;
+    color:#333333;
+    border-width:1px;
+    border-color:#666666;
+    border-collapse:collapse;
 }
 th {
-        border-width: 1px;
-        padding: 8px;
-        border-style: solid;
-        border-color: #666666;
-        background-color: #dedede;
+    border-width:1px;
+    padding:8px;
+    border-style:solid;
+    border-color:#666666;
+    background-color:#dedede;
 }
 td {
-        border-width: 1px;
-        padding: 8px;
-        border-style: solid;
-        border-color: #666666;
-        background-color: #ffffff;
+    border-width:1px;
+    padding:8px;
+    border-style:solid;
+    border-color:#666666;
+    background-color:#ffffff;
 }
 </style>
 "@
 
-        Write-Verbose 'Generating Information for email...'
-
-        $TableInfo = $Table | Select-Object -Property Vendor,HostName,IPAddress,ClientId
-        $PreContent = "<Title>Newest Devices to have joined the Netowrk</Title>"
+        Write-Verbose -Message "[*] Generating Information For Email"
+        $TableInfo = $Table | Select-Object Vendor,HostName,IPAddress,ClientId
+        $PreContent = "<Title>Newest Devices To Have Joined The Network</Title>"
         $NoteLine = "$(Get-Date -Format 'MM/dd/yyyy HH:mm:ss')"
         $PostContent = "<br><p><font size='2'><i>$NoteLine</i></font>"
+        $MailBody = $TableInfo | ConvertTo-Html `
+                        -Head $Css `
+                        -PostContent $PostContent `
+                        -PreContent $PreContent `
+                        -Body "This is a list of the newest devices to have joined the network." | Out-String
 
-        $MailBody = $TableInfo | ConvertTo-Html -Head $Css -PostContent $PostContent -PreContent $PreContent -Body "This is a list of the newest devices to have joined the Network." | Out-String
+        If ($Table) {
+            Try {
+                Send-MailMessage `
+                    -From $FromEmail `
+                    -To $ToEmail `
+                    -Subject "AD Event: New Device Check $DhcpServer" `
+                    -BodyAsHtml `
+                    -Body $MailBody `
+                    -SmtpServer $SmtpServer `
+                    -UseSSL `
+                    -Port 587 `
+                    -Credential $Credential
+                Write-Verbose -Message "[*] Email Sent"
+            } Catch {
+                Write-Output -InputObject "[x] Failed Sending Email For $DhcpServer"
+                Write-Output -InputObject $_
+            }  # End Try Catch
+        } Else {
+            Write-Verbose -Message "[*] No New Devices Found"
+        }  # End If Else
 
-            If ($Table) {
+    }  # End ForEach
 
-                Send-MailMessage -From FromEmail -To ToEmail -Subject "AD Event: New Device Check $DhcpServer" -BodyAsHtml -Body $MailBody -SmtpServer UseSmtpServer -UseSSL -Port 587  -Credential $Credential
-
-                Write-Verbose 'Email sent.'
-
-            } # End if
-           Else {
-
-                Write-Verbose "No new devices found."
-
-           } # End Else
-
-        } # End Finally
-
-    } # End Foreach DHCP Server
-
-} # End Function
-
-# SIG # Begin signature block
-# MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
-# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU0A9mVW/dshQtLe0eTp5zb2Vo
-# JfWgggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
-# BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
-# BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
-# IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
-# MDUwMzA3MDAwMFowgbQxCzAJBgNVBAYTAlVTMRAwDgYDVQQIEwdBcml6b25hMRMw
-# EQYDVQQHEwpTY290dHNkYWxlMRowGAYDVQQKExFHb0RhZGR5LmNvbSwgSW5jLjEt
-# MCsGA1UECxMkaHR0cDovL2NlcnRzLmdvZGFkZHkuY29tL3JlcG9zaXRvcnkvMTMw
-# MQYDVQQDEypHbyBEYWRkeSBTZWN1cmUgQ2VydGlmaWNhdGUgQXV0aG9yaXR5IC0g
-# RzIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC54MsQ1K92vdSTYusw
-# ZLiBCGzDBNliF44v/z5lz4/OYuY8UhzaFkVLVat4a2ODYpDOD2lsmcgaFItMzEUz
-# 6ojcnqOvK/6AYZ15V8TPLvQ/MDxdR/yaFrzDN5ZBUY4RS1T4KL7QjL7wMDge87Am
-# +GZHY23ecSZHjzhHU9FGHbTj3ADqRay9vHHZqm8A29vNMDp5T19MR/gd71vCxJ1g
-# O7GyQ5HYpDNO6rPWJ0+tJYqlxvTV0KaudAVkV4i1RFXULSo6Pvi4vekyCgKUZMQW
-# OlDxSq7neTOvDCAHf+jfBDnCaQJsY1L6d8EbyHSHyLmTGFBUNUtpTrw700kuH9zB
-# 0lL7AgMBAAGjggEaMIIBFjAPBgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIB
-# BjAdBgNVHQ4EFgQUQMK9J47MNIMwojPX+2yz8LQsgM4wHwYDVR0jBBgwFoAUOpqF
-# BxBnKLbv9r0FQW4gwZTaD94wNAYIKwYBBQUHAQEEKDAmMCQGCCsGAQUFBzABhhho
-# dHRwOi8vb2NzcC5nb2RhZGR5LmNvbS8wNQYDVR0fBC4wLDAqoCigJoYkaHR0cDov
-# L2NybC5nb2RhZGR5LmNvbS9nZHJvb3QtZzIuY3JsMEYGA1UdIAQ/MD0wOwYEVR0g
-# ADAzMDEGCCsGAQUFBwIBFiVodHRwczovL2NlcnRzLmdvZGFkZHkuY29tL3JlcG9z
-# aXRvcnkvMA0GCSqGSIb3DQEBCwUAA4IBAQAIfmyTEMg4uJapkEv/oV9PBO9sPpyI
-# BslQj6Zz91cxG7685C/b+LrTW+C05+Z5Yg4MotdqY3MxtfWoSKQ7CC2iXZDXtHwl
-# TxFWMMS2RJ17LJ3lXubvDGGqv+QqG+6EnriDfcFDzkSnE3ANkR/0yBOtg2DZ2HKo
-# cyQetawiDsoXiWJYRBuriSUBAA/NxBti21G00w9RKpv0vHP8ds42pM3Z2Czqrpv1
-# KrKQ0U11GIo/ikGQI31bS/6kA1ibRrLDYGCD+H1QQc7CoZDDu+8CL9IVVO5EFdkK
-# rqeKM+2xLXY2JtwE65/3YR8V3Idv7kaWKK2hJn0KCacuBKONvPi8BDABMIIFIzCC
-# BAugAwIBAgIIXIhNoAmmSAYwDQYJKoZIhvcNAQELBQAwgbQxCzAJBgNVBAYTAlVT
-# MRAwDgYDVQQIEwdBcml6b25hMRMwEQYDVQQHEwpTY290dHNkYWxlMRowGAYDVQQK
-# ExFHb0RhZGR5LmNvbSwgSW5jLjEtMCsGA1UECxMkaHR0cDovL2NlcnRzLmdvZGFk
-# ZHkuY29tL3JlcG9zaXRvcnkvMTMwMQYDVQQDEypHbyBEYWRkeSBTZWN1cmUgQ2Vy
-# dGlmaWNhdGUgQXV0aG9yaXR5IC0gRzIwHhcNMjAxMTE1MjMyMDI5WhcNMjExMTA0
-# MTkzNjM2WjBlMQswCQYDVQQGEwJVUzERMA8GA1UECBMIQ29sb3JhZG8xGTAXBgNV
-# BAcTEENvbG9yYWRvIFNwcmluZ3MxEzARBgNVBAoTCk9zYm9ybmVQcm8xEzARBgNV
-# BAMTCk9zYm9ybmVQcm8wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDJ
-# V6Cvuf47D4iFITUSNj0ucZk+BfmrRG7XVOOiY9o7qJgaAN88SBSY45rpZtGnEVAY
-# Avj6coNuAqLa8k7+Im72TkMpoLAK0FZtrg6PTfJgi2pFWP+UrTaorLZnG3oIhzNG
-# Bt5oqBEy+BsVoUfA8/aFey3FedKuD1CeTKrghedqvGB+wGefMyT/+jaC99ezqGqs
-# SoXXCBeH6wJahstM5WAddUOylTkTEfyfsqWfMsgWbVn3VokIqpL6rE6YCtNROkZq
-# fCLZ7MJb5hQEl191qYc5VlMKuWlQWGrgVvEIE/8lgJAMwVPDwLNcFnB+zyKb+ULu
-# rWG3gGaKUk1Z5fK6YQ+BAgMBAAGjggGFMIIBgTAMBgNVHRMBAf8EAjAAMBMGA1Ud
-# JQQMMAoGCCsGAQUFBwMDMA4GA1UdDwEB/wQEAwIHgDA1BgNVHR8ELjAsMCqgKKAm
-# hiRodHRwOi8vY3JsLmdvZGFkZHkuY29tL2dkaWcyczUtNi5jcmwwXQYDVR0gBFYw
-# VDBIBgtghkgBhv1tAQcXAjA5MDcGCCsGAQUFBwIBFitodHRwOi8vY2VydGlmaWNh
-# dGVzLmdvZGFkZHkuY29tL3JlcG9zaXRvcnkvMAgGBmeBDAEEATB2BggrBgEFBQcB
-# AQRqMGgwJAYIKwYBBQUHMAGGGGh0dHA6Ly9vY3NwLmdvZGFkZHkuY29tLzBABggr
-# BgEFBQcwAoY0aHR0cDovL2NlcnRpZmljYXRlcy5nb2RhZGR5LmNvbS9yZXBvc2l0
-# b3J5L2dkaWcyLmNydDAfBgNVHSMEGDAWgBRAwr0njsw0gzCiM9f7bLPwtCyAzjAd
-# BgNVHQ4EFgQUkWYB7pDl3xX+PlMK1XO7rUHjbrwwDQYJKoZIhvcNAQELBQADggEB
-# AFSsN3fgaGGCi6m8GuaIrJayKZeEpeIK1VHJyoa33eFUY+0vHaASnH3J/jVHW4BF
-# U3bgFR/H/4B0XbYPlB1f4TYrYh0Ig9goYHK30LiWf+qXaX3WY9mOV3rM6Q/JfPpf
-# x55uU9T4yeY8g3KyA7Y7PmH+ZRgcQqDOZ5IAwKgknYoH25mCZwoZ7z/oJESAstPL
-# vImVrSkCPHKQxZy/tdM9liOYB5R2o/EgOD5OH3B/GzwmyFG3CqrqI2L4btQKKhm+
-# CPrue5oXv2theaUOd+IYJW9LA3gvP/zVQhlOQ/IbDRt7BibQp0uWjYaMAOaEKxZN
-# IksPKEJ8AxAHIvr+3P8R17UxggJjMIICXwIBATCBwTCBtDELMAkGA1UEBhMCVVMx
-# EDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAYBgNVBAoT
-# EUdvRGFkZHkuY29tLCBJbmMuMS0wKwYDVQQLEyRodHRwOi8vY2VydHMuZ29kYWRk
-# eS5jb20vcmVwb3NpdG9yeS8xMzAxBgNVBAMTKkdvIERhZGR5IFNlY3VyZSBDZXJ0
-# aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
-# CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
-# AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FKMNM2zJRN+gY09i5qwFx8oxRoO+MA0GCSqGSIb3DQEBAQUABIIBACF9JDO0BiYs
-# tPP8TvLO8cOCpeELd56zyAoxW7eJWtZDln/AR6+varc1j8zo4S2YELffifPPQeMh
-# VdffbAQxDqNb4BKEtyO0Wbwz13AwEAa6q8JrQwU8Egdgg9xdGLMQnZia9ec3VOsh
-# BYMaER7Z32lkA1BXQ2R3JDzlZAoCZkgBOCbLG/rV4k4WYAivlxWJMjxdzy0ZSivT
-# Bc102eeRsPd0EuXb5IWg9pumMEGYtSPoiiNZDR4IeziccyOd0xetLRpWUA5W3Uwi
-# dOR08rXNy0lJ8TOB2hfRZb+hk40fgmZtktlj6bshqOq4KyZf1vZ8Ss3gQfBgg/q1
-# W6ObeHFFFqU=
-# SIG # End signature block
+}  # End Function Find-NewDevices
