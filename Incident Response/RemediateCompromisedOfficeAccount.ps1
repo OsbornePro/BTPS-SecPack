@@ -1,237 +1,439 @@
-# I built this off of a Microsoft suggested script. I will add the link if it is ever sent to me or I find it
-#
-# This script is used to remediate a compromised Office365 account by performing the Microsoft recommended actions.
-#
-# The following actions will be performed.
-#
-#    1.) Reset password (which kills the session).
-#
-#    2.) Remove mailbox delegates.
-#
-#    3.) Remove mailforwarding rules to external domains.
-#
-#    4.) Remove global mailforwarding property on mailbox.
-#
-#    5.) Set password complexity on the account to be high.
-#
-#    6.) Enable mailbox auditing.
-#
-#    7.) Produce Audit Log for the admin to review.
-
-$Upn = Read-Host "What is the user's Email Address/UserPrincipalName Example: first.last@$env:USERDNSDOMAIN"
-If ($Null -eq $Upn) {
-
-    Throw "User UPN/email address was not defined was not defined. Ending script"
-
-} # End If
-Else {
-
-    $SamAccountName = $Upn -Split "@"
-    $TranscriptPath = "C:\Users\Public\Desktop\" + $SamAccountName[0] + "_RemediationTranscript_" + (Get-Date).ToString('MM-dd-yyyy') + ".txt"
-
-    Start-Transcript -Path $TranscriptPath
-    Write-Output "$Upn's account will have remediation actions applied to it.`nAn audit report will be saved to $TranscriptPath"
-
-    Import-Module MSOnline
-    Write-Verbose "Connecting to Exchange Online Remote Powershell Service"
-    $ExoSession = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential (Get-Credential -Message "Enter Global Admin Creds") -Authentication Basic -AllowRedirection
-
-    If ($Null -ne $ExoSession) {
-
-        Import-PSSession -Session $ExoSession
-
-    } # End If
-    Else {
-
-        Output "[x] No EXO service set up for this account"
-
-    } # End Else
-
-    Write-Host "Connecting to EOP Powershell Service" -ForegroundColor Cyan
-    $EopSession = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://ps.compliance.protection.outlook.com/powershell-liveid/ -Credential $AdminCredential -Authentication Basic -AllowRedirection
-
-    If ($Null -ne $EopSession) {
-
-        Import-PSSession -Session $EopSession -AllowClobber
-
-    } # End If
-    Else {
-
-        Write-Output "[x] No EOP service set up for this account"
-
-    } # End Else
-
-    Connect-MsolService -Credential $AdminCredential
-    [Reflection.Assembly]::LoadWithPartialName("System.Web")
-
-# BELOW THIS LINE CREATES THE FUNCTIONS------------------------------------------------------------------------
-
-Function Reset-Password($Upn) {
-
-    $NewPassword = ([System.Web.Security.Membership]::GeneratePassword(16,2))
-    Set-MsolUserPassword –UserPrincipalName $Upn –NewPassword $NewPassword -ForceChangePassword $True
-
-    Write-Host "Password for the user $Upn was changed to $NewPassword. Make sure you record this and share with the user, or be ready to reset the password again. They will have to reset their password on the next logon." -ForegroundColor Cyan
-    Set-MsolUser -UserPrincipalName $Upn -StrongPasswordRequired $True
-
-} # End Function Reset-Password
+#Requires -Version 5.1
+#Requires -Modules ExchangeOnlineManagement,Microsoft.Graph.Users,Microsoft.Graph.Users.Actions
+<#
+.SYNOPSIS
+Remediates a potentially compromised Microsoft 365 account.
 
 
+.DESCRIPTION
+This cmdlet performs Microsoft 365 account remediation actions for a potentially compromised user.
 
-Function Enable-MailboxAuditing($Upn) {
-
-    Write-Host "Mailbox auditing for user is being enabled..."
-    Set-Mailbox $Upn -AuditEnabled $True -AuditLogAgeLimit 365
-
-    Write-Host "Current auditing configuration."
-    Get-Mailbox -Identity $Upn | Select-Object -Property Name, AuditEnabled, AuditLogAgeLimit
-
-} # End Functgion Enable-MailboxAuditing
-
-
-
-Function Remove-MailboxDelegates($Upn) {
-
-    Write-Host "Removing Mailbox Delegate Permissions for the affected user $upn." -ForegroundColor Cyan
-    $MailboxDelegates = Get-MailboxPermission -Identity $Upn | Where-Object {($_.IsInherited -ne "True") -and ($_.User -notlike "*SELF*")}
-
-    Get-MailboxPermission -Identity $Upn | Where-Object {($_.IsInherited -ne "True") -and ($_.User -notlike "*SELF*")}
-    ForEach ($Delegate in $MailboxDelegates) {
-
-        Remove-MailboxPermission -Identity $Upn -User $Delegate.User -AccessRights $Delegate.AccessRights -InheritanceType All -Confirm:$False
-
-    } # End ForEach
-
-} # End Function Remove-MailboxDelegates
+The following actions are performed:
+    1.) Reset the user's password.
+    2.) Revoke active user sign-in sessions.
+    3.) Remove mailbox delegate permissions.
+    4.) Disable inbox rules that forward, redirect, forward as attachment, or send SMS notifications.
+    5.) Remove mailbox-level forwarding.
+    6.) Enable mailbox auditing.
+    7.) Export Unified Audit Log results for review.
 
 
+.PARAMETER UserPrincipalName
+Defines the affected user's UserPrincipalName.
 
-Function Disable-MailforwardingRulesToExternalDomains($Upn) {
+.PARAMETER AdminUserPrincipalName
+Defines the administrator account used to connect to Exchange Online.
 
-    Write-Host "Disabling mailforwarding rules to external domains for the affected user $Upn."
-    Write-Host "Found the following rules that forward or redirect mail to other accounts: "
+.PARAMETER OutputPath
+Defines where transcript and audit log files will be saved.
 
-    Get-InboxRule -Mailbox $Upn | Select-Object -Property Name, Description, Enabled, Priority, ForwardTo, ForwardAsAttachmentTo, RedirectTo, DeleteMessage, SendTextMessageNotificationTo | Where-Object {(($_.Enabled -eq $True) -and (($_.ForwardTo -ne $Null) -or ($_.ForwardAsAttachmentTo -ne $Null) -or ($_.RedirectTo -ne $Null) -or ($_.SendTextMessageNotificationTo -ne $Null)))} | Format-Table
-    Get-InboxRule -Mailbox $Upn | Where-Object {(($_.Enabled -eq $true) -and (($_.ForwardTo -ne $Null) -or ($_.ForwardAsAttachmentTo -ne $Null) -or ($_.RedirectTo -ne $Null) -or ($_.SendTextMessageNotificationTo -ne $Null)))} | Disable-InboxRule -Confirm:$False
-    Write-Output "Completed disabling of rules being forwarded to outside domains"
-
-} # Disable Disable-MailforwardingRulesToExternalDomains
-
-
-
-Function Remove-MailboxForwarding($Upn) {
-
-    Write-Output "Removing Mailbox Forwarding configurations for the affected user $Upn. Current configuration is:"
-    Get-Mailbox -Identity $Upn | Select-Object -Property Name, DeliverToMailboxAndForward, ForwardingSmtpAddress
-    Set-Mailbox -Identity $Upn -DeliverToMailboxAndForward $False -ForwardingSmtpAddress $Null
-
-    Write-Host "Mailbox forwarding removal completed. Current configuration is:"
-    Get-Mailbox -Identity $Upn | Select-Object -Property Name, DeliverToMailboxAndForward, ForwardingSmtpAddress
-
-} # End Function Remove-MailboxForwarding
+.PARAMETER AuditDays
+Defines how many days back to search the Unified Audit Log.
 
 
+.EXAMPLE
+PS> Invoke-M365CompromisedAccountRemediation `
+    -UserPrincipalName compromised.user@domain.com `
+    -AdminUserPrincipalName admin@domain.com `
+    -OutputPath "C:\Users\Public\Desktop" `
+    -AuditDays 7 `
+    -Verbose
 
-Function Get-AuditLog ($Upn) {
+#>
+Function New-RandomPassword {
+    [CmdletBinding()]
+        param (
+            [Parameter(
+                Mandatory=$False,
+                Position=0
+            )]  # End Parameter
+            [Int]$Length = 20
+        )  # End Param
 
-    Write-Host "$Upn account has been remediated. There may be things missed. Review the audit transcript for this user to be super-sure you've got everything." -ForegroundColor Red
-    $UserName = $Upn -split "@"
-    $AuditLogPath = ".\" + $UserName[0] + "AuditLog" + (Get-Date).ToString('MM-dd-yyyy') + ".csv"
-    $StartDate = (Get-Date).AddDays(-7).ToString('MM/dd/yyyy')
-    $EndDate = (Get-Date).ToString('MM/dd/yyyy')
-    $Results = Search-UnifiedAuditLog -StartDate $StartDate -EndDate $EndDate -UserIds $Upn
-    $Results | Export-Csv -Path $AuditLogPath
+    Add-Type -AssemblyName System.Web
+    Return [System.Web.Security.Membership]::GeneratePassword($Length,4)
 
-    Write-Host "Log of this command can be found here: $AuditLogPath. You can also review the activity below." -ForegroundColor Green
-    $Results | Format-Table
-
-} # End Function Get-AuditLog
+}  # End Function New-RandomPassword
 
 
+Function Reset-M365UserPassword {
+    [CmdletBinding(SupportsShouldProcess=$True)]
+        param (
+            [Parameter(
+                Mandatory=$True,
+                Position=0
+        )]  # End Parameter
+            [String]$UserPrincipalName
+        )  # End Param
+
+    $NewPassword = New-RandomPassword -Length 20
+    $PasswordProfile = @{
+        Password = $NewPassword
+        ForceChangePasswordNextSignIn = $True
+    }
+
+    If ($PSCmdlet.ShouldProcess($UserPrincipalName,"Reset Password")) {
+
+        Write-Verbose -Message "[*] Resetting Password For $UserPrincipalName"
+        Update-MgUser -UserId $UserPrincipalName -PasswordProfile $PasswordProfile -ErrorAction Stop
+
+        Write-Output -InputObject "[*] Password For $UserPrincipalName Was Reset"
+        Write-Output -InputObject "[!] Temporary Password: $NewPassword"
+        Write-Output -InputObject "[!] Store This Password Securely. The User Must Change It At Next Sign-In."
+
+    }  # End If
+
+}  # End Function Reset-M365UserPassword
 
 
-# BELOW THIS LINE EXECUTES THE ABOVE CREATED FUNCTIONS---------------------------------------------------------------------------
+Function Revoke-M365UserSessions {
+    [CmdletBinding(
+        SupportsShouldProcess=$True
+    )]  # End CmdletBinding
+    param (
+        [Parameter(
+            Mandatory=$True,
+            Position=0
+        )]  # End Parameter
+        [String]$UserPrincipalName
+    )  # End Param
 
-    Reset-Password $Upn
-    Enable-MailboxAuditing $Upn
-    Remove-MailboxDelegates $Upn
-    Disable-MailforwardingRulesToExternalDomains $Upn
-    Remove-MailboxForwarding $Upn
+    If ($PSCmdlet.ShouldProcess($UserPrincipalName,"Revoke Sign-In Sessions")) {
+        Write-Verbose -Message "[*] Revoking Active Sign-In Sessions For $UserPrincipalName"
+        Revoke-MgUserSignInSession -UserId $UserPrincipalName -ErrorAction Stop | Out-Null
+        Write-Output -InputObject "[*] Active Sign-In Sessions Revoked For $UserPrincipalName"
+    }  # End If
 
-    Get-AuditLog $Upn
-    Stop-Transcript
+}  # End Function Revoke-M365UserSessions
 
-} # End Else
 
-# SIG # Begin signature block
-# MIIM9AYJKoZIhvcNAQcCoIIM5TCCDOECAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
-# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUb4bXGRjwbFyvF1NJ3wTXd3Uz
-# 3N+gggn7MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UE
-# BhMCVVMxEDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAY
-# BgNVBAoTEUdvRGFkZHkuY29tLCBJbmMuMTEwLwYDVQQDEyhHbyBEYWRkeSBSb290
-# IENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTExMDUwMzA3MDAwMFoXDTMx
-# MDUwMzA3MDAwMFowgbQxCzAJBgNVBAYTAlVTMRAwDgYDVQQIEwdBcml6b25hMRMw
-# EQYDVQQHEwpTY290dHNkYWxlMRowGAYDVQQKExFHb0RhZGR5LmNvbSwgSW5jLjEt
-# MCsGA1UECxMkaHR0cDovL2NlcnRzLmdvZGFkZHkuY29tL3JlcG9zaXRvcnkvMTMw
-# MQYDVQQDEypHbyBEYWRkeSBTZWN1cmUgQ2VydGlmaWNhdGUgQXV0aG9yaXR5IC0g
-# RzIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC54MsQ1K92vdSTYusw
-# ZLiBCGzDBNliF44v/z5lz4/OYuY8UhzaFkVLVat4a2ODYpDOD2lsmcgaFItMzEUz
-# 6ojcnqOvK/6AYZ15V8TPLvQ/MDxdR/yaFrzDN5ZBUY4RS1T4KL7QjL7wMDge87Am
-# +GZHY23ecSZHjzhHU9FGHbTj3ADqRay9vHHZqm8A29vNMDp5T19MR/gd71vCxJ1g
-# O7GyQ5HYpDNO6rPWJ0+tJYqlxvTV0KaudAVkV4i1RFXULSo6Pvi4vekyCgKUZMQW
-# OlDxSq7neTOvDCAHf+jfBDnCaQJsY1L6d8EbyHSHyLmTGFBUNUtpTrw700kuH9zB
-# 0lL7AgMBAAGjggEaMIIBFjAPBgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIB
-# BjAdBgNVHQ4EFgQUQMK9J47MNIMwojPX+2yz8LQsgM4wHwYDVR0jBBgwFoAUOpqF
-# BxBnKLbv9r0FQW4gwZTaD94wNAYIKwYBBQUHAQEEKDAmMCQGCCsGAQUFBzABhhho
-# dHRwOi8vb2NzcC5nb2RhZGR5LmNvbS8wNQYDVR0fBC4wLDAqoCigJoYkaHR0cDov
-# L2NybC5nb2RhZGR5LmNvbS9nZHJvb3QtZzIuY3JsMEYGA1UdIAQ/MD0wOwYEVR0g
-# ADAzMDEGCCsGAQUFBwIBFiVodHRwczovL2NlcnRzLmdvZGFkZHkuY29tL3JlcG9z
-# aXRvcnkvMA0GCSqGSIb3DQEBCwUAA4IBAQAIfmyTEMg4uJapkEv/oV9PBO9sPpyI
-# BslQj6Zz91cxG7685C/b+LrTW+C05+Z5Yg4MotdqY3MxtfWoSKQ7CC2iXZDXtHwl
-# TxFWMMS2RJ17LJ3lXubvDGGqv+QqG+6EnriDfcFDzkSnE3ANkR/0yBOtg2DZ2HKo
-# cyQetawiDsoXiWJYRBuriSUBAA/NxBti21G00w9RKpv0vHP8ds42pM3Z2Czqrpv1
-# KrKQ0U11GIo/ikGQI31bS/6kA1ibRrLDYGCD+H1QQc7CoZDDu+8CL9IVVO5EFdkK
-# rqeKM+2xLXY2JtwE65/3YR8V3Idv7kaWKK2hJn0KCacuBKONvPi8BDABMIIFIzCC
-# BAugAwIBAgIIXIhNoAmmSAYwDQYJKoZIhvcNAQELBQAwgbQxCzAJBgNVBAYTAlVT
-# MRAwDgYDVQQIEwdBcml6b25hMRMwEQYDVQQHEwpTY290dHNkYWxlMRowGAYDVQQK
-# ExFHb0RhZGR5LmNvbSwgSW5jLjEtMCsGA1UECxMkaHR0cDovL2NlcnRzLmdvZGFk
-# ZHkuY29tL3JlcG9zaXRvcnkvMTMwMQYDVQQDEypHbyBEYWRkeSBTZWN1cmUgQ2Vy
-# dGlmaWNhdGUgQXV0aG9yaXR5IC0gRzIwHhcNMjAxMTE1MjMyMDI5WhcNMjExMTA0
-# MTkzNjM2WjBlMQswCQYDVQQGEwJVUzERMA8GA1UECBMIQ29sb3JhZG8xGTAXBgNV
-# BAcTEENvbG9yYWRvIFNwcmluZ3MxEzARBgNVBAoTCk9zYm9ybmVQcm8xEzARBgNV
-# BAMTCk9zYm9ybmVQcm8wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDJ
-# V6Cvuf47D4iFITUSNj0ucZk+BfmrRG7XVOOiY9o7qJgaAN88SBSY45rpZtGnEVAY
-# Avj6coNuAqLa8k7+Im72TkMpoLAK0FZtrg6PTfJgi2pFWP+UrTaorLZnG3oIhzNG
-# Bt5oqBEy+BsVoUfA8/aFey3FedKuD1CeTKrghedqvGB+wGefMyT/+jaC99ezqGqs
-# SoXXCBeH6wJahstM5WAddUOylTkTEfyfsqWfMsgWbVn3VokIqpL6rE6YCtNROkZq
-# fCLZ7MJb5hQEl191qYc5VlMKuWlQWGrgVvEIE/8lgJAMwVPDwLNcFnB+zyKb+ULu
-# rWG3gGaKUk1Z5fK6YQ+BAgMBAAGjggGFMIIBgTAMBgNVHRMBAf8EAjAAMBMGA1Ud
-# JQQMMAoGCCsGAQUFBwMDMA4GA1UdDwEB/wQEAwIHgDA1BgNVHR8ELjAsMCqgKKAm
-# hiRodHRwOi8vY3JsLmdvZGFkZHkuY29tL2dkaWcyczUtNi5jcmwwXQYDVR0gBFYw
-# VDBIBgtghkgBhv1tAQcXAjA5MDcGCCsGAQUFBwIBFitodHRwOi8vY2VydGlmaWNh
-# dGVzLmdvZGFkZHkuY29tL3JlcG9zaXRvcnkvMAgGBmeBDAEEATB2BggrBgEFBQcB
-# AQRqMGgwJAYIKwYBBQUHMAGGGGh0dHA6Ly9vY3NwLmdvZGFkZHkuY29tLzBABggr
-# BgEFBQcwAoY0aHR0cDovL2NlcnRpZmljYXRlcy5nb2RhZGR5LmNvbS9yZXBvc2l0
-# b3J5L2dkaWcyLmNydDAfBgNVHSMEGDAWgBRAwr0njsw0gzCiM9f7bLPwtCyAzjAd
-# BgNVHQ4EFgQUkWYB7pDl3xX+PlMK1XO7rUHjbrwwDQYJKoZIhvcNAQELBQADggEB
-# AFSsN3fgaGGCi6m8GuaIrJayKZeEpeIK1VHJyoa33eFUY+0vHaASnH3J/jVHW4BF
-# U3bgFR/H/4B0XbYPlB1f4TYrYh0Ig9goYHK30LiWf+qXaX3WY9mOV3rM6Q/JfPpf
-# x55uU9T4yeY8g3KyA7Y7PmH+ZRgcQqDOZ5IAwKgknYoH25mCZwoZ7z/oJESAstPL
-# vImVrSkCPHKQxZy/tdM9liOYB5R2o/EgOD5OH3B/GzwmyFG3CqrqI2L4btQKKhm+
-# CPrue5oXv2theaUOd+IYJW9LA3gvP/zVQhlOQ/IbDRt7BibQp0uWjYaMAOaEKxZN
-# IksPKEJ8AxAHIvr+3P8R17UxggJjMIICXwIBATCBwTCBtDELMAkGA1UEBhMCVVMx
-# EDAOBgNVBAgTB0FyaXpvbmExEzARBgNVBAcTClNjb3R0c2RhbGUxGjAYBgNVBAoT
-# EUdvRGFkZHkuY29tLCBJbmMuMS0wKwYDVQQLEyRodHRwOi8vY2VydHMuZ29kYWRk
-# eS5jb20vcmVwb3NpdG9yeS8xMzAxBgNVBAMTKkdvIERhZGR5IFNlY3VyZSBDZXJ0
-# aWZpY2F0ZSBBdXRob3JpdHkgLSBHMgIIXIhNoAmmSAYwCQYFKw4DAhoFAKB4MBgG
-# CisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
-# AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYE
-# FPGFCjn7Evq9R47r2Y0qyvSlgLUaMA0GCSqGSIb3DQEBAQUABIIBADhqGfJioVa/
-# kMrFfi2KibhE728ftFQJVq3dZ8H+iX+62lgr1ZbpLzZvKHB0AvuvGNQmKKwJuPx9
-# iJpiQWOLigaGN6hgP498C0RqHEBAOUinKwYqXo1XU5FSgPtjnPbuSYpysxXrFVUD
-# FTHLPl/fwALY/DkCEC1tCOdf/GBHzaZ4is0oIiz7Xpj8LE6gDnbBEOVcx28kAdoC
-# i4O6MnmAEnIGPDrmTDQoDDuXrZ/BV65g0W0I5PrxyEE5AzOG/KzVfspclyiwHz4w
-# P2I5/ri1deAYEAMp6YAcjFXJbaK3irMgatiFKqiwAnqu01hV3BqF2LSMYgADYx0q
-# 7WB5D9HBiU8=
-# SIG # End signature block
+Function Enable-M365MailboxAuditing {
+    [CmdletBinding(SupportsShouldProcess=$True)]
+    param (
+        [Parameter(
+            Mandatory=$True,
+            Position=0
+        )]  # End Parameter
+        [String]$UserPrincipalName
+    )  # End Param
+
+    If ($PSCmdlet.ShouldProcess($UserPrincipalName,"Enable Mailbox Auditing")) {
+
+        Write-Verbose -Message "[*] Enabling Mailbox Auditing For $UserPrincipalName"
+
+        Set-Mailbox `
+            -Identity $UserPrincipalName `
+            -AuditEnabled $True `
+            -AuditLogAgeLimit 365 `
+            -ErrorAction Stop
+
+        Get-Mailbox -Identity $UserPrincipalName |
+            Select-Object -Property Name,AuditEnabled,AuditLogAgeLimit
+
+    }  # End If
+
+}  # End Function Enable-M365MailboxAuditing
+
+
+Function Remove-M365MailboxDelegates {
+    [CmdletBinding(SupportsShouldProcess=$True)]
+    param (
+        [Parameter(
+            Mandatory=$True,
+            Position=0
+        )]  # End Parameter
+        [String]$UserPrincipalName
+    )  # End Param
+
+    Write-Verbose -Message "[*] Finding Mailbox Delegate Permissions For $UserPrincipalName"
+    $MailboxDelegates = Get-MailboxPermission -Identity $UserPrincipalName -ErrorAction Stop |
+        Where-Object -FilterScript {
+            ($_.IsInherited -ne $True) -and
+            ($_.User -notlike "*SELF*")
+        }  # End Where-Object
+
+    If ($MailboxDelegates) {
+
+        Write-Output -InputObject "[*] The Following Mailbox Delegates Were Found"
+        $MailboxDelegates | Select-Object -Property User,AccessRights,Deny,IsInherited
+        ForEach ($Delegate in $MailboxDelegates) {
+
+            If ($PSCmdlet.ShouldProcess($UserPrincipalName,"Remove Mailbox Delegate $($Delegate.User)")) {
+                Remove-MailboxPermission -Identity $UserPrincipalName -User $Delegate.User -AccessRights $Delegate.AccessRights -InheritanceType All -Confirm:$False -ErrorAction Stop
+                Write-Output -InputObject "[*] Removed Delegate Permission For $($Delegate.User)"
+            }  # End If
+
+        }  # End ForEach
+
+    } Else {
+        Write-Verbose -Message "[*] No Mailbox Delegates Found For $UserPrincipalName"
+    }  # End If Else
+
+}  # End Function Remove-M365MailboxDelegates
+
+
+Function Disable-M365MailboxForwardingRules {
+    [CmdletBinding(
+        SupportsShouldProcess=$True
+    )]  # End CmdletBinding
+        param (
+            [Parameter(
+                Mandatory=$True,
+                Position=0
+        )]  # End Parameter
+            [String]$UserPrincipalName
+        )  # End Param
+
+    Write-Verbose -Message "[*] Finding Inbox Rules That Forward Or Redirect Mail For $UserPrincipalName"
+    $InboxRules = Get-InboxRule -Mailbox $UserPrincipalName -ErrorAction Stop |
+        Where-Object -FilterScript {
+            ($_.Enabled -eq $True) -and
+            (
+                ($Null -ne $_.ForwardTo) -or
+                ($Null -ne $_.ForwardAsAttachmentTo) -or
+                ($Null -ne $_.RedirectTo) -or
+                ($Null -ne $_.SendTextMessageNotificationTo)
+            )
+        }  # End Where-Object
+
+    If ($InboxRules) {
+
+        Write-Output -InputObject "[*] The Following Forwarding Or Redirect Rules Were Found"
+        $InboxRules | Select-Object -Property Name,Description,Enabled,Priority,ForwardTo,ForwardAsAttachmentTo,RedirectTo,DeleteMessage,SendTextMessageNotificationTo
+        ForEach ($Rule in $InboxRules) {
+
+            If ($PSCmdlet.ShouldProcess($UserPrincipalName,"Disable Inbox Rule $($Rule.Name)")) {
+                Disable-InboxRule -Mailbox $UserPrincipalName -Identity $Rule.Identity -Confirm:$False -ErrorAction Stop
+                Write-Output -InputObject "[*] Disabled Inbox Rule $($Rule.Name)"
+            }  # End If
+
+        }  # End ForEach
+
+    } Else {
+        Write-Verbose -Message "[*] No Forwarding Or Redirect Inbox Rules Found For $UserPrincipalName"
+    }  # End If Else
+
+}  # End Function Disable-M365MailboxForwardingRules
+
+
+Function Remove-M365MailboxForwarding {
+    [CmdletBinding(SupportsShouldProcess=$True)]
+    param (
+        [Parameter(
+            Mandatory=$True,
+            Position=0
+        )]  # End Parameter
+        [String]$UserPrincipalName
+    )  # End Param
+
+    Write-Verbose -Message "[*] Checking Mailbox Forwarding Configuration For $UserPrincipalName"
+    $MailboxForwarding = Get-Mailbox -Identity $UserPrincipalName -ErrorAction Stop | Select-Object -Property Name,DeliverToMailboxAndForward,ForwardingAddress,ForwardingSmtpAddress
+    $MailboxForwarding
+
+    If (
+        ($MailboxForwarding.DeliverToMailboxAndForward -eq $True) -or
+        ($Null -ne $MailboxForwarding.ForwardingAddress) -or
+        ($Null -ne $MailboxForwarding.ForwardingSmtpAddress)
+    ) {
+
+        If ($PSCmdlet.ShouldProcess($UserPrincipalName,"Remove Mailbox Forwarding")) {
+
+            Set-Mailbox -Identity $UserPrincipalName -DeliverToMailboxAndForward $False -ForwardingAddress $Null -ForwardingSmtpAddress $Null -ErrorAction Stop
+            Write-Output -InputObject "[*] Mailbox Forwarding Removed For $UserPrincipalName"
+
+        }  # End If
+
+    } Else {
+        Write-Verbose -Message "[*] No Mailbox Forwarding Configuration Found For $UserPrincipalName"
+    }  # End If Else
+
+}  # End Function Remove-M365MailboxForwarding
+
+
+Function Export-M365UserAuditLog {
+    [CmdletBinding()]
+    param (
+        [Parameter(
+            Mandatory=$True,
+            Position=0
+        )]  # End Parameter
+        [String]$UserPrincipalName,
+
+        [Parameter(
+            Mandatory=$True,
+            Position=1
+        )]  # End Parameter
+        [String]$OutputPath,
+
+        [Parameter(
+            Mandatory=$False,
+            Position=2
+        )]  # End Parameter
+        [Int]$AuditDays = 7
+    )  # End Param
+
+    $UserName = $UserPrincipalName -split "@"
+    $AuditLogPath = Join-Path -Path $OutputPath -ChildPath "$($UserName[0])_AuditLog_$(Get-Date -Format 'MM-dd-yyyy').csv"
+    $StartDate = (Get-Date).AddDays(-$AuditDays)
+    $EndDate = Get-Date
+
+    Write-Verbose -Message "[*] Searching Unified Audit Log For $UserPrincipalName"
+    $Results = Search-UnifiedAuditLog -StartDate $StartDate -EndDate $EndDate -UserIds $UserPrincipalName -ResultSize 5000 -ErrorAction Stop
+
+    $Results | Export-Csv -Path $AuditLogPath -NoTypeInformation
+    Write-Output -InputObject "[*] Audit Log Exported To $AuditLogPath"
+    $Results
+
+}  # End Function Export-M365UserAuditLog
+
+
+Function Invoke-M365CompromisedAccountRemediation {
+    [CmdletBinding(SupportsShouldProcess=$True)]
+    param (
+        [Parameter(
+            Mandatory=$True,
+            Position=0,
+            HelpMessage="Enter The UserPrincipalName Of The Compromised User"
+        )]  # End Parameter
+        [ValidateNotNullOrEmpty()]
+        [String]$UserPrincipalName,
+
+        [Parameter(
+            Mandatory=$True,
+            Position=1,
+            HelpMessage="Enter The Admin UserPrincipalName Used To Connect To Exchange Online"
+        )]  # End Parameter
+        [ValidateNotNullOrEmpty()]
+        [String]$AdminUserPrincipalName,
+
+        [Parameter(
+            Mandatory=$False,
+            Position=2
+        )]  # End Parameter
+        [String]$OutputPath = "C:\Users\Public\Desktop",
+
+        [Parameter(
+            Mandatory=$False,
+            Position=3
+        )]  # End Parameter
+        [Int]$AuditDays = 7
+    )  # End Param
+
+    BEGIN {
+
+        Clear-Variable -Name TranscriptPath,SamAccountName -ErrorAction SilentlyContinue
+        $SamAccountName = $UserPrincipalName -Split "@"
+        $TranscriptPath = Join-Path -Path $OutputPath -ChildPath "$($SamAccountName[0])_RemediationTranscript_$(Get-Date -Format 'MM-dd-yyyy').txt"
+        Try {
+
+            If (!(Test-Path -Path $OutputPath)) {
+                New-Item -ItemType Directory -Path $OutputPath -ErrorAction Stop | Out-Null
+            }  # End If
+
+        } Catch {
+
+            Write-Output -InputObject "[x] Failed Creating Output Path $OutputPath"
+            Write-Output -InputObject $_
+            Return
+
+        }  # End Try Catch
+
+        Start-Transcript -Path $TranscriptPath -ErrorAction Stop
+        Write-Output -InputObject "[*] $UserPrincipalName Will Have Remediation Actions Applied"
+        Write-Output -InputObject "[*] Transcript Will Be Saved To $TranscriptPath"
+
+        Try {
+
+            Write-Verbose -Message "[*] Importing Microsoft Graph And Exchange Online Modules"
+            Import-Module -Name Microsoft.Graph.Users,Microsoft.Graph.Users.Actions,ExchangeOnlineManagement -ErrorAction Stop
+
+        } Catch {
+
+            Write-Output -InputObject "[x] Failed Importing Required Modules"
+            Write-Output -InputObject $_
+            Stop-Transcript
+            Return
+
+        }  # End Try Catch
+
+        Try {
+
+            Write-Verbose -Message "[*] Connecting To Microsoft Graph"
+            Connect-MgGraph -Scopes "User.ReadWrite.All","Directory.AccessAsUser.All" -NoWelcome -ErrorAction Stop
+
+        } Catch {
+
+            Write-Output -InputObject "[x] Failed Connecting To Microsoft Graph"
+            Write-Output -InputObject $_
+            Stop-Transcript
+            Return
+
+        }  # End Try Catch
+
+        Try {
+
+            Write-Verbose -Message "[*] Connecting To Exchange Online"
+            Connect-ExchangeOnline -UserPrincipalName $AdminUserPrincipalName -ShowBanner:$False -ErrorAction Stop
+
+        } Catch {
+
+            Write-Output -InputObject "[x] Failed Connecting To Exchange Online"
+            Write-Output -InputObject $_
+            Disconnect-MgGraph -ErrorAction SilentlyContinue
+            Stop-Transcript
+            Return
+
+        }  # End Try Catch
+
+    } PROCESS {
+
+        Try {
+
+            Reset-M365UserPassword -UserPrincipalName $UserPrincipalName
+            Revoke-M365UserSessions -UserPrincipalName $UserPrincipalName
+            Enable-M365MailboxAuditing -UserPrincipalName $UserPrincipalName
+            Remove-M365MailboxDelegates -UserPrincipalName $UserPrincipalName
+            Disable-M365MailboxForwardingRules -UserPrincipalName $UserPrincipalName
+            Remove-M365MailboxForwarding -UserPrincipalName $UserPrincipalName
+            Export-M365UserAuditLog -UserPrincipalName $UserPrincipalName -OutputPath $OutputPath -AuditDays $AuditDays
+
+            Write-Output -InputObject "[*] $UserPrincipalName Account Remediation Completed"
+            Write-Output -InputObject "[!] Review The Transcript And Audit Log To Confirm No Additional Action Is Required"
+
+        } Catch {
+
+            Write-Output -InputObject "[x] Error During Remediation For $UserPrincipalName"
+            Write-Output -InputObject $_
+
+        }  # End Try Catch
+
+    } END {
+
+        Try {
+
+            Write-Verbose -Message "[*] Disconnecting From Exchange Online"
+            Disconnect-ExchangeOnline -Confirm:$False -ErrorAction SilentlyContinue
+
+        } Catch {
+
+            Write-Output -InputObject "[x] Failed Disconnecting From Exchange Online"
+            Write-Output -InputObject $_
+
+        }  # End Try Catch
+
+        Try {
+
+            Write-Verbose -Message "[*] Disconnecting From Microsoft Graph"
+            Disconnect-MgGraph -ErrorAction SilentlyContinue
+
+        } Catch {
+
+            Write-Output -InputObject "[x] Failed Disconnecting From Microsoft Graph"
+            Write-Output -InputObject $_
+
+        }  # End Try Catch
+        Stop-Transcript
+
+    }  # End B P E
+
+}  # End Function Invoke-M365CompromisedAccountRemediation
