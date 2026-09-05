@@ -64,7 +64,7 @@ Installer and task-import helpers provide a starting point for repeatable deploy
 
 ## Recommended reading order
 
-Start with {doc}`getting-started`, review the {doc}`security-and-safety` notes, and then choose the relevant area from {doc}`components`. For event collection and alerting, continue to {doc}`event-monitoring`. If you are responding to a suspected compromise, see {doc}`incident-response`.
+Start with {doc}`getting-started`, review the {doc}`security-and-safety` notes, and then choose the relevant area from {doc}`components`. For the original, detailed deployment and configuration material—including WinRM over HTTPS, WEF Group Policy settings, certificates, SQL/WEF application setup, installer details, and troubleshooting—see {doc}`configuration-reference`. For event collection and alerting, continue to {doc}`event-monitoring`. If you are responding to a suspected compromise, see {doc}`incident-response`.
 
 ## Project links
 
@@ -79,6 +79,7 @@ Start with {doc}`getting-started`, review the {doc}`security-and-safety` notes, 
 :maxdepth: 2
 
 getting-started
+configuration-reference
 components
 event-monitoring
 incident-response
