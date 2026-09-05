@@ -1,0 +1,101 @@
+:root {
+  --btps-accent: #3978d0;
+  --btps-accent-strong: #255da8;
+  --btps-surface: #f5f8fc;
+  --btps-border: rgba(76, 92, 119, 0.18);
+}
+
+body { font-feature-settings: "kern"; }
+
+.content { line-height: 1.7; }
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  gap: 2.2rem;
+  align-items: center;
+  margin: 0 0 2.25rem;
+  padding: 2.4rem;
+  border: 1px solid var(--btps-border);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(57,120,208,.10), rgba(255,255,255,.02));
+}
+
+.hero h1 {
+  margin: .25rem 0 1rem;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  line-height: 1.05;
+  letter-spacing: -.035em;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: .8rem;
+  font-weight: 750;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--btps-accent);
+}
+
+.hero-lede {
+  max-width: 54rem;
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .7rem;
+  margin-top: 1.35rem;
+}
+
+.hero-actions .btn {
+  display: inline-block;
+  padding: .62rem .9rem;
+  border: 1px solid var(--btps-border);
+  border-radius: 9px;
+  text-decoration: none;
+  font-weight: 650;
+}
+
+.hero-actions .btn.primary {
+  color: white;
+  background: var(--btps-accent);
+  border-color: var(--btps-accent);
+}
+
+.hero-actions .btn:hover { transform: translateY(-1px); }
+.hero-actions .btn.primary:hover { background: var(--btps-accent-strong); }
+.hero-mark { text-align: center; }
+.hero-mark img { width: 150px; max-width: 100%; opacity: .92; }
+
+.sd-card {
+  border: 1px solid var(--btps-border) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+.sd-card:hover { transform: translateY(-2px); transition: transform .15s ease; }
+
+table.docutils { font-size: .94rem; }
+.doc-shot {
+  display: block;
+  max-width: 100%;
+  margin: 1rem auto 2rem;
+  border: 1px solid var(--btps-border);
+  border-radius: 10px;
+  box-shadow: 0 8px 28px rgba(20, 35, 60, .08);
+}
+
+@media (max-width: 720px) {
+  .hero { grid-template-columns: 1fr; padding: 1.5rem; }
+  .hero-mark { display: none; }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --btps-surface: #151922;
+    --btps-border: rgba(220, 228, 240, .16);
+  }
+}
